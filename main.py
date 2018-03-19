@@ -29,7 +29,7 @@ if __name__ == '__main__' :
             tracker = cv2.TrackerGOTURN_create()
 
     # Read video
-    video = cv2.VideoCapture("videos/prezunic/video-02-case-01.mp4")
+    video = cv2.VideoCapture("videos/prezunic/video-01-d.mp4")
 
     # Exit if video not opened.
     if not video.isOpened():
