@@ -26,10 +26,6 @@ COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 if not os.path.exists(COCO_MODEL_PATH):
     utils.download_trained_weights(COCO_MODEL_PATH)
 
-# Directory of images to run detection on
-###IMAGE_DIR = os.path.join(ROOT_DIR, "images")
-IMAGE_DIR = "/Users/gvieira/code/toneto/videos/sandbox2"
-
 class InferenceConfig(coco.CocoConfig):
     # Set batch size to 1 since we'll be running inference on
     # one image at a time. Batch size = GPU_COUNT * IMAGES_PER_GPU
@@ -64,16 +60,25 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                'teddy bear', 'hair drier', 'toothbrush']
 
+
+# Directory of images to run detection on
+###IMAGE_DIR = os.path.join(ROOT_DIR, "images")
+IMAGE_DIR = "/Users/gvieira/temp/split/video-01-d-fps-5"
+
 # Load a random image from the images folder
 file_names = next(os.walk(IMAGE_DIR))[2]
-###image = skimage.io.imread(os.path.join(IMAGE_DIR, random.choice(file_names)))
-image = skimage.io.imread(os.path.join(IMAGE_DIR, "frame01234.png"))
+print("File names: " + file_names)
+image_name = "frame-0000028.png"
+image = skimage.io.imread(os.path.join(IMAGE_DIR, image_name))
 
 # Run detection
 results = model.detect([image], verbose=1)
 
 # Visualize results
 r = results[0]
-visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], 
-                            class_names, r['scores'])
-
+#visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+print(r)
+video_name = os.path.basename(os.path.normpath(IMAGE_DIR))
+output_dir = os.path.join("/Users/gvieira/temp/objs", video_name)
+filename = os.path.join(output_dir, "tagged-{0}".format(image_name))
+visualize.save_image_instances(filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
