@@ -76,6 +76,7 @@ def apply_mask(image, mask, color, alpha=0.5):
 def save_image_instances(output_filename, image, boxes, masks, class_ids, class_names,
                          scores=None, title="",
                          figsize=(16, 16), ax=None):
+    # TODO: refactor this method to isolate image saving from JSON saving behavior
     """
     boxes: [num_instance, (y1, x1, y2, x2, class_id)] in image coordinates.
     masks: [height, width, num_instances]
@@ -144,6 +145,16 @@ def save_image_instances(output_filename, image, boxes, masks, class_ids, class_
             ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
     plt.savefig(output_filename, bbox_inches="tight")
+    # let's convert boxes to a normal Python array so it can be JSON dumped
+    simple_boxes = []
+    for i in range(0, len(boxes)):
+        box = []
+        for coord in range(0, len(boxes[i])):
+            # convert to normal int so it can be JSON dumped
+            # See: https://stackoverflow.com/questions/11942364/typeerror-integer-is-not-json-serializable-when-serializing-json-in-python
+            box.append(int(boxes[i][coord])) 
+        simple_boxes.append(box)
+    return {'tagged_frame_image_path': output_filename, 'boxes': simple_boxes}
 
 
 def display_instances(image, boxes, masks, class_ids, class_names,

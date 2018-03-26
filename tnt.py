@@ -2,6 +2,8 @@
 #
 """Toneto helper module."""
 
+import os
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -20,3 +22,6 @@ def color_fail(s):
 
 def color_ok(s):
   return bcolors.OKGREEN + s + bcolors.ENDC
+
+def extract_video_name(dir):
+  return os.path.basename(os.path.normpath(dir))
