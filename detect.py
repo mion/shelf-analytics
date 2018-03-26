@@ -71,6 +71,8 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
 
 
 def get_images_file_names(input_dir):
+  # TODO: rename "names" to "basenames"
+  # TODO: rename "images_file_names" to "images_full_paths"
   names = next(os.walk(input_dir))[2]
   images_file_names = []
   for i in range(0, len(names)):
