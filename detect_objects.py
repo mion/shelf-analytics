@@ -18,57 +18,13 @@ import utils
 import model as modellib
 import visualize
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-def warn(s):
-  return bcolors.WARNING + s + bcolors.ENDC
+import tnt
 
 class InferenceConfig(coco.CocoConfig):
     # Set batch size to 1 since we'll be running inference on
     # one image at a time. Batch size = GPU_COUNT * IMAGES_PER_GPU
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
-
-config = InferenceConfig()
-config.display()
-
-ROOT_DIR = os.getcwd()
-MODEL_DIR = os.path.join(ROOT_DIR, "logs")
-COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
-
-# Create model object in inference mode.
-model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
-
-# Load weights trained on MS-COCO
-model.load_weights(COCO_MODEL_PATH, by_name=True)
-
-# COCO Class names
-# Index of the class in the list is its ID. For example, to get ID of
-# the teddy bear class, use: class_names.index('teddy bear')
-class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
-               'bus', 'train', 'truck', 'boat', 'traffic light',
-               'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird',
-               'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear',
-               'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie',
-               'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-               'kite', 'baseball bat', 'baseball glove', 'skateboard',
-               'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup',
-               'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-               'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
-               'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed',
-               'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote',
-               'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
-               'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
-               'teddy bear', 'hair drier', 'toothbrush']
-
 
 def get_images_file_names(input_dir):
   # TODO: rename "names" to "basenames"
@@ -89,14 +45,14 @@ def load_images(images_file_names):
   return images
 
 
-def detect_objects(input_dir, output_dir):
+def detect_objects(input_dir, output_dir, model):
   video_name = os.path.basename(os.path.normpath(input_dir))
   final_output_dir = os.path.join(output_dir, video_name)
 
   try:
     os.mkdir(final_output_dir)
   except FileExistsError as err:
-    print(bcolors.WARNING + "ERROR: could not create directory at {0}".format(final_output_dir) + bcolors.ENDC)
+    print(tnt.color_warn("ERROR: could not create directory at {0}".format(final_output_dir)))
     print(err)
     return False
 
@@ -104,7 +60,7 @@ def detect_objects(input_dir, output_dir):
   images = load_images(images_file_names)
 
   for i in range(0, len(images)):
-    print(warn("Processing image ") + str(i + 1) + warn(" of ") + str(len(images)) + "...")
+    print(tnt.color_warn("Processing image ") + str(i + 1) + tnt.color_warn(" of ") + str(len(images)) + "...")
     image = images[i]
     name = names[i]
     results = model.detect([image], verbose=1)
@@ -121,11 +77,55 @@ if __name__ == "__main__":
   parser.add_argument("output_dir", help="output directory")
   args = parser.parse_args()
 
-  print(bcolors.WARNING + "Input directory: " + bcolors.ENDC + args.input_dir)
-  print(bcolors.WARNING + "Output directory: " + bcolors.ENDC + args.output_dir)
+  print(tnt.color_warn("Input directory: ") + args.input_dir)
+  print(tnt.color_warn("Output directory: ") + args.output_dir)
+
+  if not os.path.exists(args.input_dir):
+    print(tnt.color_fail("ERROR: unable to open (or missing permissions) for input directory: ") + args.input_dir)
+    exit(1)
+  
+  if not os.path.exists(args.output_dir):
+    print(tnt.color_fail("ERROR: unable to open (or missing permissions) for output directory: ") + args.output_dir)
+    exit(1)
+
   print("Working, please wait...")
-  success = detect_objects(args.input_dir, args.output_dir)
+
+  config = InferenceConfig()
+  config.display()
+
+  ROOT_DIR = os.getcwd()
+  MODEL_DIR = os.path.join(ROOT_DIR, "logs")
+  COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+
+  # Create model object in inference mode.
+  model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
+
+  # Load weights trained on MS-COCO
+  model.load_weights(COCO_MODEL_PATH, by_name=True)
+
+  # COCO Class names
+  # Index of the class in the list is its ID. For example, to get ID of
+  # the teddy bear class, use: class_names.index('teddy bear')
+  class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
+                'bus', 'train', 'truck', 'boat', 'traffic light',
+                'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird',
+                'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear',
+                'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie',
+                'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
+                'kite', 'baseball bat', 'baseball glove', 'skateboard',
+                'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup',
+                'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+                'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
+                'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed',
+                'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote',
+                'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
+                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
+                'teddy bear', 'hair drier', 'toothbrush']
+  
+  success = detect_objects(args.input_dir, args.output_dir, model)
   if success:
-    print(bcolors.OKGREEN + "Done!" + bcolors.ENDC)
+    print(tnt.color_ok("Done!"))
+    exit(0)
   else:
-    print(bcolors.FAIL + "ERROR: failed to detect objects" + bcolors.ENDC)
+    print(tnt.color_fail("ERROR: failed to detect objects"))
+    exit(1)
