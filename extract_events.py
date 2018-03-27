@@ -51,6 +51,14 @@ def extract_events(camera_config, tagged_bundle, figsize=(16, 16), ax=None):
     tagged_frame_image = load_image(frame['tagged_frame_image_path'])
     for roi in camera_config['rois']:
       x1, y1, x2, y2 = roi['box']
+      #
+      # TODO: fix this, I have no idea where the 2.5 factor came from...
+      #
+      x1 = 2.5 * x1
+      y1 = 2.5 * y1
+      x2 = 2.5 * x2
+      y2 = 2.5 * y2
+      #
       p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2,
                             alpha=0.5, linestyle="dashed",
                             edgecolor=(0.0, 0.2, 0.8), facecolor='none')
