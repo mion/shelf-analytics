@@ -6,6 +6,10 @@ import argparse
 import json
 import os
 
+import skimage
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
 import tnt
 
 def load_tagged_bundle(path):
@@ -14,9 +18,31 @@ def load_tagged_bundle(path):
     return json.loads(tags_file.read())
 
 def load_camera_config(path):
-  return {}
+  return {
+    "rois": [
+      {
+        "name": "left",
+        "box": [0, 180, 160, 270]
+      },
+      {
+        "name": "middle",
+        "box": [190, 110, (190 + 240), (110 + 150)]
+      }
+    ]
+  }
 
-def extract_events(camera_config, tagged_bundle):
+def load_image(path):
+  return skimage.io.imread(path)
+
+def extract_events(camera_config, tagged_bundle, figsize=(16, 16), ax=None):
+  if not ax:
+    _, ax = plt.subplots(1, figsize=figsize)
+
+  frames = tagged_bundle['frames']
+  for i in range(len(frames)):
+    frame = frames[i]
+    # tagged_frame_image = load_image(frame['tagged_frame_image_path'])
+
   return {}
 
 if __name__ == '__main__':
