@@ -28,3 +28,8 @@ def extract_video_name(dir):
 
 def extract_video_fps(dir):
   return int(extract_video_name(dir).split("-")[-1])
+
+def add_suffix_to_basename(path, suffix):
+  base_path, base_name = os.path.split(os.path.normpath(path))
+  name, ext = os.path.splitext(base_name)
+  return os.path.join(base_path, name + suffix + ext)
