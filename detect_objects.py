@@ -52,6 +52,25 @@ def load_images(img_file_paths):
 
 
 def detect_objects(input_dir, output_dir, model):
+  # COCO Class names
+  # Index of the class in the list is its ID. For example, to get ID of
+  # the teddy bear class, use: class_names.index('teddy bear')
+  class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
+                'bus', 'train', 'truck', 'boat', 'traffic light',
+                'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird',
+                'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear',
+                'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie',
+                'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
+                'kite', 'baseball bat', 'baseball glove', 'skateboard',
+                'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup',
+                'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+                'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
+                'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed',
+                'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote',
+                'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
+                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
+                'teddy bear', 'hair drier', 'toothbrush']
+
   video_name = os.path.basename(os.path.normpath(input_dir))
   final_output_dir = os.path.join(output_dir, video_name)
   # create output dir
@@ -111,25 +130,6 @@ if __name__ == "__main__":
   # Load weights trained on MS-COCO
   model.load_weights(COCO_MODEL_PATH, by_name=True)
 
-  # COCO Class names
-  # Index of the class in the list is its ID. For example, to get ID of
-  # the teddy bear class, use: class_names.index('teddy bear')
-  class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
-                'bus', 'train', 'truck', 'boat', 'traffic light',
-                'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird',
-                'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear',
-                'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie',
-                'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-                'kite', 'baseball bat', 'baseball glove', 'skateboard',
-                'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup',
-                'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-                'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
-                'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed',
-                'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote',
-                'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
-                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
-                'teddy bear', 'hair drier', 'toothbrush']
-  
   success, tags = detect_objects(args.input_dir, args.output_dir, model)
 
   if success:
@@ -138,7 +138,6 @@ if __name__ == "__main__":
     tags_file_name = "tags-" + video_name + ".json"
     tags_dir = os.path.join(args.output_dir, video_name)
     tags_file_path = os.path.join(tags_dir, tags_file_name)
-    # pdb.set_trace()    
     with open(tags_file_path, "w") as tags_file:
       json.dump(tags, tags_file)
     print(tnt.color_ok("Success! Tag JSON file saved to: ") + tags_file_path)

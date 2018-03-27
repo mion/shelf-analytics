@@ -109,6 +109,10 @@ def save_image_instances(output_filename, image, boxes, masks, class_ids, class_
     for i in range(N):
         color = colors[i]
 
+        # Skip objects that are not people
+        if class_names.index('person') != class_ids[i]:
+            continue
+
         # Bounding box
         if not np.any(boxes[i]):
             # Skip this instance. Has no bbox. Likely lost in image cropping.
@@ -147,7 +151,10 @@ def save_image_instances(output_filename, image, boxes, masks, class_ids, class_
     plt.savefig(output_filename, bbox_inches="tight")
     # let's convert boxes to a normal Python array so it can be JSON dumped
     simple_boxes = []
-    for i in range(0, len(boxes)):
+    for i in range(N):
+        # Skip objects that are not people
+        if class_names.index('person') != class_ids[i]:
+            continue
         box = []
         for coord in range(0, len(boxes[i])):
             # convert to normal int so it can be JSON dumped
