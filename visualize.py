@@ -96,12 +96,14 @@ def tag_frame(output_filename, image, boxes, masks, class_ids, class_names,
     if not ax:
         _, ax = plt.subplots(1, figsize=figsize)
 
-    # Show area outside image boundaries.
-    height, width = image.shape[:2]
-    ax.set_ylim(height + 10, -10)
-    ax.set_xlim(-10, width + 10)
-    ax.axis('off')
-    ax.set_title(title)
+    # Remove white margin:
+    # https://stackoverflow.com/a/27227718
+    ax.set_axis_off()
+    ax.set_title("")
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+    ax.get_xaxis().set_major_locator(plt.NullLocator())
+    ax.get_yaxis().set_major_locator(plt.NullLocator())
 
     # Always use red
     color = (0.9, 0.1, 0.0)
@@ -147,7 +149,7 @@ def tag_frame(output_filename, image, boxes, masks, class_ids, class_names,
             p = Polygon(verts, facecolor="none", edgecolor=color)
             ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
-    plt.savefig(output_filename, bbox_inches="tight")
+    plt.savefig(output_filename, bbox_inches="tight", pad_inches=0)
     # let's convert boxes to a normal Python array so it can be JSON dumped
     simple_boxes = []
     for i in range(N):
