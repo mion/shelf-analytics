@@ -84,6 +84,8 @@ def detect_objects(input_dir, output_dir, model):
   img_file_names, img_file_paths = scan_images(input_dir)
   images = load_images(img_file_paths)
   tags = {}
+  tags['frames'] = []
+  tags['frames_per_second'] = tnt.extract_video_fps(input_dir) # TODO: fix this
   # run the Mask RCNN code for each one of them
   for i in range(0, len(images)):
     print(tnt.color_ok("Processing image ") + str(i + 1) + tnt.color_ok(" of ") + str(len(images)) + "...")
@@ -92,9 +94,9 @@ def detect_objects(input_dir, output_dir, model):
     results = model.detect([image], verbose=1)
     r = results[0]
     tagged_filename = os.path.join(final_output_dir, "tagged-{0}".format(name))
-    tag = visualize.save_image_instances(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
-    tag['frame_index'] = i
-    tags[name] = tag
+    tagged_frame = visualize.save_image_instances(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+    tagged_frame['frame_index'] = i
+    tags['frames'].append(tagged_frame)
   return (True, tags)
 
 
@@ -135,7 +137,7 @@ if __name__ == "__main__":
   if success:
     print(tnt.color_ok("Done!") + " Saving tags into a JSON file...")
     video_name = tnt.extract_video_name(args.input_dir)
-    tags_file_name = "tags-" + video_name + ".json"
+    tags_file_name = "tags.json" #"tags-" + video_name + ".json"
     tags_dir = os.path.join(args.output_dir, video_name)
     tags_file_path = os.path.join(tags_dir, tags_file_name)
     with open(tags_file_path, "w") as tags_file:
