@@ -6,6 +6,7 @@ Copyright (c) 2017 Matterport, Inc.
 Licensed under the MIT License (see LICENSE for details)
 Written by Waleed Abdulla
 """
+import pdb
 
 import random
 import itertools
@@ -107,7 +108,9 @@ def save_image_instances(output_filename, image, boxes, masks, class_ids, class_
 
     masked_image = image.astype(np.uint32).copy()
     for i in range(N):
-        color = colors[i]
+        # color = colors[i]
+        # Always use red
+        color = (0.9, 0.1, 0.0)
 
         # Skip objects that are not people
         if class_names.index('person') != class_ids[i]:
