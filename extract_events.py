@@ -6,7 +6,7 @@ import argparse
 import json
 import os
 
-import skimage
+import skimage.io
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
@@ -38,10 +38,19 @@ def extract_events(camera_config, tagged_bundle, figsize=(16, 16), ax=None):
   if not ax:
     _, ax = plt.subplots(1, figsize=figsize)
 
-  frames = tagged_bundle['frames']
-  for i in range(len(frames)):
-    frame = frames[i]
-    # tagged_frame_image = load_image(frame['tagged_frame_image_path'])
+  ax.axis('off')
+
+  for frame in tagged_bundle['frames']:
+    tagged_frame_image = load_image(frame['tagged_frame_image_path'])
+    for roi in camera_config['rois']:
+      x1, y1, x2, y2 = roi['box']
+      p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2,
+                            alpha=0.5, linestyle="dashed",
+                            edgecolor=(0.0, 0.2, 0.8), facecolor='none')
+      ax.add_patch(p)
+    ax.imshow(tagged_frame_image)
+    output_filename = tnt.add_suffix_to_basename(frame['tagged_frame_image_path'], "-cameraroi")
+    plt.savefig(output_filename, bbox_inches="tight")
 
   return {}
 
