@@ -42,7 +42,7 @@ def extract_events(camera_config, tagged_bundle, figsize=(16, 16), ax=None):
   # https://stackoverflow.com/a/27227718
   ax.set_axis_off()
   ax.set_title("")
-  plt.subplots_adjust(top=0, bottom=0, right=0, left=0, hspace=0, wspace=0)
+  plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
   plt.margins(0, 0)
   ax.get_xaxis().set_major_locator(plt.NullLocator())
   ax.get_yaxis().set_major_locator(plt.NullLocator())
@@ -57,7 +57,7 @@ def extract_events(camera_config, tagged_bundle, figsize=(16, 16), ax=None):
       ax.add_patch(p)
     ax.imshow(tagged_frame_image)
     output_filename = tnt.add_suffix_to_basename(frame['tagged_frame_image_path'], "-cameraroi")
-    plt.savefig(output_filename, bbox_inches="tight", pad_inches=0)
+    plt.savefig(output_filename, bbox_inches="tight", pad_inches=0, Transparent=True)
 
   return {}
 

@@ -29,7 +29,7 @@ def main():
   ax.add_patch(p)
 
   ax.imshow(image)
-  plt.savefig("foobar.jpg", bbox_inches="tight", pad_inches=0.0)
+  plt.savefig("foobar.jpg", bbox_inches=0, pad_inches=0.0)
 
 if __name__ == '__main__':
   main()
