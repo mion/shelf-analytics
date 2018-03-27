@@ -25,3 +25,6 @@ def color_ok(s):
 
 def extract_video_name(dir):
   return os.path.basename(os.path.normpath(dir))
+
+def extract_video_fps(dir):
+  return int(extract_video_name(dir).split("-")[-1])
