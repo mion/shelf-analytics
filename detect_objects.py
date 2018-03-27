@@ -94,7 +94,7 @@ def detect_objects(input_dir, output_dir, model):
     results = model.detect([image], verbose=1)
     r = results[0]
     tagged_filename = os.path.join(final_output_dir, "tagged-{0}".format(name))
-    tagged_frame = visualize.save_image_instances(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+    tagged_frame = visualize.tag_frame(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
     tagged_frame['frame_index'] = i
     tags['frames'].append(tagged_frame)
   return (True, tags)

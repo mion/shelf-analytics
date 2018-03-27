@@ -74,7 +74,7 @@ def apply_mask(image, mask, color, alpha=0.5):
     return image
 
 
-def save_image_instances(output_filename, image, boxes, masks, class_ids, class_names,
+def tag_frame(output_filename, image, boxes, masks, class_ids, class_names,
                          scores=None, title="",
                          figsize=(16, 16), ax=None):
     # TODO: refactor this method to isolate image saving from JSON saving behavior
@@ -96,9 +96,6 @@ def save_image_instances(output_filename, image, boxes, masks, class_ids, class_
     if not ax:
         _, ax = plt.subplots(1, figsize=figsize)
 
-    # Generate random colors
-    colors = random_colors(N)
-
     # Show area outside image boundaries.
     height, width = image.shape[:2]
     ax.set_ylim(height + 10, -10)
@@ -106,12 +103,11 @@ def save_image_instances(output_filename, image, boxes, masks, class_ids, class_
     ax.axis('off')
     ax.set_title(title)
 
+    # Always use red
+    color = (0.9, 0.1, 0.0)
+
     masked_image = image.astype(np.uint32).copy()
     for i in range(N):
-        # color = colors[i]
-        # Always use red
-        color = (0.9, 0.1, 0.0)
-
         # Skip objects that are not people
         if class_names.index('person') != class_ids[i]:
             continue
