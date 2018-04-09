@@ -2,7 +2,23 @@
 import cv2
 import sys
 
+import tnt
+
 major_ver, minor_ver, subminor_ver = cv2.__version__.split(".")
+
+def read_frames_from_video(video):
+    is_first_frame = True
+    frames = []
+    ok, frame = video.read()
+    while True:
+        if not ok and is_first_frame:
+            return None
+        elif not ok and not is_first_frame:
+            break
+        else:
+            is_first_frame = False
+            frames.append(frame)
+    return frames
 
 if __name__ == '__main__' :
 
@@ -29,18 +45,25 @@ if __name__ == '__main__' :
             tracker = cv2.TrackerGOTURN_create()
 
     # Read video
-    video = cv2.VideoCapture("videos/prezunic/video-01-d.mp4")
+    video = cv2.VideoCapture("/Users/gvieira/temp/transcoded/video-01-d-fps-5.mp4")
 
     # Exit if video not opened.
     if not video.isOpened():
-        print("Could not open video")
+        print(tnt.color_fail("ERROR: ") + "Could not open video")
         sys.exit()
 
     # Read first frame.
-    ok, frame = video.read()
-    if not ok:
-        print('Cannot read video file')
+    # ok, frame = video.read()
+    # if not ok:
+    #     print(tnt.color_fail("ERROR: ") + 'Cannot read video file')
+    #     sys.exit()
+
+    frames = read_frames_from_video(video)
+    if frames == None:
+        print(tnt.color_fail("ERROR: ") + 'Cannot read video file')
         sys.exit()
+
+
      
     # Define an initial bounding box
     bbox = (287, 23, 86, 320)
