@@ -13,8 +13,8 @@ major_ver, minor_ver, subminor_ver = cv2.__version__.split(".")
 def read_frames_from_video(video):
     is_first_frame = True
     frames = []
-    ok, frame = video.read()
     while True:
+        ok, frame = video.read()
         if not ok and is_first_frame:
             return None
         elif not ok and not is_first_frame:
