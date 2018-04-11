@@ -2,6 +2,7 @@ import pdb
 import sys
 import json
 import cv2
+import math
 
 
 class Track:
@@ -66,6 +67,30 @@ class HumanTracker:
         return cv2.TrackerGOTURN_create()
       else:
         raise "unknown obj tracker type" # FIXME
+
+  def bbox_distance(self, bbox_orig, bbox_dest):
+    x1_orig, y1_orig, x2_orig, y2_orig = bbox_orig
+    x1_dest, y1_dest, x2_dest, y2_dest = bbox_dest
+    center_orig = ((x1_orig + x2_orig) / 2, (y1_orig + y2_orig) / 2)
+    center_dest = ((x1_dest + x2_dest) / 2, (y1_dest + y2_dest) / 2)
+    dx = center_dest[0] - center_orig[0]
+    dy = center_dest[1] - center_orig[1]
+    return math.sqrt((dx * dx) + (dy * dy))
+  
+  def find_closest_bbox_to_snap_on(self, index, tracker_bbox):
+    MIN_SNAPPING_DISTANCE = 15.0
+    closest_bbox = None
+    min_distance = 99999999 # FIXME
+    bboxes_list = self.list_of_bboxes_lists[index]
+    for bbox in bboxes_list:
+      dist = self.bbox_distance(tracker_bbox, bbox)
+      if dist < min_distance:
+        min_distance = dist
+        closest_bbox = bbox
+    if min_distance < MIN_SNAPPING_DISTANCE:
+      return closest_bbox
+    else:
+      return None
   
   def find_some_untracked_index_bbox_pair(self):
     for idx in range(len(self.frames)):
@@ -95,16 +120,23 @@ class HumanTracker:
     print("tracking human:")
     for idx in range(start_index + 1, len(self.frames)):
       frame = self.frames[idx]
-      ok, bbox = obj_tracker.update(frame)
+      ok, tracker_bbox = obj_tracker.update(frame)
       if ok:
         # FIXME bbox should be floats perhaps
-        int_bbox = tuple([int(n) for n in bbox])
-        curr_track.add(idx, int_bbox)
-        print("\tat frame {0} moved to bbox {1}".format(idx, int_bbox))
+        int_tracker_bbox = tuple([int(n) for n in tracker_bbox])
+        bbox = self.find_closest_bbox_to_snap_on(idx, int_tracker_bbox)
+        if bbox != None:
+          print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
+          curr_track.add(idx, bbox)
+        else:
+          print("\t(tracked) at frame {0} moved to bbox {1}".format(idx, int_tracker_bbox))
+          curr_track.add(idx, int_tracker_bbox)
       else:
+        # TODO implement retake by detected bbox
         break
     self.tracks_list.add(curr_track)
     print("done tracking human, tracks found: {0}".format(str(len(self.tracks_list.tracks))))
+    # pdb.set_trace()
     # print(self.tracks_list.dump_json_string())
     return True
 
