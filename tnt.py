@@ -14,14 +14,17 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+def color_info(s):
+  return bcolors.HEADER + str(s) + bcolors.ENDC
+
 def color_warn(s):
-  return bcolors.WARNING + s + bcolors.ENDC
+  return bcolors.WARNING + str(s) + bcolors.ENDC
 
 def color_fail(s):
-  return bcolors.FAIL + s + bcolors.ENDC
+  return bcolors.FAIL + str(s) + bcolors.ENDC
 
 def color_ok(s):
-  return bcolors.OKGREEN + s + bcolors.ENDC
+  return bcolors.OKGREEN + str(s) + bcolors.ENDC
 
 def extract_video_name(dir):
   return os.path.basename(os.path.normpath(dir))
