@@ -14,6 +14,8 @@ def read_frames_from_video(video):
             frames.append(frame)
     return frames
 
-def draw_rectangle_on_frame(frame):
-  pass
-
+def draw_bbox_on_frame(frame, bbox):
+  x1, y1, x2, y2 = bbox
+  new_frame = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+  font = cv2.FONT_HERSHEY_SIMPLEX
+  return cv2.putText(new_frame, "({0},{1},{2},{3})".format(x1, y1, x2, y2), (x1, y2 + 15), font, 0.30, (255, 255, 255), 1, cv2.LINE_AA)
