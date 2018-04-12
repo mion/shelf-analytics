@@ -33,7 +33,7 @@ class Track:
       return (False, None)
   
   def to_json(self):
-    return [{"index": i, "bbox": b} for i, b in self.index_bbox_pairs]
+    return [{"index": i, "bbox": [int(n) for n in b]} for i, b in self.index_bbox_pairs]
 
 
 class TracksList:
@@ -49,6 +49,9 @@ class TracksList:
       if ok:
         return True
     return False
+  
+  def get_tracks(self):
+    return [track.to_json() for track in self.tracks]
   
   def dump_json_string(self):
     return json.dumps([track.to_json() for track in self.tracks])
@@ -156,3 +159,6 @@ class HumanTracker:
 
   def dump_tracks_json_string(self):
     return self.tracks_list.dump_json_string()
+  
+  def get_tracks(self):
+    return self.tracks_list.get_tracks()
