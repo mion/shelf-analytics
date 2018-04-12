@@ -48,7 +48,14 @@ if __name__ == '__main__' :
                                  list_of_bboxes_lists=list_of_bboxes_lists,
                                  obj_tracker_type="KCF")
     has_untracked_humans = True
-    while has_untracked_humans:
+    tracks_count = 0
+    max_tracks_count = 3
+    while tracks_count < max_tracks_count and has_untracked_humans:
         has_untracked_humans = human_tracker.track_someone_once()
-    tracks_json_string = human_tracker.dump_tracks_json_string()
-    print(tracks_json_string)
+        tracks_count += 1
+    # tracks_json_string = human_tracker.dump_tracks_json_string()
+    # print(tracks_json_string)
+    tracks = human_tracker.get_tracks()
+
+    with open("tracks.json", "w") as tracks_file:
+        json.dump(tracks, tracks_file)
