@@ -3,6 +3,20 @@ import sys
 import json
 import cv2
 import math
+import os
+
+
+def save_track_as_images(frames, track, folder_name, path):
+  # create output dir
+  try:
+    folder_path = os.path.join(path, folder_name)
+    os.mkdir(folder_path)
+  except Exception as err:
+    print("ERROR - Could not create folder '{0}' at path '{1}':\n{2}".format(folder_name, path, str(err)))
+  # draw each bbox in the track on the frame and then save it
+  for i in range(len(frames)):
+    # TODO stopped here
+    pass
 
 
 class Track:
