@@ -1,4 +1,5 @@
 import cv2
+import os
 
 def read_frames_from_video(video):
     is_first_frame = True
@@ -14,8 +15,11 @@ def read_frames_from_video(video):
             frames.append(frame)
     return frames
 
-def draw_bbox_on_frame(frame, bbox):
+def draw_bbox_on_frame(frame, bbox, rect_color=(0,0,255), text_color=(255,255,255)):
   x1, y1, x2, y2 = bbox
-  new_frame = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+  new_frame = cv2.rectangle(frame, (x1, y1), (x2, y2), rect_color, 2)
   font = cv2.FONT_HERSHEY_SIMPLEX
-  return cv2.putText(new_frame, "({0},{1},{2},{3})".format(x1, y1, x2, y2), (x1, y2 + 15), font, 0.30, (255, 255, 255), 1, cv2.LINE_AA)
+  return cv2.putText(new_frame, "({0},{1},{2},{3})".format(x1, y1, x2, y2), (x1, y2 + 15), font, 0.30, text_color, 1, cv2.LINE_AA)
+
+def save_image(img, name, path):
+  cv2.imwrite(os.path.join(path, name), img)
