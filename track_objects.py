@@ -5,25 +5,13 @@ import cv2
 import sys
 import argparse
 
+import cvutil
+
 from tracking import HumanTracker
 
 def load_tags(path):
   with open(path, "r") as tags_file:
     return json.loads(tags_file.read())
-
-def read_frames_from_video(video):
-    is_first_frame = True
-    frames = []
-    while True:
-        ok, frame = video.read()
-        if not ok and is_first_frame:
-            return None
-        elif not ok and not is_first_frame:
-            break
-        else:
-            is_first_frame = False
-            frames.append(frame)
-    return frames
 
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
@@ -37,7 +25,7 @@ if __name__ == '__main__' :
     if not video.isOpened():
         print("ERROR: could not open video")
         sys.exit()
-    frames = read_frames_from_video(video)
+    frames = cvutil.read_frames_from_video(video)
     if frames == None:
         print('ERROR: could not read frames from video file')
         sys.exit()
