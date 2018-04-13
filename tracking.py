@@ -19,18 +19,43 @@ def save_track_as_images(frames, track, folder_name, path):
     pass
 
 
+def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox):
+  MIN_SNAPPING_DISTANCE = 15.0
+  closest_bbox = None
+  min_distance = 99999999 # FIXME
+  for bbox in bboxes_list:
+    dist = bbox_distance(tracker_bbox, bbox)
+    if dist < min_distance:
+      min_distance = dist
+      closest_bbox = bbox
+  if min_distance < MIN_SNAPPING_DISTANCE:
+    return closest_bbox
+  else:
+    return None
+
+
+def bbox_distance(bbox_orig, bbox_dest):
+  y1_orig, x1_orig, y2_orig, x2_orig = bbox_orig
+  y1_dest, x1_dest, y2_dest, x2_dest = bbox_dest
+  center_orig = ((x1_orig + x2_orig) / 2, (y1_orig + y2_orig) / 2)
+  center_dest = ((x1_dest + x2_dest) / 2, (y1_dest + y2_dest) / 2)
+  dx = center_dest[0] - center_orig[0]
+  dy = center_dest[1] - center_orig[1]
+  return math.sqrt((dx * dx) + (dy * dy))
+
+
 class Track:
   def __init__(self):
     self.index_bbox_pairs = []
+    self.bboxes_list = []
   
   def add(self, index, bbox):
     self.index_bbox_pairs.append((index, bbox))
+    self.bboxes_list.append(bbox)
   
   def contains(self, index, bbox):
-    try:
-      return (True, self.index_bbox_pairs.index((index,bbox)))
-    except ValueError:
-      return (False, None)
+    closest_bbox = find_closest_bbox_to_snap_on(self.bboxes_list, bbox)
+    return closest_bbox != None
   
   def to_json(self):
     return [{"index": i, "bbox": [int(n) for n in b]} for i, b in self.index_bbox_pairs]
@@ -45,8 +70,7 @@ class TracksList:
   
   def belongs_to_some_track(self, index, bbox):
     for track in self.tracks:
-      ok, _ = track.contains(index, bbox)
-      if ok:
+      if track.contains(index, bbox):
         return True
     return False
   
@@ -84,36 +108,13 @@ class HumanTracker:
         return cv2.TrackerGOTURN_create()
       else:
         raise "unknown obj tracker type" # FIXME
-
-  def bbox_distance(self, bbox_orig, bbox_dest):
-    y1_orig, x1_orig, y2_orig, x2_orig = bbox_orig
-    y1_dest, x1_dest, y2_dest, x2_dest = bbox_dest
-    center_orig = ((x1_orig + x2_orig) / 2, (y1_orig + y2_orig) / 2)
-    center_dest = ((x1_dest + x2_dest) / 2, (y1_dest + y2_dest) / 2)
-    dx = center_dest[0] - center_orig[0]
-    dy = center_dest[1] - center_orig[1]
-    return math.sqrt((dx * dx) + (dy * dy))
-  
-  def find_closest_bbox_to_snap_on(self, index, tracker_bbox):
-    MIN_SNAPPING_DISTANCE = 15.0
-    closest_bbox = None
-    min_distance = 99999999 # FIXME
-    bboxes_list = self.list_of_bboxes_lists[index]
-    for bbox in bboxes_list:
-      dist = self.bbox_distance(tracker_bbox, bbox)
-      if dist < min_distance:
-        min_distance = dist
-        closest_bbox = bbox
-    if min_distance < MIN_SNAPPING_DISTANCE:
-      return closest_bbox
-    else:
-      return None
   
   def find_some_untracked_index_bbox_pair(self):
     for idx in range(len(self.frames)):
       bboxes_list = self.list_of_bboxes_lists[idx]
       for bbox in bboxes_list:
         if not self.tracks_list.belongs_to_some_track(idx, bbox):
+          # pdb.set_trace()
           return (idx, bbox)
     return None
 
@@ -146,7 +147,8 @@ class HumanTracker:
         x2 = x1 + int(w)
         y2 = y1 + int(h)
         int_tracker_bbox = (y1, x1, y2, x2)
-        bbox = self.find_closest_bbox_to_snap_on(idx, int_tracker_bbox)
+        bboxes_list = self.list_of_bboxes_lists[idx]
+        bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
           curr_track.add(idx, bbox)
