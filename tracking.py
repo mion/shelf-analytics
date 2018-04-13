@@ -86,8 +86,8 @@ class HumanTracker:
         raise "unknown obj tracker type" # FIXME
 
   def bbox_distance(self, bbox_orig, bbox_dest):
-    x1_orig, y1_orig, x2_orig, y2_orig = bbox_orig
-    x1_dest, y1_dest, x2_dest, y2_dest = bbox_dest
+    y1_orig, x1_orig, y2_orig, x2_orig = bbox_orig
+    y1_dest, x1_dest, y2_dest, x2_dest = bbox_dest
     center_orig = ((x1_orig + x2_orig) / 2, (y1_orig + y2_orig) / 2)
     center_dest = ((x1_dest + x2_dest) / 2, (y1_dest + y2_dest) / 2)
     dx = center_dest[0] - center_orig[0]
