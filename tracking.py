@@ -53,6 +53,10 @@ class Track:
   def add(self, index, bbox):
     self.index_bbox_pairs.append((index, bbox))
     self.bboxes_list.append(bbox)
+
+  def last_bbox(self):
+    # TODO handle empty array
+    return self.bboxes_list[len(self.bboxes_list) - 1]
   
   def contains(self, index, bbox):
     closest_bbox = find_closest_bbox_to_snap_on(self.bboxes_list, bbox)
@@ -137,6 +141,7 @@ class HumanTracker:
       raise "failed to init obj tracker" # FIXME
     curr_track = Track()
     curr_track.add(start_index, start_bbox)
+
     # FIXME 1 frame videos?
     print("tracking human:")
     for idx in range(start_index + 1, len(self.frames)):
@@ -151,6 +156,7 @@ class HumanTracker:
         y2 = y1 + int(h)
         int_tracker_bbox = (y1, x1, y2, x2)
         bboxes_list = self.list_of_bboxes_lists[idx]
+        # snap the bbox from tracker onto a detected bbox so we can compare it later on
         bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE/2)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
@@ -159,8 +165,17 @@ class HumanTracker:
           print("\t(tracked) at frame {0} moved to bbox {1}".format(idx, int_tracker_bbox))
           curr_track.add(idx, int_tracker_bbox)
       else:
-        # TODO implement retake by detected bbox
-        break
+        # when the tracker fails, find the nearest detected bbox and snap to it
+        bboxes_list = self.list_of_bboxes_lists[idx]
+        last_tracker_bbox = curr_track.last_bbox()
+        bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE/2)
+        if bbox != None:
+          print("\t(retaken) at frame {0} moved to bbox {1}".format(idx, bbox))
+          curr_track.add(idx, bbox)
+        else:
+          print("\ttrack lost at frame {0}".format(idx))
+          break
+    
     self.tracks_list.add(curr_track)
     print("done tracking human, tracks found: {0}".format(str(len(self.tracks_list.tracks))))
     # pdb.set_trace()
