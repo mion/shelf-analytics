@@ -19,8 +19,9 @@ def save_track_as_images(frames, track, folder_name, path):
     pass
 
 
-def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox):
-  MIN_SNAPPING_DISTANCE = 15.0
+DEFAULT_MIN_SNAPPING_DISTANCE = 30.0
+
+def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE):
   closest_bbox = None
   min_distance = 99999999 # FIXME
   for bbox in bboxes_list:
@@ -28,7 +29,7 @@ def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox):
     if dist < min_distance:
       min_distance = dist
       closest_bbox = bbox
-  if min_distance < MIN_SNAPPING_DISTANCE:
+  if min_distance < min_snapping_distance:
     return closest_bbox
   else:
     return None
@@ -129,7 +130,9 @@ class HumanTracker:
     print("found someone at frame {0} at bbox {1}".format(start_index, start_bbox))
     start_frame = self.frames[0] # FIXME check empty frames
     obj_tracker = self.create_obj_tracker()
-    ok = obj_tracker.init(start_frame, start_bbox)
+    y1, x1, y2, x2 = start_bbox
+    init_tracker_bbox = (x1, y1, x2 - x1, y2 - y1)
+    ok = obj_tracker.init(start_frame, init_tracker_bbox)
     if not ok:
       raise "failed to init obj tracker" # FIXME
     curr_track = Track()
