@@ -19,7 +19,7 @@ def save_track_as_images(frames, track, folder_name, path):
     pass
 
 
-DEFAULT_MIN_SNAPPING_DISTANCE = 30.0
+DEFAULT_MIN_SNAPPING_DISTANCE = 50.0
 
 def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE):
   closest_bbox = None
@@ -151,7 +151,7 @@ class HumanTracker:
         y2 = y1 + int(h)
         int_tracker_bbox = (y1, x1, y2, x2)
         bboxes_list = self.list_of_bboxes_lists[idx]
-        bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox)
+        bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE/2)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
           curr_track.add(idx, bbox)
