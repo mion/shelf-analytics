@@ -137,10 +137,15 @@ class HumanTracker:
     print("tracking human:")
     for idx in range(start_index + 1, len(self.frames)):
       frame = self.frames[idx]
-      ok, tracker_bbox = obj_tracker.update(frame)
+      ok, xywh = obj_tracker.update(frame)
       if ok:
         # FIXME bbox should be floats perhaps
-        int_tracker_bbox = tuple([int(n) for n in tracker_bbox])
+        x, y, w, h = xywh
+        x1 = int(x)
+        y1 = int(y)
+        x2 = x1 + int(w)
+        y2 = y1 + int(h)
+        int_tracker_bbox = (y1, x1, y2, x2)
         bbox = self.find_closest_bbox_to_snap_on(idx, int_tracker_bbox)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))

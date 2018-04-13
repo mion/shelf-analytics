@@ -49,7 +49,7 @@ if __name__ == '__main__' :
                                  obj_tracker_type="KCF")
     has_untracked_humans = True
     tracks_count = 0
-    max_tracks_count = 3
+    max_tracks_count = 100
     while tracks_count < max_tracks_count and has_untracked_humans:
         has_untracked_humans = human_tracker.track_someone_once()
         tracks_count += 1
