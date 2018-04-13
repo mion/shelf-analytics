@@ -118,7 +118,7 @@ def tag_frame(output_filename, image, boxes, masks, class_ids, class_names,
         if not np.any(boxes[i]):
             # Skip this instance. Has no bbox. Likely lost in image cropping.
             continue
-        y1, x1, y2, x2 = boxes[i]
+        y1, x1, y2, x2 = boxes[i] # CAREFUL WITH THE ORDERING
         p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2,
                               alpha=0.7, linestyle="dashed",
                               edgecolor=color, facecolor='none')
