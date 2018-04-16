@@ -19,23 +19,47 @@ def load_video(path):
   else:
     return video
 
-def extract_events(video, tracks, rois):
-  events = []
+def find_intersection_bbox(bbox_a, bbox_b): # TODO this method has NOT been tested
+  y1_a, x1_a, y2_a, x2_a = bbox_a
+  y1_b, x1_b, y2_b, x2_b = bbox_b
+  x1 = max(x1_a, x1_b)
+  y1 = max(y1_a, y1_b)
+  x2 = min(x2_a, x2_b)
+  y2 = min(y2_a, y2_b)
+  if x1 < x2 and y1 < y2:
+    return (y1, x1, y2, x2)
+  else:
+    return None
+
+def extract_events(tracks, rois):
+  # walked
+  # pondered
+  # interacted
+  return []
+
+def extract_intersection_area_by_frame_by_roi(tracks, rois):
+  intersection_area_by_frame_by_roi = {}
+  for roi in rois:
+    name = roi["name"]
+    intersection_area_by_frame_by_roi[name] = {}
+  for track in tracks:
+    for i in range(len(track)):
+      frame_index = track[i]["index"]
+      bbox = track[i]["bbox"]
+      for roi in rois:
+        name = roi["name"]
+        bbox = roi["bbox"]
+        intersection_area_by_frame_by_roi[name][frame_index] = 
   return events
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument("video_path", help="path a transcoded video")
   parser.add_argument("tracks_path", help="path to JSON file")
   parser.add_argument("rois_path", help="path a JSON file")
   args = parser.parse_args()
 
-  video = load_video(args.video_path)
-  if video is None:
-    print("Could not load video")
-    sys.exit()
   tracks = load_json(args.tracks_path)
   rois = load_json(args.rois_path)
 
-  events = extract_events(video, tracks, rois)
+  events = extract_events(tracks, rois)
   print(json.dumps(events))
