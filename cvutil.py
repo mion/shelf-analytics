@@ -23,5 +23,8 @@ def draw_bbox_on_frame(frame, bbox, rect_color=(0,0,255), text_color=(255,255,25
       text = "({0},{1},{2},{3})".format(x1, y1, x2, y2)
   return cv2.putText(new_frame, text, (x1, y2 + 15), font, 0.30, text_color, 1, cv2.LINE_AA)
 
+def draw_text_on_frame(frame, text, x, y, color):
+  return cv2.putText(frame, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.30, color, 1, cv2.LINE_AA)
+
 def save_image(img, name, path):
   cv2.imwrite(os.path.join(path, name), img)
