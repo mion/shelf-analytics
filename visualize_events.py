@@ -27,6 +27,8 @@ def get_tracked_objects_by_frame_index(tracks):
     track = tracks[track_index]
     for step in track:
       frame_index = step["index"]
+      if frame_index not in tracked_objects_by_frame_index:
+        tracked_objects_by_frame_index[frame_index] = {}
       track_name = "track_" + str(track_index)
       if track_name not in tracked_objects_by_frame_index[frame_index]:
         tracked_objects_by_frame_index[frame_index][track_name] = {}
@@ -34,11 +36,16 @@ def get_tracked_objects_by_frame_index(tracks):
   return tracked_objects_by_frame_index
 
 def visualize_events(output_path, video, events, rois, tracks, intersection_area_over_time):
-  # frames = cvutil.read_frames_from_video(video)
-  # for index in range(len(frames)):
-  #   frame = frames[index]
-  #   pass
-  print(get_tracked_objects_by_frame_index(tracks))
+  tracked_objects_by_frame_index = get_tracked_objects_by_frame_index(tracks)
+  frames = cvutil.read_frames_from_video(video)
+  for index in range(len(frames)):
+    frame = frames[index]
+    if index in tracked_objects_by_frame_index:
+      tracked_objects = tracked_objects_by_frame_index[index]
+      for track_name in tracked_objects.keys():
+        tracked_bbox = tracked_objects[track_name]
+        frame = cvutil.draw_bbox_on_frame(frame, tracked_bbox, (0, 75, 255), (255, 255, 255), track_name)
+    cvutil.save_image(frame, "frame-{0}.png".format(str(index)), output_path)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
