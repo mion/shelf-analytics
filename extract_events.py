@@ -1,6 +1,6 @@
 #  Copyright 2018 Toneto Labs. All Rights Reserved.
 #
-"""Extract business insights into a JSON file given a tagged bundle (tagged frames and tags data) and a camera configuration file."""
+"""Extract given a JSON file with the intersection area over time for each track."""
 
 import argparse
 import json
@@ -12,54 +12,46 @@ def load_json(path):
   with open(path, "r") as json_file:
     return json.loads(json_file.read())
 
-def load_video(path):
-  video = cv2.VideoCapture(args.video_path)
-  if not video.isOpened():
-    return None
-  else:
-    return video
+def area_of_bbox(bbox):
+  y1, x1, y2, x2 = bbox
+  w = x2 - x1
+  h = y2 - y1
+  return w * h
 
-def find_intersection_bbox(bbox_a, bbox_b): # TODO this method has NOT been tested
-  y1_a, x1_a, y2_a, x2_a = bbox_a
-  y1_b, x1_b, y2_b, x2_b = bbox_b
-  x1 = max(x1_a, x1_b)
-  y1 = max(y1_a, y1_b)
-  x2 = min(x2_a, x2_b)
-  y2 = min(y2_a, y2_b)
-  if x1 < x2 and y1 < y2:
-    return (y1, x1, y2, x2)
-  else:
-    return None
+WALKED_EVENT_MIN_INTERSEC_AREA_PERCENTAGE = 0.25
 
-def extract_events(tracks, rois):
+def extract_events(rois, intersection_area_over_time):
   # walked
   # pondered
   # interacted
-  return []
-
-def extract_intersection_area_by_frame_by_roi(tracks, rois):
-  intersection_area_by_frame_by_roi = {}
+  bbox_by_roi_name = {}
   for roi in rois:
-    name = roi["name"]
-    intersection_area_by_frame_by_roi[name] = {}
-  for track in tracks:
-    for i in range(len(track)):
-      frame_index = track[i]["index"]
-      bbox = track[i]["bbox"]
-      for roi in rois:
-        name = roi["name"]
-        bbox = roi["bbox"]
-        intersection_area_by_frame_by_roi[name][frame_index] = 
+    bbox_by_roi_name[roi["name"]] = roi["bbox"]
+  
+  events = []
+  for track_index in range(len(intersection_area_over_time)):
+    intersections_by_name = intersection_area_over_time[track_index]
+    roi_names = intersections_by_name.keys()
+    for name in roi_names:
+      for i in range(len(intersections_by_name[name])):
+        intersec = intersections_by_name[name][i]
+        frame_index = intersec["index"]
+        intersec_perc = intersec["area"] / area_of_bbox(bbox_by_roi_name[name])
+        if intersec_perc > WALKED_EVENT_MIN_INTERSEC_AREA_PERCENTAGE:
+          # for now let's look for walked events only
+          event = {"type": "walked", "index": frame_index, "roi_name": name, "track": track_index}
+          events.append(event)
+          break
   return events
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument("tracks_path", help="path to JSON file")
-  parser.add_argument("rois_path", help="path a JSON file")
+  parser.add_argument("rois_path", help="path to JSON file")
+  parser.add_argument("iaot_path", help="path to JSON file")
   args = parser.parse_args()
 
-  tracks = load_json(args.tracks_path)
   rois = load_json(args.rois_path)
+  intersection_area_over_time = load_json(args.iaot_path)
 
-  events = extract_events(tracks, rois)
+  events = extract_events(rois, intersection_area_over_time)
   print(json.dumps(events))
