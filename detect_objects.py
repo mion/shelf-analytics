@@ -51,7 +51,7 @@ def load_images(img_file_paths):
   return images
 
 
-def detect_objects(input_dir, output_dir, model):
+def detect_objects(input_dir, output_dir, model, visually=False):
   # COCO Class names
   # Index of the class in the list is its ID. For example, to get ID of
   # the teddy bear class, use: class_names.index('teddy bear')
@@ -94,7 +94,10 @@ def detect_objects(input_dir, output_dir, model):
     results = model.detect([image], verbose=1)
     r = results[0]
     tagged_filename = os.path.join(final_output_dir, "tagged-{0}".format(name))
-    tagged_frame = visualize.tag_frame(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+    if visually:
+      tagged_frame = visualize.tag_frame_visually(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+    else:
+      tagged_frame = visualize.tag_frame(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
     tagged_frame['frame_index'] = i
     tags['frames'].append(tagged_frame)
   return (True, tags)
@@ -104,6 +107,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("input_dir", help="input directory representing a video with its frames inside")
   parser.add_argument("output_dir", help="output directory")
+  parser.add_argument("format", help="can be either 'json' or 'visual'")
   args = parser.parse_args()
 
   print(tnt.color_warn("Input directory: ") + args.input_dir)
@@ -132,7 +136,8 @@ if __name__ == "__main__":
   # Load weights trained on MS-COCO
   model.load_weights(COCO_MODEL_PATH, by_name=True)
 
-  success, tags = detect_objects(args.input_dir, args.output_dir, model)
+  visually = (args.format == 'visual')
+  success, tags = detect_objects(args.input_dir, args.output_dir, model, visually)
 
   if success:
     print(tnt.color_ok("Done!") + " Saving tags into a JSON file...")
