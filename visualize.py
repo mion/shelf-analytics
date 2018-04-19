@@ -184,7 +184,7 @@ def tag_frame_visually(output_filename, image, boxes, masks, class_ids, class_na
         assert boxes.shape[0] == masks.shape[-1] == class_ids.shape[0]
 
     if not ax:
-        _, ax = plt.subplots(1, figsize=figsize)
+        fig, ax = plt.subplots(1, figsize=figsize)
 
     # Remove white margin:
     # https://stackoverflow.com/a/27227718
@@ -240,6 +240,7 @@ def tag_frame_visually(output_filename, image, boxes, masks, class_ids, class_na
             ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
     plt.savefig(output_filename, bbox_inches="tight", pad_inches=0, Transparent=True)
+    plt.close(fig)
     # let's convert boxes to a normal Python array so it can be JSON dumped
     simple_boxes = []
     for i in range(N):
