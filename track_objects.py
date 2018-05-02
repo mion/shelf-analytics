@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pdb
+import os
 import json
 import cv2
 import sys
@@ -17,6 +18,7 @@ if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
     parser.add_argument("video_path", help="path to the video")
     parser.add_argument("tags_path", help="path to a tags JSON file")
+    parser.add_argument("output_dir_path", help="path to the output directory where a JSON file with the tracks will be saved")
     args = parser.parse_args()
 
     print("Loading video...")
@@ -57,5 +59,6 @@ if __name__ == '__main__' :
     # print(tracks_json_string)
     tracks = human_tracker.get_tracks()
 
-    with open("tracks.json", "w") as tracks_file:
+    output_file_path = os.path.join(args.output_dir_path, "tracks.json")
+    with open(output_file_path, "w") as tracks_file:
         json.dump(tracks, tracks_file)
