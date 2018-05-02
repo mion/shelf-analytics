@@ -8,12 +8,11 @@ import shutil
 import os
 
 from colorize import red, green, yellow, header
+from tnt import extract_video_name, has_ffmpeg_installed, DEFAULT_TRANSCODED_VIDEO_NAME
 
-def has_ffmpeg_installed():
-  return shutil.which("ffmpeg") != None
 
 def split_frames(input_path, output_dir, ext):
-  frame_number_format = '%07d'
+  frame_number_format = '%07d' # FIXME count total number of frames beforehand
   _, input_name = os.path.split(input_path)
   name, _ = os.path.splitext(input_name)
   video_dir = os.path.join(output_dir, name)
@@ -25,13 +24,12 @@ def split_frames(input_path, output_dir, ext):
     return False
   output_path = os.path.join(video_dir, "frame-{0}.{1}".format(frame_number_format, ext))
   cmd_template = "ffmpeg -i {0} {1} -hide_banner"
-  #
   # [!] WARNING: shell=True is dangerous
-  #
   cmd = cmd_template.format(input_path, output_path)
   print("\n\n\t" + cmd + "\n\n")
   result = subprocess.call(cmd, shell=True)
   return result == 0
+
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
