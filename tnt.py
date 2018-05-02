@@ -8,8 +8,8 @@ import shutil
 def has_ffmpeg_installed():
   return shutil.which("ffmpeg") != None
 
-def extract_video_name(dir):
-  return os.path.basename(os.path.normpath(dir))
+def extract_video_name(path):
+  return os.path.basename(os.path.normpath(path))
 
 def extract_video_fps(dir):
   return int(extract_video_name(dir).split("-")[-1])
