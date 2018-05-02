@@ -27,5 +27,5 @@ def red(string):
 
 
 def green(string):
-    return Colors.OKBLUE + string + Colors.ENDC
+    return Colors.OKGREEN + string + Colors.ENDC
 
