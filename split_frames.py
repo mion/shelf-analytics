@@ -7,15 +7,7 @@ import subprocess
 import shutil
 import os
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+from colorize import red, green, yellow, header
 
 def has_ffmpeg_installed():
   return shutil.which("ffmpeg") != None
@@ -28,7 +20,7 @@ def split_frames(input_path, output_dir, ext):
   try:
     os.mkdir(video_dir)
   except FileExistsError as err:
-    print(bcolors.WARNING + "ERROR: could not create directory at {0}".format(video_dir) + bcolors.ENDC)
+    print(yellow("ERROR: could not create directory at {0}".format(video_dir)))
     print(err)
     return False
   output_path = os.path.join(video_dir, "frame-{0}.{1}".format(frame_number_format, ext))
@@ -49,14 +41,14 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   if has_ffmpeg_installed():
-    print(bcolors.WARNING + "Input video: " + bcolors.ENDC + args.input_path)
-    print(bcolors.WARNING + "Output directory: " + bcolors.ENDC + args.output_dir)
-    print(bcolors.WARNING + "Frame images extension: " + bcolors.ENDC + str(args.ext))
+    print(yellow("Input video: ") + args.input_path)
+    print(yellow("Output directory: ") + args.output_dir)
+    print(yellow("Frame images extension: ") + str(args.ext))
     print("Working...")
     success = split_frames(args.input_path, args.output_dir, args.ext)
     if success:
-      print(bcolors.OKGREEN + "Done!" + bcolors.ENDC)
+      print(green("Done!"))
     else:
-      print(bcolors.FAIL + "ERROR: failed to split video into frames" + bcolors.ENDC)
+      print(red("ERROR: failed to split video into frames"))
   else:
-    print(bcolors.FAIL + "ERROR: could not find 'ffmpeg' executable" + bcolors.ENDC)
+    print(red("ERROR: could not find 'ffmpeg' executable"))
