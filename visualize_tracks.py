@@ -16,6 +16,7 @@ if __name__ == '__main__':
   parser.add_argument("tags_path", help="path to a tags JSON file")
   parser.add_argument("tracks_path", help="path to a tracks JSON file")
   parser.add_argument("track_index", type=int, help="index of track to visualize")
+  parser.add_argument("output_dir", help="path to output directory")
   args = parser.parse_args()
 
   video = cv2.VideoCapture(args.video_path)
@@ -34,8 +35,7 @@ if __name__ == '__main__':
   track_first_index = track[0]["index"]
   track_last_index = track[len(track) - 1]["index"]
 
-  bundle_path = "/Users/gvieira/temp/tagged_frames/video-01-d-fps-5/tracks"
-  track_folder_path = os.path.join(bundle_path, "track-{0}".format(track_index))
+  track_folder_path = os.path.join(args.output_dir, "track-{0}".format(track_index))
   try:
     os.mkdir(track_folder_path)
   except FileExistsError as err:
