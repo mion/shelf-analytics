@@ -3,28 +3,10 @@
 """Toneto helper module."""
 
 import os
+import shutil
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-def color_info(s):
-  return bcolors.HEADER + str(s) + bcolors.ENDC
-
-def color_warn(s):
-  return bcolors.WARNING + str(s) + bcolors.ENDC
-
-def color_fail(s):
-  return bcolors.FAIL + str(s) + bcolors.ENDC
-
-def color_ok(s):
-  return bcolors.OKGREEN + str(s) + bcolors.ENDC
+def has_ffmpeg_installed():
+  return shutil.which("ffmpeg") != None
 
 def extract_video_name(dir):
   return os.path.basename(os.path.normpath(dir))
