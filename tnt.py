@@ -5,6 +5,8 @@
 import os
 import shutil
 
+DEFAULT_TRANSCODED_VIDEO_NAME = "video"
+
 def has_ffmpeg_installed():
   return shutil.which("ffmpeg") != None
 
