@@ -7,15 +7,7 @@ import subprocess
 import shutil
 import os
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+from colorize import red, green, yellow, header
 
 def has_ffmpeg_installed():
   return shutil.which("ffmpeg") != None
@@ -35,20 +27,20 @@ def transcode(input_path, output_dir, fps):
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("input_path", help="input video file path")
-  parser.add_argument("output_dir", help="output directory")
+  parser.add_argument("video_path", help="input video file path")
+  parser.add_argument("output_dir_path", help="output directory")
   parser.add_argument("--fps", default=10, type=int, help="frames per second for output video")
   args = parser.parse_args()
 
   if has_ffmpeg_installed():
-    print(bcolors.WARNING + "Input video: " + bcolors.ENDC + args.input_path)
-    print(bcolors.WARNING + "Output directory: " + bcolors.ENDC + args.output_dir)
-    print(bcolors.WARNING + "Output video FPS: " + bcolors.ENDC + str(args.fps))
+    print(yellow("Input video: ") + args.video_path)
+    print(yellow("Output directory: ") + args.output_dir_path)
+    print(yellow("Output video FPS: ") + str(args.fps))
     print("Transcoding...")
-    success = transcode(args.input_path, args.output_dir, args.fps)
+    success = transcode(args.video_path, args.output_dir_path, args.fps)
     if success:
-      print(bcolors.OKGREEN + "Done!" + bcolors.ENDC)
+      print(green("Done!"))
     else:
-      print(bcolors.FAIL + "ERROR: failed to transcode video" + bcolors.ENDC)
+      print(red("ERROR: failed to transcode video"))
   else:
-    print(bcolors.FAIL + "ERROR: could not find 'ffmpeg' executable" + bcolors.ENDC)
+    print(red("ERROR: could not find 'ffmpeg' executable"))
