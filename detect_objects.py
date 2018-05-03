@@ -19,7 +19,8 @@ import utils
 import model as modellib
 import visualize
 
-import tnt
+from colorize import red, green, yellow
+from tnt import extract_video_fps, extract_video_name, has_ffmpeg_installed, DEFAULT_TRANSCODED_VIDEO_NAME
 
 
 class InferenceConfig(coco.CocoConfig):
@@ -39,7 +40,7 @@ def scan_images(input_dir):
       images_file_names.append(file_name)
       images_file_paths.append(os.path.join(input_dir, file_name))
     else:
-      print(tnt.color_warn("Found file '") + file_name + tnt.color_warn("' inside directory but it is not an image, skipping..."))
+      print(yellow("Found file '") + file_name + yellow("' inside directory but it is not an image, skipping..."))
   return (images_file_names, images_file_paths)
 
 
@@ -51,7 +52,7 @@ def load_images(img_file_paths):
   return images
 
 
-def detect_objects(input_dir, output_dir, model, visually=False):
+def detect_objects(input_dir, video_fps, output_dir, model, visually=False):
   # COCO Class names
   # Index of the class in the list is its ID. For example, to get ID of
   # the teddy bear class, use: class_names.index('teddy bear')
@@ -71,29 +72,20 @@ def detect_objects(input_dir, output_dir, model, visually=False):
                 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                 'teddy bear', 'hair drier', 'toothbrush']
 
-  video_name = os.path.basename(os.path.normpath(input_dir))
-  final_output_dir = os.path.join(output_dir, video_name)
-  # create output dir
-  try:
-    os.mkdir(final_output_dir)
-  except FileExistsError as err:
-    print(tnt.color_warn("ERROR: could not create directory at {0}".format(final_output_dir)))
-    print(err)
-    return (False, None)
   # scan and load images
   img_file_names, img_file_paths = scan_images(input_dir)
   images = load_images(img_file_paths)
   tags = {}
   tags['frames'] = []
-  tags['frames_per_second'] = tnt.extract_video_fps(input_dir) # TODO: fix this
+  tags['frames_per_second'] = video_fps # TODO: fix this
   # run the Mask RCNN code for each one of them
   for i in range(0, len(images)):
-    print(tnt.color_ok("Processing image ") + str(i + 1) + tnt.color_ok(" of ") + str(len(images)) + "...")
+    print(green("Processing image ") + str(i + 1) + green(" of ") + str(len(images)) + "...")
     image = images[i]
     name = img_file_names[i]
     results = model.detect([image], verbose=1)
     r = results[0]
-    tagged_filename = os.path.join(final_output_dir, "tagged-{0}".format(name))
+    tagged_filename = os.path.join(output_dir, "tagged-{0}".format(name))
     if visually:
       tagged_frame = visualize.tag_frame_visually(tagged_filename, image, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
     else:
@@ -106,19 +98,20 @@ def detect_objects(input_dir, output_dir, model, visually=False):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("input_dir", help="input directory representing a video with its frames inside")
+  parser.add_argument("--fps", default=10, type=int, help="frames per second for output video")
   parser.add_argument("output_dir", help="output directory")
   parser.add_argument("format", help="can be either 'json' or 'visual'")
   args = parser.parse_args()
 
-  print(tnt.color_warn("Input directory: ") + args.input_dir)
-  print(tnt.color_warn("Output directory: ") + args.output_dir)
+  print(yellow("Input directory: ") + args.input_dir)
+  print(yellow("Output directory: ") + args.output_dir)
 
   if not os.path.exists(args.input_dir):
-    print(tnt.color_fail("ERROR: unable to open (or missing permissions) for input directory: ") + args.input_dir)
+    print(red("ERROR: unable to open (or missing permissions) for input directory: ") + args.input_dir)
     exit(1)
   
   if not os.path.exists(args.output_dir):
-    print(tnt.color_fail("ERROR: unable to open (or missing permissions) for output directory: ") + args.output_dir)
+    print(red("ERROR: unable to open (or missing permissions) for output directory: ") + args.output_dir)
     exit(1)
 
   print("Working, please wait...")
@@ -137,18 +130,15 @@ if __name__ == "__main__":
   model.load_weights(COCO_MODEL_PATH, by_name=True)
 
   visually = (args.format == 'visual')
-  success, tags = detect_objects(args.input_dir, args.output_dir, model, visually)
+  success, tags = detect_objects(args.input_dir, args.fps, args.output_dir, model, visually)
 
   if success:
-    print(tnt.color_ok("Done!") + " Saving tags into a JSON file...")
-    video_name = tnt.extract_video_name(args.input_dir)
-    tags_file_name = "tags.json" #"tags-" + video_name + ".json"
-    tags_dir = os.path.join(args.output_dir, video_name)
-    tags_file_path = os.path.join(tags_dir, tags_file_name)
+    print(green("Done!") + " Saving tags into a JSON file...")
+    tags_file_path = os.path.join(args.output_dir, "tags.json")
     with open(tags_file_path, "w") as tags_file:
       json.dump(tags, tags_file)
-    print(tnt.color_ok("Success! Tag JSON file saved to: ") + tags_file_path)
+    print(green("Success! Tag JSON file saved to: ") + tags_file_path)
     exit(0)
   else:
-    print(tnt.color_fail("ERROR: failed to detect objects"))
+    print(red("ERROR: failed to detect objects"))
     exit(1)
