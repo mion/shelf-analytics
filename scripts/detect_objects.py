@@ -1,12 +1,13 @@
 #  Copyright 2018 Toneto Labs. All Rights Reserved.
 #
 """Detect objects inside one or more images, usually frames extracted from a video."""
-import pdb
+import os
+import sys
+sys.path.append(os.path.join(os.getcwd(), 'shan'))
+sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
 
 import argparse
 import json
-import os
-import sys
 import random
 import math
 import numpy as np
@@ -14,7 +15,6 @@ import skimage.io
 import matplotlib
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.join(os.getcwd(), 'mask_rcnn'))
 import coco
 import utils
 import model as modellib
