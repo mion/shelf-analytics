@@ -1,12 +1,14 @@
 #  Copyright 2018 Toneto Labs. All Rights Reserved.
 #
 """Transcode a video file before splitting it into frames."""
+import os
+import sys
+sys.path.append(os.path.join(os.getcwd(), 'shan'))
+sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
 
 import argparse
 import subprocess
 import shutil
-import sys
-import os
 
 from colorize import red, green, yellow, header
 from tnt import extract_video_name, has_ffmpeg_installed, DEFAULT_TRANSCODED_VIDEO_NAME
