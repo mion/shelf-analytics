@@ -14,6 +14,7 @@ import skimage.io
 import matplotlib
 import matplotlib.pyplot as plt
 
+sys.path.append(os.path.join(os.getcwd(), 'mask_rcnn'))
 import coco
 import utils
 import model as modellib
