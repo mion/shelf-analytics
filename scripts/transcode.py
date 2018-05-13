@@ -19,13 +19,14 @@ def add_fps_suffix(video_filename, fps):
   return video_name + "-fps-" + str(fps) + video_ext
 
 
-def transcode(video_path, bundle_path, fps):
+def transcode(input_video_path, output_dir_path, fps):
+  orig_video_filename = extract_video_name(input_video_path)
+  final_video_filename = add_fps_suffix(orig_video_filename, fps)
+  output_path = os.path.join(output_dir_path, final_video_filename)
   # https://stackoverflow.com/questions/11004137/re-sampling-h264-video-to-reduce-frame-rate-while-maintaining-high-image-quality
-  _, ext = os.path.splitext(video_path)
-  output_path = os.path.join(bundle_path, DEFAULT_TRANSCODED_VIDEO_NAME + ext)
   cmd_template = "ffmpeg -i {0} -r {1} -c:v libx264 -b:v 3M -strict -2 -movflags faststart {2}" 
   # [!] WARNING: shell=True is not secure.
-  result = subprocess.call(cmd_template.format(video_path, fps, output_path), shell=True)
+  result = subprocess.call(cmd_template.format(input_video_path, fps, output_path), shell=True)
   return result == 0
 
 
@@ -40,23 +41,10 @@ if __name__ == "__main__":
     print(red("ERROR: could not find 'ffmpeg' executable"))
     sys.exit(1)
   
-  orig_video_filename = extract_video_name(args.video_path)
-  final_video_filename = add_fps_suffix(orig_video_filename, args.fps)
-
-  final_video_name, _ = os.path.splitext(final_video_filename)
-  bundle_path = os.path.join(args.output_dir_path, final_video_name)
-
-  if os.path.exists(bundle_path):
-    print(red("ERROR: a directory already exists at ") + bundle_path)
-    sys.exit(1)
-  else:
-    os.mkdir(bundle_path)
-
-  print(yellow("Final video name with FPS suffix: ") + final_video_filename)
   print("Transcoding...")
-  success = transcode(args.video_path, bundle_path, args.fps)
+  success = transcode(args.video_path, args.output_dir_path, args.fps)
   if success:
-    print(green("Done! Bundle created: ") + bundle_path)
+    print(green("SUCCESS: transcoded video file saved in output directory."))
     sys.exit(0)
   else:
     print(red("ERROR: failed to transcode video"))
