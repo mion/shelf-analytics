@@ -2,10 +2,13 @@
 #
 """Extract given a JSON file with the intersection area over time for each track."""
 
-import argparse
-import json
 import os
 import sys
+sys.path.append(os.path.join(os.getcwd(), 'shan'))
+sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
+
+import argparse
+import json
 import cv2
 
 import cvutil
