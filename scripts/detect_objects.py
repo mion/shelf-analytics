@@ -122,7 +122,8 @@ if __name__ == "__main__":
 
   ROOT_DIR = os.getcwd()
   MODEL_DIR = os.path.join(ROOT_DIR, "logs")
-  COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+  # FIXME grab values from some config file
+  COCO_MODEL_PATH = os.path.join(ROOT_DIR, "shan/mask_rcnn/mask_rcnn_coco.h5")
 
   # Create model object in inference mode.
   model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
