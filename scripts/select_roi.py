@@ -22,8 +22,11 @@ if __name__ == '__main__':
         print('ERROR: Cannot read first frame from video file.')
         sys.exit()
     
-    bbox = cv2.selectROI(frame, False)
-    y1, x1, y2, x2 = bbox
+    cv_bbox = cv2.selectROI(frame, False)
+    x1 = int(cv_bbox[0])
+    y1 = int(cv_bbox[1])
+    x2 = int(cv_bbox[0] + cv_bbox[2])
+    y2 = int(cv_bbox[1] + cv_bbox[3])
     print(json.dumps({
         'bbox': [y1, x1, y2, x2]
     }))
