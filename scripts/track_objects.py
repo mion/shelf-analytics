@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-import pdb
 import os
+import sys
+sys.path.append(os.path.join(os.getcwd(), 'shan'))
+sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
+
 import json
 import cv2
-import sys
 import argparse
 
 import cvutil
