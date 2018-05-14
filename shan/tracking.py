@@ -19,7 +19,8 @@ def save_track_as_images(frames, track, folder_name, path):
     pass
 
 
-DEFAULT_MIN_SNAPPING_DISTANCE = 50.0
+DEFAULT_MIN_SNAPPING_DISTANCE = 150.0
+TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 300.0
 
 def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE):
   closest_bbox = None
@@ -144,6 +145,7 @@ class HumanTracker:
 
     # FIXME 1 frame videos?
     print("tracking human:")
+    # pdb.set_trace()
     for idx in range(start_index + 1, len(self.frames)):
       frame = self.frames[idx]
       ok, xywh = obj_tracker.update(frame)
@@ -168,10 +170,19 @@ class HumanTracker:
         # when the tracker fails, find the nearest detected bbox and snap to it
         bboxes_list = self.list_of_bboxes_lists[idx]
         last_tracker_bbox = curr_track.last_bbox()
-        bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE/2)
+        bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE/2)
         if bbox != None:
           print("\t(retaken) at frame {0} moved to bbox {1}".format(idx, bbox))
           curr_track.add(idx, bbox)
+          # TODO Fix the retaken bug.
+          # I think the restarting of the tracker is not working.
+          # I attempted the method below but it didn't work properly.
+          #
+          # If the tracker has failed, the `update` method cannot be called again.
+          # Instead, we need to re-initialize it (the docs do not say this).
+          # obj_tracker = self.create_obj_tracker()
+          # if not obj_tracker.init(frame, bbox):
+          #   raise "failed to re-init tracker after retake" # FIXME
         else:
           print("\ttrack lost at frame {0}".format(idx))
           break
