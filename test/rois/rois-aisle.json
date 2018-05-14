@@ -6,5 +6,9 @@
   {
     "name": "roi_2",
     "bbox": [129, 245, 185, 356]
+  },
+  {
+    "name": "area_in_front_of_left_shelf",
+    "bbox": [107, 19, 269, 164]
   }
 ]
