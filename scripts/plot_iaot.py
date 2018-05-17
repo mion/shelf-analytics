@@ -8,6 +8,8 @@ import cv2
 import json
 import argparse
 import numpy as np
+from scipy.signal import find_peaks 
+import pdb
 
 def load_json(path):
   with open(path, "r") as json_file:
@@ -49,8 +51,11 @@ if __name__ == '__main__':
     dy = np.diff(y)
     dY = dy.tolist()
 
-    X.pop()
-    plt.scatter(X, dY, s=60, c='blue')
+    dX = X.copy()
+    dX.pop()
+    plt.scatter(dX, dY, s=60, c='blue')
+
+    pdb.set_trace()
 
     # plt.xlim(0,1000)
     # plt.ylim(0,100)
