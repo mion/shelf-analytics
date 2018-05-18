@@ -53,9 +53,9 @@ def visualize_events(output_path, video, events, rois, tracks, intersection_area
       captured = False
       for event in events:
         if event["index"] == index and event["roi_name"] == roi["name"]:
-          frame = cvutil.draw_bbox_on_frame(frame, roi["bbox"], (0, 255, 0), (50, 225, 50), roi["name"] + " +1 WALKED")
+          frame = cvutil.draw_bbox_on_frame(frame, roi["bbox"], (0, 255, 0), (50, 225, 50), roi["name"] + " +1 " + event["type"])
           toasts.append({
-            "text": "+1 'walked' event",
+            "text": "+1 '{0}' event".format(event["type"]),
             "x": roi["bbox"][1],
             "y": roi["bbox"][2],
             "life": 0
