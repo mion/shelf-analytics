@@ -67,7 +67,7 @@ def extract_interacted_events_indexes(iaot, frame_indexes):
     # here is where the detection happens
     duration_ms = int(1000 * (duration_in_frames / fps))
     if duration_ms > MIN_DURATION_MS_FOR_INTERACTED and intersection_area_in_pixels > MIN_INTERSECTION_AREA_PX_FOR_INTERACTED:
-      events_indexes.append(frame_index)
+      events_indexes.append(int(frame_index))
   return events_indexes
 
 def extract_events(rois, intersection_area_over_time):
