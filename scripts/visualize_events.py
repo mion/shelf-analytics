@@ -32,7 +32,7 @@ def get_tracked_objects_by_frame_index(tracks):
       frame_index = step["index"]
       if frame_index not in tracked_objects_by_frame_index:
         tracked_objects_by_frame_index[frame_index] = {}
-      track_name = "Customer " + str(track_index)
+      track_name = "Cliente " + str(track_index)
       if track_name not in tracked_objects_by_frame_index[frame_index]:
         tracked_objects_by_frame_index[frame_index][track_name] = {}
       tracked_objects_by_frame_index[frame_index][track_name] = step["bbox"]
