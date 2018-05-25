@@ -20,7 +20,7 @@ def area_of_bbox(bbox):
   h = y2 - y1
   return w * h
 
-WALKED_EVENT_MIN_INTERSEC_AREA_PERCENTAGE = 0.25
+WALKED_EVENT_MIN_INTERSEC_AREA_PERCENTAGE = 0.20
 
 def smooth_without_delay(xn):
   """
@@ -104,7 +104,7 @@ def extract_events(rois, intersection_area_over_time):
       for frame_index in interacted_events_indexes:
         events.append({
           "type": "interacted",
-          "index": frame_index,
+          "index": frame_index + 2, # skip 2 frames (arbitrary) to (try) to match the moment the hand touches the shelf
           "roi_name": name,
           "track": track_index
         })
