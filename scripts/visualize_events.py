@@ -32,7 +32,7 @@ def get_tracked_objects_by_frame_index(tracks):
       frame_index = step["index"]
       if frame_index not in tracked_objects_by_frame_index:
         tracked_objects_by_frame_index[frame_index] = {}
-      track_name = "Cliente " + str(track_index)
+      track_name = "Cliente #" + str(track_index + 1)
       if track_name not in tracked_objects_by_frame_index[frame_index]:
         tracked_objects_by_frame_index[frame_index][track_name] = {}
       tracked_objects_by_frame_index[frame_index][track_name] = step["bbox"]
@@ -56,7 +56,7 @@ def visualize_events(output_path, video, events, rois, tracks, intersection_area
       tracked_objects = tracked_objects_by_frame_index[index]
       for track_name in tracked_objects.keys():
         tracked_bbox = tracked_objects[track_name]
-        frame = cvutil.draw_bbox_on_frame(frame, tracked_bbox, (0, 75, 255), (255, 255, 255), track_name)
+        frame = cvutil.draw_bbox_on_frame(frame, tracked_bbox, (0, 75, 255), (150, 225, 250), track_name)
     for roi in rois:
       captured = False
       for event in events:
@@ -80,7 +80,7 @@ def visualize_events(output_path, video, events, rois, tracks, intersection_area
       else:
         toast["life"] += 1
         toast["y"] -= 3
-        cvutil.draw_text_on_frame(frame, toast["text"], toast["x"], toast["y"], (25, 225, 25))
+        cvutil.draw_text_on_frame(frame, toast["text"], toast["x"], toast["y"], (0, 231, 255))
 
     NUMBER_OF_DIGITS = 4
     cvutil.save_image(frame, "frame-{0}.png".format(str(index).zfill(NUMBER_OF_DIGITS)), output_path)
