@@ -2,8 +2,15 @@ import sys
 import os
 import cv2
 import cvutil
+import numpy as np
 
-if __name__ == '__main__':
+def test_drawing():
+    img = np.zeros((512, 512, 3), np.uint8)
+    # cv2.line(img, (0,0), (511,511), (255,0,0), 5)
+    cvutil.draw_label_on_frame(img, "Gondola Pet 2L (ESQUERDA)", 50, 25)
+    cvutil.show_image(img)
+
+def test_video_loading():
   print("Loading video...")
   video = cv2.VideoCapture("/Users/gvieira/temp/transcoded/video-01-d-fps-5.mp4")
   # Exit if video not opened.
@@ -26,3 +33,6 @@ if __name__ == '__main__':
   cv2.imshow('frame', new_frame)
   cv2.waitKey(0)
   cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    test_drawing()
