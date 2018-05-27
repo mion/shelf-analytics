@@ -108,13 +108,13 @@ def draw_technical_info(original_image, events):
   # Draw details
   detail_widths = []
   detail_widths.append(draw_detail(img_with_footer, (ROW_PADDING, height + 1 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Produto:", "GARRAFAS PET 2L ESQ"))
-  detail_widths.append(draw_detail(img_with_footer, (ROW_PADDING, height + 2 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Conversao:", "1,04% (ult. 30 dias)"))
-  detail_widths.append(draw_detail(img_with_footer, (ROW_PADDING, height + 3 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Sell Out:", "63,2% (ult. 30 dias)"))
+  detail_widths.append(draw_detail(img_with_footer, (ROW_PADDING, height + 2 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Conversao:", "1,04% (ult. 30 dias)", (0, 255, 0)))
+  detail_widths.append(draw_detail(img_with_footer, (ROW_PADDING, height + 3 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Sell Out:", "63,2% (ult. 30 dias)", (0, 100, 255)))
   max_width = max(detail_widths)
   second_col_x = max_width + ROW_PADDING + COL_PADDING
   draw_detail(img_with_footer, (second_col_x, height + 1 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Loja:", "PREZUNIC BOTAFOGO")
   draw_detail(img_with_footer, (second_col_x, height + 2 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Camera:", "CORREDOR BEBIDAS SEC 3")
-  draw_detail(img_with_footer, (second_col_x, height + 3 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Data:", '25/05/2018 13:32:09 GMT-3')
+  draw_detail(img_with_footer, (second_col_x, height + 3 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Data:", time.strftime("%d %b %Y %H:%M:%S %Z", FAKE_START_TIME))
 
   # Add water mark
   draw_watermark(img_with_footer, (ROW_PADDING, 2 * ROW_PADDING), "Shelf Analytics (v1.0.9)  |  Copyright (c) 2018 TonetoLabs Inc. All rights reserved.")
