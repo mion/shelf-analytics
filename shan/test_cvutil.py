@@ -4,6 +4,12 @@ import cv2
 import cvutil
 import numpy as np
 
+def draw_details_on_frame(img, details):
+    pass
+
+def draw_events_on_frame(img, events):
+    pass
+
 def test_drawing():
     img = np.zeros((512, 512, 3), np.uint8)
     # cv2.line(img, (0,0), (511,511), (255,0,0), 5)
