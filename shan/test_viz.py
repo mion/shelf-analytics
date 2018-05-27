@@ -18,6 +18,13 @@ def draw_detail(image, orig, label, value, value_text_color=(255, 255, 255)):
     value_width, _ = value_size
     return label_width + value_width + SPACE_AFTER_LABEL
 
+def draw_watermark(image, orig, text):
+    FONT_SCALE = 0.75
+    FONT_THICKNESS = 1
+    FONT_LINE = cv2.LINE_AA
+    FONT_TYPE = cv2.FONT_HERSHEY_PLAIN
+    cv2.putText(image, text, orig, FONT_TYPE, FONT_SCALE, (200, 200, 200), FONT_THICKNESS, FONT_LINE)
+
 def main():
     # Load the image
     FRAME_IMAGE_PATH = "/Users/gvieira/shan/video-42-p_03/frames_events/frame-0020.png"
@@ -47,6 +54,11 @@ def main():
     draw_detail(img_with_footer, (second_col_x, height + 1 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Loja:", "PREZUNIC BOTAFOGO")
     draw_detail(img_with_footer, (second_col_x, height + 2 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Camera:", "CORREDOR BEBIDAS SEC 3")
     draw_detail(img_with_footer, (second_col_x, height + 3 * (ROW_HEIGHT - ROW_LINE_HEIGHT)), "Data:", '25/05/2018 13:32:09 GMT-3')
+
+    # Add water mark
+    draw_watermark(img_with_footer, (ROW_PADDING, 2 * ROW_PADDING), "Shelf Analytics (v1.0.9)  |  Copyright (c) 2018 TonetoLabs Inc. All rights reserved.")
+    # draw_watermark(img_with_footer, (ROW_PADDING, 2 * ROW_PADDING), "shelf-analytics-v1.0.9")
+    # draw_watermark(img_with_footer, (ROW_PADDING, 4 * ROW_PADDING), "Copyright (c) 2018 TonetoLabs Inc. All rights reserved.")
 
     cv2.imshow('image with footer', img_with_footer)
     cv2.waitKey(0)
