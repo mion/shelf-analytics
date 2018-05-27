@@ -60,7 +60,19 @@ def main():
     # draw_watermark(img_with_footer, (ROW_PADDING, 2 * ROW_PADDING), "shelf-analytics-v1.0.9")
     # draw_watermark(img_with_footer, (ROW_PADDING, 4 * ROW_PADDING), "Copyright (c) 2018 TonetoLabs Inc. All rights reserved.")
 
-    cv2.imshow('image with footer', img_with_footer)
+    # Add events section
+    EVENTS_WIDTH = 250
+    height_with_footer = height + FOOTER_HEIGHT
+    img_with_events = np.zeros((height + FOOTER_HEIGHT, width + EVENTS_WIDTH, channels), np.uint8)
+    img_with_events[0:(height_with_footer - 1), 0:(width - 1)] = img_with_footer[0:(height_with_footer - 1), 0:(width - 1)]
+    # events = [
+    #     ("15:32:23", "Cliente passou."),
+    #     ("15:32:25", "Cliente interagiu."),
+    #     ("15:35:45", "Cliente passou.")
+    # ]
+    # draw_events(events)
+
+    cv2.imshow('image with events', img_with_events)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
