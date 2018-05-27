@@ -25,18 +25,20 @@ def draw_watermark(image, orig, text):
     FONT_TYPE = cv2.FONT_HERSHEY_PLAIN
     cv2.putText(image, text, orig, FONT_TYPE, FONT_SCALE, (200, 200, 200), FONT_THICKNESS, FONT_LINE)
 
-def draw_events(image, orig, events):
+def draw_events(image, orig, events, section_width):
     FONT_SCALE = 1
     FONT_THICKNESS = 1
     FONT_LINE = cv2.LINE_AA
     FONT_TYPE = cv2.FONT_HERSHEY_PLAIN
-    LINE_HEIGHT = 25
-    TEXT_COLOR = (68, 198, 245) # gold
+    LINE_HEIGHT = 30
+    GOLD = (68, 198, 245) # gold
+    BLACK = (0, 0, 0)
     curr_x = orig[0]
     curr_y = orig[1]
     for (timestamp, text) in events:
+        cv2.rectangle(image, (curr_x, curr_y), (curr_x + section_width, curr_y + LINE_HEIGHT), GOLD, -1)
         curr_y += LINE_HEIGHT
-        cv2.putText(image, timestamp + " " + text, (curr_x, curr_y), FONT_TYPE, FONT_SCALE, TEXT_COLOR, FONT_THICKNESS, FONT_LINE)
+        cv2.putText(image, timestamp + " " + text, (curr_x + 10, curr_y - 10), FONT_TYPE, FONT_SCALE, BLACK, FONT_THICKNESS, FONT_LINE)
 
 def main():
     # Load the image
@@ -83,7 +85,7 @@ def main():
         ("[15:32:25]", "+1 interagiu"),
         ("[15:35:45]", "+1 passou")
     ]
-    draw_events(img_with_events, (width + 15, 5), events)
+    draw_events(img_with_events, (width, 0), events, EVENTS_WIDTH)
 
     cv2.imshow('image with events', img_with_events)
     cv2.waitKey(0)
