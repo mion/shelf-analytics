@@ -167,7 +167,7 @@ class HumanTracker:
           print("\t(tracked) at frame {0} moved to bbox {1}".format(idx, int_tracker_bbox))
           curr_track.add(idx, int_tracker_bbox)
       else:
-        # when the tracker fails, find the nearest detected bbox and snap to it
+        # when the tracker fails, find the nearest detected bbox and snap onto it
         bboxes_list = self.list_of_bboxes_lists[idx]
         last_tracker_bbox = curr_track.last_bbox()
         bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE/2)
