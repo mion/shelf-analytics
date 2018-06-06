@@ -1,0 +1,32 @@
+{
+  "count": 2,
+  "tracks": [
+    { "key": 0, "frames": [] },
+    {
+      "key": 1,
+      "frames": [
+        {
+          "original_index": 105,
+          "detected_humans": [
+            {
+              "type": "currently_tracking",
+              "bbox": [1,2,3,4],
+              "transition_type": "snapped",
+              "transition_from_bbox": [1,2,3,4],
+              "transition_distance": 13.5
+            },
+            {
+              "type": "already_tracked",
+              "bbox": [1,2,3,4],
+              "parent_track_key": 1
+            },
+            {
+              "type": "untracked",
+              "bbox": [1,2,3,4]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
