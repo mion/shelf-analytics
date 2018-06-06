@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import json
 
 DEFAULT_TRANSCODED_VIDEO_NAME = "video"
 
@@ -20,3 +21,7 @@ def add_suffix_to_basename(path, suffix):
   base_path, base_name = os.path.split(os.path.normpath(path))
   name, ext = os.path.splitext(base_name)
   return os.path.join(base_path, name + suffix + ext)
+
+def load_json(path):
+  with open(path, "r") as tags_file:
+    return json.loads(tags_file.read())
