@@ -37,7 +37,7 @@ def load_frames(path):
 def load_bboxes_per_frame(tags):
     bboxes_per_frame = []
     for i in range(len(tags["frames"])):
-        bboxes_per_frame[i] = []
+        bboxes_per_frame.append([])
         for bbox in tags["frames"][i]["boxes"]:
             # IMPORTANT: OpenCV expects tuples, not lists.
             #            Also, tuples will be used as indexes so
