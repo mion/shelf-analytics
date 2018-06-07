@@ -6,6 +6,10 @@ sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
 import json
 import argparse
 from tnt import load_json, load_frames, load_bboxes_per_frame
+from tracking2 import HumanTracker
+
+
+DEFAULT_MAX_TRACKS = 100
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -25,3 +29,6 @@ if __name__ == '__main__':
     print("Loading tags...")
     tags = load_json(args.tags_path)
     bboxes_per_frame = load_bboxes_per_frame(tags)
+
+    print("Tracking humans...")
+    
