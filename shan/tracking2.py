@@ -9,7 +9,7 @@ TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 300.0
 
 class BoundingBox:
     """A bounding box is just a rectangle. This class helps handling the
-    different formats that some libs use.
+    different formats that some libraries use.
     """
     FORMAT_Y1_X1_Y2_X2 = "FORMAT_Y1X1Y2X2"
     FORMAT_X1_Y1_W_H = "FORMAT_X1_Y1_W_H"
@@ -31,3 +31,15 @@ class BoundingBox:
             self.y2 = self.y1 + self.height
         else:
             raise ValueError("invalid bounding box format: {0}".format(args_format))
+        self.topLeft = (self.x1, self.y1)
+        self.topRight = (self.x2, self.y1)
+        self.bottomLeft = (self.x1, self.y2)
+        self.bottomRight = (self.x2, self.y2)
+        self.center = (self.x1 + self.width / 2, self.y1 + self.height / 2)
+    
+    def distance_to(self, bbox):
+        dest_x, dest_y = bbox.center
+        orig_x, orig_y = self.center
+        dx = dest_x - orig_x
+        dy = dest_y - orig_y
+        return math.sqrt((dx * dx) + (dy * dy))
