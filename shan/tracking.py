@@ -48,11 +48,20 @@ def bbox_distance(bbox_orig, bbox_dest):
 
 class Track:
   def __init__(self):
-    self.index_bbox_pairs = []
+    self.index_bbox_transition_sets = []
     self.bboxes_list = []
   
-  def add(self, index, bbox):
-    self.index_bbox_pairs.append((index, bbox))
+  def add(self, index, bbox, transition):
+    """
+    `bbox` format is [y1, x1, y2, x2]
+    `transition` is an object like this:
+    {
+      "type": "snapped", (can be "snapped", "tracked", "retaken" or "first")
+      "from_bbox": [1, 2, 3, 4],
+      "distance": 321.5
+    }
+    """
+    self.index_bbox_transition_sets.append((index, bbox, transition))
     self.bboxes_list.append(bbox)
 
   def last_bbox(self):
@@ -64,7 +73,7 @@ class Track:
     return closest_bbox != None
   
   def to_json(self):
-    return [{"index": i, "bbox": [int(n) for n in b]} for i, b in self.index_bbox_pairs]
+    return [{"index": i, "bbox": [int(n) for n in b], "transition": t} for i, b, t in self.index_bbox_transition_sets]
 
 
 class TracksList:
@@ -141,7 +150,7 @@ class HumanTracker:
     if not ok:
       raise "failed to init obj tracker" # FIXME
     curr_track = Track()
-    curr_track.add(start_index, start_bbox)
+    curr_track.add(start_index, start_bbox, {"type": "first", "from_bbox": start_bbox, "distance": 0})
 
     # FIXME 1 frame videos?
     print("tracking human:")
@@ -162,10 +171,20 @@ class HumanTracker:
         bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE/2)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
-          curr_track.add(idx, bbox)
+          last_bbox = curr_track.last_bbox()
+          curr_track.add(idx, bbox, {
+            "type": "snapped",
+            "from_bbox": last_bbox,
+            "distance": bbox_distance(last_bbox, bbox)
+          })
         else:
           print("\t(tracked) at frame {0} moved to bbox {1}".format(idx, int_tracker_bbox))
-          curr_track.add(idx, int_tracker_bbox)
+          last_bbox = curr_track.last_bbox()
+          curr_track.add(idx, int_tracker_bbox, {
+            "type": "tracked",
+            "from_bbox": last_bbox,
+            "distance": bbox_distance(last_bbox, int_tracker_bbox)
+          })
       else:
         # when the tracker fails, find the nearest detected bbox and snap onto it
         bboxes_list = self.list_of_bboxes_lists[idx]
@@ -173,7 +192,11 @@ class HumanTracker:
         bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE/2)
         if bbox != None:
           print("\t(retaken) at frame {0} moved to bbox {1}".format(idx, bbox))
-          curr_track.add(idx, bbox)
+          curr_track.add(idx, bbox, {
+            "type": "retaken",
+            "from_bbox": last_tracker_bbox,
+            "distance": bbox_distance(last_tracker_bbox, bbox)
+          })
           # TODO Fix the retaken bug.
           # I think the restarting of the tracker is not working.
           # I attempted the method below but it didn't work properly.
