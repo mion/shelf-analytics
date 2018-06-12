@@ -22,6 +22,19 @@ def search_index_bbox_track_set(already_tracked_index_bbox_track_sets, searching
             return (index, bbox, track)
     return None
 
+def draw_transition_line(frame, orig_bbox, dest_bbox, distance):
+    if distance > 0:
+        # y1 x1 y2 x2
+        orig_width = orig_bbox[3] - orig_bbox[1]
+        orig_height = orig_bbox[2] - orig_bbox[0]
+        orig_center = (int(orig_bbox[1] + orig_width / 2), int(orig_bbox[0] + orig_height / 2))
+        dest_width = dest_bbox[3] - dest_bbox[1]
+        dest_height = dest_bbox[2] - dest_bbox[0]
+        dest_center = (int(dest_bbox[1] + dest_width / 2), int(dest_bbox[0] + dest_height / 2))
+        return cv2.line(frame, orig_center, dest_center, (0, 155, 255), 1)
+    else:
+        return None
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("video_path", help="path to the video")
@@ -72,6 +85,8 @@ if __name__ == '__main__':
                         cvutil.draw_bbox_on_frame(frame, obj_detected_bbox, rect_color=(205,205,205), text_color=(255,255,255))
 
                 curr_bbox = track[i - track_first_index]["bbox"]
+                cvutil.draw_rect_on_frame(frame, transition["from_bbox"], rect_color=(255,200,200))
+                draw_transition_line(frame, transition["from_bbox"], curr_bbox, transition["distance"])
                 cvutil.draw_bbox_on_frame(frame, curr_bbox, rect_color=(255, 155, 0), text_color=(0,155,255))
                 cvutil.draw_label_on_frame(frame, transition["type"], curr_bbox[1], curr_bbox[0], bg_color=(255,0,0))
                 already_tracked_index_bbox_track_sets.append((i, track[i - track_first_index]["bbox"], track_index))
