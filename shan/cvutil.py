@@ -40,7 +40,7 @@ def show_image(img, window_title='Image'):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-def draw_label_on_frame(frame, text, x, y):
+def draw_label_on_frame(frame, text, x, y, bg_color=(50, 50, 50), text_color=(255, 255, 255)):
     font = cv2.FONT_HERSHEY_PLAIN
     font_scale = 1.0
     font_thickness = 1
@@ -50,7 +50,7 @@ def draw_label_on_frame(frame, text, x, y):
     cv2.rectangle(frame, 
                   (x, y), 
                   (x + width + (2 * PADDING), y + height + (2 * PADDING)), 
-                  (50, 50, 50), 
+                  bg_color, 
                   cv2.FILLED, 
                   cv2.LINE_AA)
     cv2.putText(frame, 
@@ -58,7 +58,7 @@ def draw_label_on_frame(frame, text, x, y):
                 (x + PADDING, y + height + PADDING), 
                 font, 
                 font_scale, 
-                (255,255,255), 
+                text_color, 
                 thickness=font_thickness, 
                 lineType=cv2.LINE_AA)
     return frame
