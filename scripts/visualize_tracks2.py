@@ -60,16 +60,19 @@ if __name__ == '__main__':
         for i in range(len(frames)):
             if i >= track_first_index and i <= track_last_index:
                 frame = frames[i]
+                transition = track[i - track_first_index]["transition"]
+                
                 for obj_detected_bbox in tags["frames"][i]["boxes"]:
-                    # index_bbox_track_set = (i, obj_detected_bbox, track_index)
                     found_index_bbox_track_set = search_index_bbox_track_set(already_tracked_index_bbox_track_sets, i, obj_detected_bbox)
                     if found_index_bbox_track_set is not None:
                         _, _, belongs_to_track_index = found_index_bbox_track_set
-                        cvutil.draw_label_on_frame(frame, "t#{0}".format(belongs_to_track_index), obj_detected_bbox[1], obj_detected_bbox[0])
-                        cvutil.draw_bbox_on_frame(frame, obj_detected_bbox, rect_color=(0,0,0), text_color=(55,55,55))
+                        cvutil.draw_label_on_frame(frame, "#{0}".format(belongs_to_track_index), obj_detected_bbox[1], obj_detected_bbox[0])
+                        cvutil.draw_bbox_on_frame(frame, obj_detected_bbox, rect_color=(0,0,0), text_color=(105,105,105))
                     else:
-                        cvutil.draw_bbox_on_frame(frame, obj_detected_bbox, rect_color=(255,255,255), text_color=(255,255,255))
+                        cvutil.draw_bbox_on_frame(frame, obj_detected_bbox, rect_color=(205,205,205), text_color=(255,255,255))
 
-                cvutil.draw_bbox_on_frame(frame, track[i - track_first_index]["bbox"], rect_color=(255, 155, 0), text_color=(0,155,255))
+                curr_bbox = track[i - track_first_index]["bbox"]
+                cvutil.draw_bbox_on_frame(frame, curr_bbox, rect_color=(255, 155, 0), text_color=(0,155,255))
+                cvutil.draw_label_on_frame(frame, transition["type"], curr_bbox[1], curr_bbox[0], bg_color=(255,0,0))
                 already_tracked_index_bbox_track_sets.append((i, track[i - track_first_index]["bbox"], track_index))
                 cvutil.save_image(frame, "track-{0}-frame-{1}.png".format(track_index, i), track_folder_path)
