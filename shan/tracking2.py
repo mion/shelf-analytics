@@ -7,6 +7,7 @@ import cv2
 DEFAULT_MIN_SNAPPING_DISTANCE = 150.0
 TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 300.0
 
+
 class BoundingBox:
     """A bounding box is just a rectangle. This class helps handling the
     different formats that some libraries use.
@@ -43,3 +44,55 @@ class BoundingBox:
         dx = dest_x - orig_x
         dy = dest_y - orig_y
         return math.sqrt((dx * dx) + (dy * dy))
+
+
+class HumanTracker:
+    """A track represents a bounding box that was identified as being the
+    same across a sequence of frames.
+
+    Args:
+        key (int): The index of this track.
+    
+    Attributes:
+        index_bbox_pairs (list): A list of (index, bbox) tuples, 
+        where `index` represents the frame index and `bbox` is an 
+        instance of the `BoundingBox` class.
+    """
+
+    def __init__(self, key):
+        self.key = key
+        self.index_bbox_pairs = []
+
+    def add(self, index, bbox):
+        self.index_bbox_pairs.append((index, bbox))
+
+
+# class TripProc:
+#     def __init__(self, mechanic):
+#         self.bicycles = []
+#         for bike in self.bicycles:
+#             mechanic.clean(bike)
+#             mechanic.pump(bike)
+#             mechanic.lump(bike)
+
+# class TripOk:
+#     def __init__(self, mechanic):
+#         self.bicycles = []
+#         for bike in self.bicycles:
+#             mechanic.prepare(bike)
+    
+# class Trip:
+#     def __init__(self, mechanic):
+#         self.bicycles = []
+#         mechanic.prepare_trip(self)
+
+# class Mechanic:
+#     def __init__(self):
+#         pass
+    
+#     def prepare_trip(self, trip):
+#         for bike in trip.bicycles:
+#             self.prepare_bicycle(bike)
+    
+#     def prepare_bicycle(self, bike):
+#         pass
