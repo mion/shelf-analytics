@@ -8,6 +8,7 @@ import json
 import cv2
 import cvutil
 import tnt
+from colorize import yellow
 
 def load_json(path):
   with open(path) as json_file:
@@ -42,7 +43,7 @@ if __name__ == '__main__':
   try:
     os.mkdir(track_folder_path)
   except FileExistsError as err:
-    print(tnt.color_warn("ERROR: could not create directory at {0}".format(track_folder_path)))
+    print(yellow("ERROR: could not create directory at {0}".format(track_folder_path)))
     print(err)
 
   frames = cvutil.read_frames_from_video(video)
