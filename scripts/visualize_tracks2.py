@@ -8,6 +8,7 @@ import json
 import cv2
 import cvutil
 import tnt
+import numpy as np
 from colorize import yellow
 
 import pdb
@@ -34,6 +35,14 @@ def draw_transition_line(frame, orig_bbox, dest_bbox, distance):
         return cv2.line(frame, orig_center, dest_center, (0, 155, 255), 1)
     else:
         return None
+
+def draw_footer(frame, footer_height):
+    height, width, channels = frame.shape
+    # create larger black img 
+    frame_with_footer = np.zeros((height + footer_height, width, channels), np.uint8)
+    # copy everything over
+    frame_with_footer[0:(height - 1), 0:(width - 1)] = frame[0:(height - 1), 0:(width - 1)]
+    return frame_with_footer
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -90,4 +99,8 @@ if __name__ == '__main__':
                 cvutil.draw_bbox_on_frame(frame, curr_bbox, rect_color=(255, 155, 0), text_color=(0,155,255))
                 cvutil.draw_label_on_frame(frame, transition["type"], curr_bbox[1], curr_bbox[0], bg_color=(255,0,0))
                 already_tracked_index_bbox_track_sets.append((i, track[i - track_first_index]["bbox"], track_index))
-                cvutil.save_image(frame, "track-{0}-frame-{1}.png".format(track_index, i), track_folder_path)
+
+                # draw lines for calibration
+                frame_with_footer = draw_footer(frame, footer_height=100)
+
+                cvutil.save_image(frame_with_footer, "track-{0}-frame-{1}.png".format(track_index, i), track_folder_path)
