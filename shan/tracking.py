@@ -168,7 +168,7 @@ class HumanTracker:
         y2 = y1 + int(h)
         int_tracker_bbox = (y1, x1, y2, x2)
         bboxes_list = self.list_of_bboxes_lists[idx]
-        # snap the bbox from tracker onto a detected bbox so we can compare it later on
+        # try to snap the bbox from tracker onto a detected bbox so we can compare it later on
         bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE/2)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
@@ -178,7 +178,7 @@ class HumanTracker:
             "from_bbox": last_bbox,
             "distance": bbox_distance(last_bbox, bbox)
           })
-        else:
+        else: # the detection fails too, so we may have to go with whatever the tracker has
           print("\t(tracked) at frame {0} moved to bbox {1}".format(idx, int_tracker_bbox))
           last_bbox = curr_track.last_bbox()
           curr_track.add(idx, int_tracker_bbox, {
@@ -187,9 +187,10 @@ class HumanTracker:
             "distance": bbox_distance(last_bbox, int_tracker_bbox)
           })
       else:
-        # when the tracker fails, find the nearest detected bbox and snap onto it
+        # when the tracker fails, also try to find the nearest detected bbox and snap onto it
         bboxes_list = self.list_of_bboxes_lists[idx]
         last_tracker_bbox = curr_track.last_bbox()
+        # but in this case, its OK to look a bit further
         bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE/2)
         if bbox != None:
           print("\t(retaken) at frame {0} moved to bbox {1}".format(idx, bbox))
