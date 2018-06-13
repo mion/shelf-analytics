@@ -70,6 +70,14 @@ class Track:
     return self.bboxes_list[len(self.bboxes_list) - 1]
   
   def contains(self, index, bbox):
+    #
+    # [!] BUG: This code is terribly incorrect!
+    # You need to first make sure that the index you are looking at matches the index in
+    # the `index_bbox_transition_sets` array, and only then you you look at the bbox to see
+    # if it matches.
+    #
+    # [?] TODO: Should we look for an absolute match or a close match?
+    #
     closest_bbox = find_closest_bbox_to_snap_on(self.bboxes_list, bbox)
     return closest_bbox != None
   
@@ -127,10 +135,13 @@ class HumanTracker:
   
   def find_some_untracked_index_bbox_pair(self):
     for idx in range(len(self.frames)):
+
+      if len(self.tracks_list.get_tracks()) == 3 and idx == 739:
+        pdb.set_trace()
+
       bboxes_list = self.list_of_bboxes_lists[idx]
       for bbox in bboxes_list:
         if not self.tracks_list.belongs_to_some_track(idx, bbox):
-          # pdb.set_trace()
           return (idx, bbox)
     return None
 
