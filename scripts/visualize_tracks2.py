@@ -36,12 +36,42 @@ def draw_transition_line(frame, orig_bbox, dest_bbox, distance):
     else:
         return None
 
-def draw_footer(frame, footer_height):
+# TODO add this to a shared json file
+DISTANCES = {
+    "SNAPPING": 150,
+    "RETAKING": 300
+}
+
+def draw_calibration_footer(frame):
     height, width, channels = frame.shape
+    FOOTER_HEIGHT = 200
     # create larger black img 
-    frame_with_footer = np.zeros((height + footer_height, width, channels), np.uint8)
+    frame_with_footer = np.zeros((height + FOOTER_HEIGHT, width, channels), np.uint8)
     # copy everything over
     frame_with_footer[0:(height - 1), 0:(width - 1)] = frame[0:(height - 1), 0:(width - 1)]
+    # draw lines and labels
+    PADDING = 50
+    LINE_HEIGHT = 75
+    frame_with_footer = cv2.line(frame_with_footer, 
+            (PADDING, height + PADDING), 
+            (PADDING + DISTANCES["SNAPPING"], height + PADDING),
+            (0, 255, 255), 3)
+    frame_with_footer = cvutil.draw_text_on_frame(frame_with_footer, 
+                            "SNAPPING",
+                            PADDING,
+                            height + PADDING - 10,
+                            (0, 255, 255))
+
+    frame_with_footer = cv2.line(frame_with_footer, 
+            (PADDING, height + PADDING + LINE_HEIGHT), 
+            (PADDING + DISTANCES["RETAKING"], height + PADDING + LINE_HEIGHT),
+            (0, 255, 255), 3)
+    frame_with_footer = cvutil.draw_text_on_frame(frame_with_footer, 
+                            "RETAKING",
+                            PADDING,
+                            height + PADDING - 10 + LINE_HEIGHT,
+                            (0, 255, 255))
+
     return frame_with_footer
 
 if __name__ == '__main__':
@@ -101,6 +131,6 @@ if __name__ == '__main__':
                 already_tracked_index_bbox_track_sets.append((i, track[i - track_first_index]["bbox"], track_index))
 
                 # draw lines for calibration
-                frame_with_footer = draw_footer(frame, footer_height=100)
+                frame_with_footer = draw_calibration_footer(frame)
 
                 cvutil.save_image(frame_with_footer, "track-{0}-frame-{1}.png".format(track_index, i), track_folder_path)

@@ -19,6 +19,7 @@ def save_track_as_images(frames, track, folder_name, path):
     pass
 
 
+# TODO add this to a shared json file
 DEFAULT_MIN_SNAPPING_DISTANCE = 150.0
 TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 300.0
 
