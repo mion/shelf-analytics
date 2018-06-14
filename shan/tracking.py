@@ -20,10 +20,10 @@ def save_track_as_images(frames, track, folder_name, path):
 
 
 # TODO add this to a shared json file
-DEFAULT_MIN_SNAPPING_DISTANCE = 150.0
-TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 300.0
+DEFAULT_MIN_SNAPPING_DISTANCE = 75
+TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 150
 
-def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE):
+def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox, min_snapping_distance):
   closest_bbox = None
   min_distance = 99999999 # FIXME
   for bbox in bboxes_list:
@@ -50,7 +50,7 @@ def bbox_distance(bbox_orig, bbox_dest):
 class Track:
   def __init__(self):
     self.index_bbox_transition_sets = []
-    self.bboxes_list = []
+    self.contained_index_bbox = {}
   
   def add(self, index, bbox, transition):
     """
@@ -63,23 +63,27 @@ class Track:
     }
     """
     self.index_bbox_transition_sets.append((index, bbox, transition))
-    self.bboxes_list.append(bbox)
+    self.contained_index_bbox[self.to_key(index, bbox)] = True
+  
+  def to_key(self, index, bbox):
+    """
+    Transforms `index` and `bbox` into a string key to 
+    be used in the `contained_index_bbox` dictionary.
+    """
+    return str(index) + "_" + ",".join([str(n) for n in bbox])
 
   def last_bbox(self):
-    # TODO handle empty array
-    return self.bboxes_list[len(self.bboxes_list) - 1]
+    count = len(self.index_bbox_transition_sets)
+    if count == 0:
+      return None
+    else:
+      _, bbox, _ = self.index_bbox_transition_sets[count - 1]
+      return bbox
   
   def contains(self, index, bbox):
-    #
-    # [!] BUG: This code is terribly incorrect!
-    # You need to first make sure that the index you are looking at matches the index in
-    # the `index_bbox_transition_sets` array, and only then you you look at the bbox to see
-    # if it matches.
-    #
-    # [?] TODO: Should we look for an absolute match or a close match?
-    #
-    closest_bbox = find_closest_bbox_to_snap_on(self.bboxes_list, bbox)
-    return closest_bbox != None
+    # [!] TODO: Here we are looking for an absolute match.
+    # Should we look for an approximate match instead?
+    return self.to_key(index, bbox) in self.contained_index_bbox
   
   def to_json(self):
     return [{"index": i, "bbox": [int(n) for n in b], "transition": t} for i, b, t in self.index_bbox_transition_sets]
@@ -135,10 +139,6 @@ class HumanTracker:
   
   def find_some_untracked_index_bbox_pair(self):
     for idx in range(len(self.frames)):
-
-      if len(self.tracks_list.get_tracks()) == 3 and idx == 739:
-        pdb.set_trace()
-
       bboxes_list = self.list_of_bboxes_lists[idx]
       for bbox in bboxes_list:
         if not self.tracks_list.belongs_to_some_track(idx, bbox):
@@ -180,7 +180,7 @@ class HumanTracker:
         int_tracker_bbox = (y1, x1, y2, x2)
         bboxes_list = self.list_of_bboxes_lists[idx]
         # try to snap the bbox from tracker onto a detected bbox so we can compare it later on
-        bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE/2)
+        bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
           last_bbox = curr_track.last_bbox()
@@ -202,7 +202,7 @@ class HumanTracker:
         bboxes_list = self.list_of_bboxes_lists[idx]
         last_tracker_bbox = curr_track.last_bbox()
         # but in this case, its OK to look a bit further
-        bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE/2)
+        bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE)
         if bbox != None:
           print("\t(retaken) at frame {0} moved to bbox {1}".format(idx, bbox))
           curr_track.add(idx, bbox, {

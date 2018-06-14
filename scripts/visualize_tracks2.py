@@ -38,8 +38,8 @@ def draw_transition_line(frame, orig_bbox, dest_bbox, distance):
 
 # TODO add this to a shared json file
 DISTANCES = {
-    "SNAPPING": 150,
-    "RETAKING": 300
+    "SNAPPING": 75,
+    "RETAKING": 150
 }
 
 def draw_calibration_footer(frame):
