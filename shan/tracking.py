@@ -23,6 +23,26 @@ def save_track_as_images(frames, track, folder_name, path):
 DEFAULT_MIN_SNAPPING_DISTANCE = 75
 TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 150
 
+# TODO do not accept a bbox if it belongs to some other track
+def find_nearest_available_bbox(orig_bbox, other_bboxes_in_frame, frame_index, tracks_list, max_allowed_distance):
+  nearest_available = {
+    "bbox": None,
+    "distance": 999999999 # FIXME use Infinity or something
+  }
+
+  for bbox in other_bboxes_in_frame:
+    if orig_bbox == bbox:
+      continue # just in case, make sure it's not the same bbox
+    distance = bbox_distance(orig_bbox, bbox)
+    is_available = not tracks_list.belongs_to_some_track(frame_index, bbox)
+    if is_available and distance < max_allowed_distance:
+      if distance < nearest_available["distance"]:
+        nearest_available["bbox"] = bbox
+        nearest_available["distance"] = distance
+
+  return nearest_available["bbox"]
+
+# DEPRECATED in favor of the method above.
 def find_closest_bbox_to_snap_on(bboxes_list, tracker_bbox, min_snapping_distance):
   closest_bbox = None
   min_distance = 99999999 # FIXME
@@ -166,8 +186,11 @@ class HumanTracker:
 
     # FIXME 1 frame videos?
     print("tracking human:")
-    # pdb.set_trace()
     for idx in range(start_index + 1, len(self.frames)):
+
+      # if idx == 270 and len(self.tracks_list.get_tracks()) == 3:
+      #   pdb.set_trace()
+
       frame = self.frames[idx]
       ok, xywh = obj_tracker.update(frame)
       if ok:
@@ -180,7 +203,8 @@ class HumanTracker:
         int_tracker_bbox = (y1, x1, y2, x2)
         bboxes_list = self.list_of_bboxes_lists[idx]
         # try to snap the bbox from tracker onto a detected bbox so we can compare it later on
-        bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE)
+        bbox = find_nearest_available_bbox(int_tracker_bbox, bboxes_list, idx, self.tracks_list, DEFAULT_MIN_SNAPPING_DISTANCE)
+        # bbox = find_closest_bbox_to_snap_on(bboxes_list, int_tracker_bbox, min_snapping_distance=DEFAULT_MIN_SNAPPING_DISTANCE)
         if bbox != None:
           print("\t(snapped) at frame {0} moved to bbox {1}".format(idx, bbox))
           last_bbox = curr_track.last_bbox()
@@ -202,7 +226,8 @@ class HumanTracker:
         bboxes_list = self.list_of_bboxes_lists[idx]
         last_tracker_bbox = curr_track.last_bbox()
         # but in this case, its OK to look a bit further
-        bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE)
+        bbox = find_nearest_available_bbox(last_tracker_bbox, bboxes_list, idx, self.tracks_list, TRACKER_FAILED_MIN_SNAPPING_DISTANCE)
+        # bbox = find_closest_bbox_to_snap_on(bboxes_list, last_tracker_bbox, min_snapping_distance=TRACKER_FAILED_MIN_SNAPPING_DISTANCE)
         if bbox != None:
           print("\t(retaken) at frame {0} moved to bbox {1}".format(idx, bbox))
           curr_track.add(idx, bbox, {
@@ -210,15 +235,15 @@ class HumanTracker:
             "from_bbox": last_tracker_bbox,
             "distance": bbox_distance(last_tracker_bbox, bbox)
           })
-          # TODO Fix the retaken bug.
-          # I think the restarting of the tracker is not working.
-          # I attempted the method below but it didn't work properly.
-          #
           # If the tracker has failed, the `update` method cannot be called again.
           # Instead, we need to re-initialize it (the docs do not say this).
-          # obj_tracker = self.create_obj_tracker()
-          # if not obj_tracker.init(frame, bbox):
-          #   raise "failed to re-init tracker after retake" # FIXME
+          # See: https://stackoverflow.com/questions/31432815/opencv-3-tracker-wont-work-after-reinitialization
+          obj_tracker.clear()
+          obj_tracker = self.create_obj_tracker()
+          y1, x1, y2, x2 = bbox
+          reinit_bbox = (x1, y1, x2 - x1, y2 - y1)
+          if not obj_tracker.init(frame, reinit_bbox):
+            raise "failed to re-init tracker after retake" # FIXME
         else:
           print("\ttrack lost at frame {0}".format(idx))
           break
