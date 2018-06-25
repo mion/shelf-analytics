@@ -151,6 +151,7 @@ def tag_frame(output_filename, image, boxes, masks, class_ids, class_names,
     # plt.savefig(output_filename, bbox_inches="tight", pad_inches=0, Transparent=True)
     # let's convert boxes to a normal Python array so it can be JSON dumped
     simple_boxes = []
+    simple_scores = []
     for i in range(N):
         # Skip objects that are not people
         if class_names.index('person') != class_ids[i]:
@@ -161,7 +162,12 @@ def tag_frame(output_filename, image, boxes, masks, class_ids, class_names,
             # See: https://stackoverflow.com/questions/11942364/typeerror-integer-is-not-json-serializable-when-serializing-json-in-python
             box.append(int(boxes[i][coord])) 
         simple_boxes.append(box)
-    return {'boxes': simple_boxes}
+        # convert scores so they can be JSON dumped
+        if scores[i] is not None:
+            simple_scores.append(float(scores[i]))
+        else:
+            simple_scores.append(0.0)
+    return {'boxes': simple_boxes, 'scores': simple_scores}
 
 
 def tag_frame_visually(output_filename, image, boxes, masks, class_ids, class_names,
@@ -243,6 +249,7 @@ def tag_frame_visually(output_filename, image, boxes, masks, class_ids, class_na
     plt.close(fig)
     # let's convert boxes to a normal Python array so it can be JSON dumped
     simple_boxes = []
+    simple_scores = []
     for i in range(N):
         # Skip objects that are not people
         if class_names.index('person') != class_ids[i]:
@@ -253,7 +260,12 @@ def tag_frame_visually(output_filename, image, boxes, masks, class_ids, class_na
             # See: https://stackoverflow.com/questions/11942364/typeerror-integer-is-not-json-serializable-when-serializing-json-in-python
             box.append(int(boxes[i][coord])) 
         simple_boxes.append(box)
-    return {'tagged_frame_image_path': output_filename, 'boxes': simple_boxes}
+        # convert scores so they can be JSON dumped
+        if scores[i] is not None:
+            simple_scores.append(float(scores[i]))
+        else:
+            simple_scores.append(0.0)
+    return {'tagged_frame_image_path': output_filename, 'boxes': simple_boxes, 'scores': simple_scores}
 
 
 def display_instances(image, boxes, masks, class_ids, class_names,
