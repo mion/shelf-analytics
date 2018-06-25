@@ -20,8 +20,8 @@ def save_track_as_images(frames, track, folder_name, path):
 
 
 # TODO add this to a shared json file
-DEFAULT_MIN_SNAPPING_DISTANCE = 75
-TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 150
+DEFAULT_MIN_SNAPPING_DISTANCE = 50
+TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 50
 
 # TODO do not accept a bbox if it belongs to some other track
 def find_nearest_available_bbox(orig_bbox, other_bboxes_in_frame, frame_index, tracks_list, max_allowed_distance):
