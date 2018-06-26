@@ -16,6 +16,8 @@ def load_tags(path):
   with open(path, "r") as tags_file:
     return json.loads(tags_file.read())
 
+DEFAULT_MIN_SCORE = 0.95
+
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
     parser.add_argument("video_path", help="path to the video")
@@ -41,10 +43,13 @@ if __name__ == '__main__' :
     list_of_bboxes_lists = []
     for i in range(len(tags["frames"])):
         bboxes_list = []
-        for bbox in tags["frames"][i]["boxes"]:
-            # IMPORTANT opencv expects tuples, not lists;
-            #           tuples are used as index so ints are necessary;
-            bboxes_list.append(tuple([int(n) for n in bbox])) 
+        for j in range(len(tags["frames"][i]["boxes"])): # should be same length as tags["frames"][i]["scores"]
+            score = tags["frames"][i]["scores"][j]
+            bbox = tags["frames"][i]["boxes"][j]
+            if score > DEFAULT_MIN_SCORE:
+                # IMPORTANT opencv expects tuples, not lists;
+                #           tuples are used as index so ints are necessary;
+                bboxes_list.append(tuple([int(n) for n in bbox])) 
         list_of_bboxes_lists.append(bboxes_list)
 
     print("Tracking humans...")

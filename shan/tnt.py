@@ -45,3 +45,8 @@ def load_bboxes_per_frame(tags):
             bboxes_per_frame[i].append(tuple([int(n) for n in bbox]))
     return bboxes_per_frame
 
+def filter_bounding_boxes_with_score_below(tags, min_value):
+    """
+    `min_value` is a float between 0 and 1
+    """
+    pass # TODO
