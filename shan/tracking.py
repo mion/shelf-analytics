@@ -156,7 +156,20 @@ class HumanTracker:
         return cv2.TrackerGOTURN_create()
       else:
         raise "unknown obj tracker type" # FIXME
-  
+
+  def restart_obj_tracker(self, obj_tracker, frame, bbox):
+    """
+    Expected format of `bbox` is (y1, x1, y2, x2)
+    """
+    obj_tracker.clear()
+    obj_tracker = self.create_obj_tracker()
+    y1, x1, y2, x2 = bbox
+    reinit_bbox = (x1, y1, x2 - x1, y2 - y1)
+    if not obj_tracker.init(frame, reinit_bbox):
+      raise "failed to re-init tracker after retake" # FIXME
+    else:
+      return obj_tracker
+
   def find_some_untracked_index_bbox_pair(self):
     for idx in range(len(self.frames)):
       bboxes_list = self.list_of_bboxes_lists[idx]
@@ -213,6 +226,8 @@ class HumanTracker:
             "from_bbox": last_bbox,
             "distance": bbox_distance(last_bbox, bbox)
           })
+          # Let's update the tracker with the currently snapped bounding box
+          obj_tracker = self.restart_obj_tracker(obj_tracker, frame, bbox)
         else: # the detection fails too, so we may have to go with whatever the tracker has
           print("\t(tracked) at frame {0} moved to bbox {1}".format(idx, int_tracker_bbox))
           last_bbox = curr_track.last_bbox()
@@ -238,12 +253,13 @@ class HumanTracker:
           # If the tracker has failed, the `update` method cannot be called again.
           # Instead, we need to re-initialize it (the docs do not say this).
           # See: https://stackoverflow.com/questions/31432815/opencv-3-tracker-wont-work-after-reinitialization
-          obj_tracker.clear()
-          obj_tracker = self.create_obj_tracker()
-          y1, x1, y2, x2 = bbox
-          reinit_bbox = (x1, y1, x2 - x1, y2 - y1)
-          if not obj_tracker.init(frame, reinit_bbox):
-            raise "failed to re-init tracker after retake" # FIXME
+          obj_tracker = self.restart_obj_tracker(obj_tracker, frame, bbox)
+          # obj_tracker.clear()
+          # obj_tracker = self.create_obj_tracker()
+          # y1, x1, y2, x2 = bbox
+          # reinit_bbox = (x1, y1, x2 - x1, y2 - y1)
+          # if not obj_tracker.init(frame, reinit_bbox):
+          #   raise "failed to re-init tracker after retake" # FIXME
         else:
           print("\ttrack lost at frame {0}".format(idx))
           break
