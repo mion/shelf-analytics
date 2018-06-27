@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import pdb
+
 import os
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'shan'))
@@ -11,12 +13,15 @@ import argparse
 import cvutil
 
 from tracking import HumanTracker
+from bounding_box import BoundingBox
 
 def load_tags(path):
   with open(path, "r") as tags_file:
     return json.loads(tags_file.read())
 
-DEFAULT_MIN_SCORE = 0.95
+DEFAULT_MIN_SCORE = 0.95 # TODO visualize this for calibration
+DEFAULT_MIN_BBOX_AREA = 7500 # TODO visualize this for claibration
+DEFAULT_MAX_BBOX_AREA = 15000 # TODO visualize this for calibration
 
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
@@ -43,10 +48,13 @@ if __name__ == '__main__' :
     list_of_bboxes_lists = []
     for i in range(len(tags["frames"])):
         bboxes_list = []
-        for j in range(len(tags["frames"][i]["boxes"])): # should be same length as tags["frames"][i]["scores"]
+        for j in range(len(tags["frames"][i]["boxes"])): 
             score = tags["frames"][i]["scores"][j]
-            bbox = tags["frames"][i]["boxes"][j]
-            if score > DEFAULT_MIN_SCORE:
+            bbox = tags["frames"][i]["boxes"][j] # should be same length as tags["frames"][i]["scores"]
+            # detected objs with p < .95 should not be considered people
+            # remove bboxes that are too small to be a person
+            bounding_box = BoundingBox(bbox, BoundingBox.FORMAT_Y1_X1_Y2_X2)
+            if score > DEFAULT_MIN_SCORE and bounding_box.area > DEFAULT_MIN_BBOX_AREA and bounding_box.area < DEFAULT_MAX_BBOX_AREA:
                 # IMPORTANT opencv expects tuples, not lists;
                 #           tuples are used as index so ints are necessary;
                 bboxes_list.append(tuple([int(n) for n in bbox])) 

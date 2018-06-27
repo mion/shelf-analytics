@@ -20,7 +20,7 @@ def save_track_as_images(frames, track, folder_name, path):
 
 
 # TODO add this to a shared json file
-DEFAULT_MIN_SNAPPING_DISTANCE = 50
+DEFAULT_MIN_SNAPPING_DISTANCE = 25
 TRACKER_FAILED_MIN_SNAPPING_DISTANCE = 50
 
 # TODO do not accept a bbox if it belongs to some other track

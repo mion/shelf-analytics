@@ -38,7 +38,7 @@ def draw_transition_line(frame, orig_bbox, dest_bbox, distance):
 
 # TODO add this to a shared json file
 DISTANCES = {
-    "SNAPPING": 50,
+    "SNAPPING": 25,
     "RETAKING": 50
 }
 
