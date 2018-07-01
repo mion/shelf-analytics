@@ -1,21 +1,25 @@
 import math
+from enum import Enum
+
+class BoundingBoxFormat(Enum):
+    y1_x1_y2_x2 = 1
+    x1_y1_w_h = 2
 
 class BoundingBox:
-    """A bounding box is just a rectangle. This class helps handling the
-    different formats that some libraries use.
     """
-    FORMAT_Y1_X1_Y2_X2 = "FORMAT_Y1X1Y2X2" # TODO refactor to BoundingBoxFormat enum class
-    FORMAT_X1_Y1_W_H = "FORMAT_X1_Y1_W_H"
-
+    A bounding box is just a rectangle. This class helps handling the
+    different formats that some libraries use and also adds some
+    helper methods to handle bounding boxes.
+    """
     def __init__(self, args, args_format):
-        if args_format == self.FORMAT_Y1_X1_Y2_X2:
+        if args_format == BoundingBoxFormat.y1_x1_y2_x2:
             self.y1 = args[0]
             self.x1 = args[1]
             self.y2 = args[2]
             self.x2 = args[3]
             self.width = self.x2 - self.x1
             self.height = self.y2 - self.y1
-        elif args_format == self.FORMAT_X1_Y1_W_H:
+        elif args_format == BoundingBoxFormat.x1_y1_w_h:
             self.x1 = args[0]
             self.y1 = args[1]
             self.width = args[2]
