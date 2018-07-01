@@ -1,6 +1,26 @@
 import cv2
 import os
 
+def create_object_tracker(obj_tracker_type):
+    major_ver, minor_ver, subminor_ver = cv2.__version__.split(".")
+    if int(minor_ver) < 3:
+        return cv2.Tracker_create(obj_tracker_type)
+    else:
+        if obj_tracker_type == 'BOOSTING':
+            return cv2.TrackerBoosting_create()
+        elif obj_tracker_type == 'MIL':
+            return cv2.TrackerMIL_create()
+        elif obj_tracker_type == 'KCF':
+            return cv2.TrackerKCF_create()
+        elif obj_tracker_type == 'TLD':
+            return cv2.TrackerTLD_create()
+        elif obj_tracker_type == 'MEDIANFLOW':
+            return cv2.TrackerMedianFlow_create()
+        elif obj_tracker_type == 'GOTURN':
+            return cv2.TrackerGOTURN_create()
+        else:
+            raise RuntimeError("invalid object tracker type")
+
 def read_frames_from_video(video):
     is_first_frame = True
     frames = []

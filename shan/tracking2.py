@@ -4,22 +4,16 @@ import json
 import math
 import cv2
 
-class HumanTracker:
-    """A track represents a bounding box that was identified as being the
-    same across a sequence of frames.
-
-    Args:
-        key (int): The index of this track.
-    
-    Attributes:
-        index_bbox_pairs (list): A list of (index, bbox) tuples, 
-        where `index` represents the frame index and `bbox` is an 
-        instance of the `BoundingBox` class.
+class HumanTrackAnalyzer:
+    """
+    A track represents a bounding box that was identified as being the
+    same person across a sequence of frames.
     """
 
-    def __init__(self, key):
-        self.key = key
-        self.index_bbox_pairs = []
+    def __init__(self, frame_bundles):
+        self.frame_bundles = frame_bundles
 
-    def add(self, index, bbox):
-        self.index_bbox_pairs.append((index, bbox))
+    def extract_tracks(self, max_number_of_tracks):
+        return {
+            "frames": []
+        }
