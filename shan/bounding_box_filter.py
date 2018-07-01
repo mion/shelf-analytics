@@ -8,7 +8,7 @@ class BoundingBoxFilterPolicy:
         self.score = score
     
     def apply(self):
-        return {'filtered': False}
+        return {'type': 'default', 'filtered': False}
 
 class MinScorePolicy(BoundingBoxFilterPolicy):
     def __init__(self, bbox, score):
@@ -16,9 +16,9 @@ class MinScorePolicy(BoundingBoxFilterPolicy):
     
     def apply(self):
         if self.score < cfg['MIN_SCORE']:
-            return {'by_score': True, 'message': 'score too low ({})'.format(str(self.score))}
+            return {'type': 'score', 'filtered': True, 'message': 'score too low ({})'.format(str(self.score))}
         else:
-            return {'by_score': False}
+            return {'type': 'score', 'filtered': False}
 
 class AreaPolicy(BoundingBoxFilterPolicy):
     def __init__(self, bbox, score):
@@ -26,11 +26,11 @@ class AreaPolicy(BoundingBoxFilterPolicy):
     
     def apply(self):
         if self.bbox.area < cfg['MIN_BBOX_AREA']:
-            return {'by_area': True, 'message': 'area too low ({})'.format(str(self.bbox.area))}
+            return {'type': 'area', 'filtered': True, 'message': 'area too low ({})'.format(str(self.bbox.area))}
         elif self.bbox.area > cfg['MAX_BBOX_AREA']:
-            return {'by_area': True, 'message': 'area too high ({})'.format(str(self.bbox.area))}
+            return {'type': 'area', 'filtered': True, 'message': 'area too high ({})'.format(str(self.bbox.area))}
         else:
-            return {'by_area': False}
+            return {'type': 'area', 'filtered': False}
 
 class BoundingBoxFilter:
     """

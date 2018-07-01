@@ -32,3 +32,6 @@ class FrameBundle:
         self.bboxes = [BBox(raw_bbox, BBoxFormat.y1_x1_y2_x2) for raw_bbox in raw_bboxes]
         self.scores = [float(raw_score) for raw_score in raw_scores]
         self.filtering_results = [[] for raw_bbox in raw_bboxes]
+    
+    def bounding_boxes_in_frame(self):
+        return []
