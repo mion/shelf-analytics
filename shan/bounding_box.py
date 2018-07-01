@@ -2,8 +2,8 @@ import math
 from enum import Enum
 
 class BoundingBoxFormat(Enum):
-    y1_x1_y2_x2 = 1
-    x1_y1_w_h = 2
+    y1_x1_y2_x2 = "(y1, x1, y2, x2)"
+    x1_y1_w_h = "(x1, y1, w, h)"
 
 class BoundingBox:
     """
@@ -11,15 +11,20 @@ class BoundingBox:
     different formats that some libraries use and also adds some
     helper methods to handle bounding boxes.
     """
-    def __init__(self, args, args_format):
-        if args_format == BoundingBoxFormat.y1_x1_y2_x2:
+    def __init__(self, raw_bbox, bbox_format):
+        # IMPORTANT: OpenCV expects tuples, not lists.
+        #            Also, tuples will be used as indexes so
+        #            ints are necessary.
+        args = tuple([int(n) for n in raw_bbox])
+        # Check the format and load
+        if bbox_format == BoundingBoxFormat.y1_x1_y2_x2:
             self.y1 = args[0]
             self.x1 = args[1]
             self.y2 = args[2]
             self.x2 = args[3]
             self.width = self.x2 - self.x1
             self.height = self.y2 - self.y1
-        elif args_format == BoundingBoxFormat.x1_y1_w_h:
+        elif bbox_format == BoundingBoxFormat.x1_y1_w_h:
             self.x1 = args[0]
             self.y1 = args[1]
             self.width = args[2]
@@ -27,7 +32,7 @@ class BoundingBox:
             self.x2 = self.x1 + self.width
             self.y2 = self.y1 + self.height
         else:
-            raise ValueError("invalid bounding box format: {0}".format(args_format))
+            raise ValueError("invalid bounding box format: {0}".format(bbox_format))
         self.topLeft = (self.x1, self.y1)
         self.topRight = (self.x2, self.y1)
         self.bottomLeft = (self.x1, self.y2)

@@ -8,6 +8,8 @@ import json
 import cv2
 import cvutil
 
+from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+
 DEFAULT_TRANSCODED_VIDEO_NAME = "video"
 
 def has_ffmpeg_installed():
@@ -39,10 +41,7 @@ def load_bboxes_per_frame(tags):
     for i in range(len(tags["frames"])):
         bboxes_per_frame.append([])
         for bbox in tags["frames"][i]["boxes"]:
-            # IMPORTANT: OpenCV expects tuples, not lists.
-            #            Also, tuples will be used as indexes so
-            #            ints are necessary.
-            bboxes_per_frame[i].append(tuple([int(n) for n in bbox]))
+            bboxes_per_frame[i].append(BBox(bbox, BBoxFormat.y1_x1_y2_x2))
     return bboxes_per_frame
 
 def filter_bounding_boxes_with_score_below(tags, min_value):
