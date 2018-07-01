@@ -25,6 +25,7 @@ class FrameBundle:
         - The frame index in the original video.
         - The bounding boxes inside it.
         - The probability of each bounding box being a human.
+        - The results of filtering bounding boxes.
     """
     def __init__(self, frame, raw_frame_index, raw_bboxes, raw_scores):
         self.frame = frame
