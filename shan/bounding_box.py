@@ -39,7 +39,13 @@ class BoundingBox:
         self.bottomRight = (self.x2, self.y2)
         self.center = (self.x1 + self.width / 2, self.y1 + self.height / 2)
         self.area = self.width * self.height
-    
+
+    def __str__(self):
+        return "<BBox ({0}, {1}) {2}x{3}>".format(self.x1, self.y1, self.width, self.height)
+
+    def __repr__(self):
+        return "<BBox ({0}, {1}) {2}x{3}>".format(self.x1, self.y1, self.width, self.height)
+
     def distance_to(self, bbox):
         dest_x, dest_y = bbox.center
         orig_x, orig_y = self.center
