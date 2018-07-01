@@ -200,10 +200,6 @@ class HumanTracker:
     # FIXME 1 frame videos?
     print("tracking human:")
     for idx in range(start_index + 1, len(self.frames)):
-
-      # if idx == 270 and len(self.tracks_list.get_tracks()) == 3:
-      #   pdb.set_trace()
-
       frame = self.frames[idx]
       ok, xywh = obj_tracker.update(frame)
       if ok:
