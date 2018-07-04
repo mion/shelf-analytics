@@ -11,7 +11,13 @@ class BoundingBox:
     different formats that some libraries use and also adds some
     helper methods to handle bounding boxes.
     """
+    next_bbox_id = 1
     def __init__(self, raw_bbox, bbox_format):
+        self.id = BoundingBox.next_bbox_id
+        BoundingBox.next_bbox_id += 1
+        self.filtering_results = []
+        self.score = None
+        self.parent_track_ids = []
         # IMPORTANT: OpenCV expects tuples, not lists.
         #            Also, tuples will be used as indexes so
         #            ints are necessary.
@@ -52,4 +58,20 @@ class BoundingBox:
         dx = dest_x - orig_x
         dy = dest_y - orig_y
         return math.sqrt((dx * dx) + (dy * dy))
+
+    def to_tuple(self, bbox_format):
+        if bbox_format == BoundingBoxFormat.x1_y1_w_h:
+            return (self.x1, self.y1, self.width, self.height)
+        elif bbox_format == BoundingBoxFormat.y1_x1_y2_x2:
+            return (self.y1, self.x1, self.y2, self.x2)
+        else:
+            raise RuntimeError('invalid bounding box format')
     
+    def is_filtered(self):
+        for result in self.filtering_results:
+            if result['filtered'] is True:
+                return True
+        return False
+    
+    def is_available(self):
+        return len(self.parent_track_ids) == 0

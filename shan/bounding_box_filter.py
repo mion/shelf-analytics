@@ -3,26 +3,25 @@ from tnt import load_json
 cfg = load_json('shan/calibration-config.json')
 
 class BoundingBoxFilterPolicy:
-    def __init__(self, bbox, score):
+    def __init__(self, bbox):
         self.bbox = bbox
-        self.score = score
     
     def apply(self):
         return {'type': 'default', 'filtered': False}
 
 class MinScorePolicy(BoundingBoxFilterPolicy):
-    def __init__(self, bbox, score):
-        super().__init__(bbox, score)
+    def __init__(self, bbox):
+        super().__init__(bbox)
     
     def apply(self):
-        if self.score < cfg['MIN_SCORE']:
-            return {'type': 'score', 'filtered': True, 'message': 'score too low ({})'.format(str(self.score))}
+        if self.bbox.score < cfg['MIN_SCORE']:
+            return {'type': 'score', 'filtered': True, 'message': 'score too low ({})'.format(str(self.bbox.score))}
         else:
             return {'type': 'score', 'filtered': False}
 
 class AreaPolicy(BoundingBoxFilterPolicy):
-    def __init__(self, bbox, score):
-        super().__init__(bbox, score)
+    def __init__(self, bbox):
+        super().__init__(bbox)
     
     def apply(self):
         if self.bbox.area < cfg['MIN_BBOX_AREA']:
@@ -46,9 +45,7 @@ class BoundingBoxFilter:
             self.policy_classes = policy_classes
     
     def filter_frame_bundle(self, frame_bundle):
-        for i in range(len(frame_bundle.bboxes)):
-            bbox = frame_bundle.bboxes[i]
-            score = frame_bundle.scores[i]
+        for bbox in frame_bundle.bboxes:
             for policy_class in self.policy_classes:
-                policy = policy_class(bbox, score)
-                frame_bundle.filtering_results[i].append(policy.apply())
+                policy = policy_class(bbox)
+                bbox.filtering_results.append(policy.apply())

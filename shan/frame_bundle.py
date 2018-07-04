@@ -23,16 +23,14 @@ class FrameBundle:
     A frame bundle is simply a container for these things:
         - The frame image data loaded with OpenCV.
         - The frame index in the original video.
-        - The bounding boxes inside it.
-        - The probability of each bounding box being a human.
-        - The results of filtering bounding boxes.
+        - The bounding boxes inside it with the probability of each bounding box being a human.
     """
     def __init__(self, frame, raw_frame_index, raw_bboxes, raw_scores):
         self.frame = frame
         self.frame_index = int(raw_frame_index)
-        self.bboxes = [BBox(raw_bbox, BBoxFormat.y1_x1_y2_x2) for raw_bbox in raw_bboxes]
-        self.scores = [float(raw_score) for raw_score in raw_scores]
-        self.filtering_results = [[] for raw_bbox in raw_bboxes]
+        self.bboxes = []
+        for i in range(len(raw_bboxes)):
+            bbox = BBox(raw_bboxes[i], BBoxFormat.y1_x1_y2_x2)
+            bbox.score = float(raw_scores[i])
+            self.bboxes.append(bbox)
     
-    def bounding_boxes_in_frame(self):
-        return []

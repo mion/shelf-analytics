@@ -10,7 +10,7 @@ import argparse
 from tnt import load_json, load_frames, load_bboxes_per_frame
 from frame_bundle import load_frame_bundles
 from bounding_box_filter import BoundingBoxFilter as BBoxFilter
-from tracking2 import HumanTrackAnalyzer
+from tracking2 import extract_tracks
 
 cfg = load_json('shan/calibration-config.json')
 
@@ -33,10 +33,9 @@ if __name__ == '__main__':
         bbox_filter.filter_frame_bundle(frame_bundle)
     
     print('Analyzing tracks...')
-    human_tracker = HumanTrackAnalyzer(frame_bundles)
-    tracks = human_tracker.extract_tracks(cfg['MAX_TRACKS'])
+    tracks = extract_tracks(frame_bundles, cfg['MAX_TRACKS'])
 
-    print('Exporing tracks...')
+    print('Exporting tracks...')
     output_file_path = os.path.join(args.output_dir_path, "tracks.json")
     with open(output_file_path, "w") as tracks_file:
         json.dump(tracks, tracks_file)
