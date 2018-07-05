@@ -43,7 +43,7 @@ class BoundingBox:
         self.topRight = (self.x2, self.y1)
         self.bottomLeft = (self.x1, self.y2)
         self.bottomRight = (self.x2, self.y2)
-        self.center = (self.x1 + self.width / 2, self.y1 + self.height / 2)
+        self.center = (self.x1 + int(self.width / 2), self.y1 + int(self.height / 2))
         self.area = self.width * self.height
 
     def __str__(self):
@@ -75,3 +75,6 @@ class BoundingBox:
     
     def is_available(self):
         return len(self.parent_track_ids) == 0
+    
+    def is_child_of(self, track_id):
+        return track_id in self.parent_track_ids
