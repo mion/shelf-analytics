@@ -15,6 +15,12 @@ def draw_bbox_outline(frame, bbox, color=(255, 255, 255), thickness=1):
     cv2.rectangle(frame, (bbox.x1, bbox.y1), (bbox.x2, bbox.y2), color, thickness)
     return frame
 
+def draw_bbox_coords(frame, bbox, color=(255, 255, 255)):
+    coords_text = "({0},{1}) {2}x{3}".format(str(bbox.x1), str(bbox.y1), str(bbox.width), str(bbox.height))
+    text_width, _ = get_text_size(coords_text)
+    frame = draw_text(frame, coords_text, (bbox.center[0] - int(text_width / 2), bbox.center[1]), color)
+    return frame
+
 def draw_calibration_config(frame, cfg):
     frame_height, frame_width, _ = frame.shape
     columns_count = 0
@@ -30,9 +36,14 @@ def draw_calibration_config(frame, cfg):
         x += column_width
     return frame
 
-def draw_text(frame, text, orig, color=(255, 255, 255)):
-  cv2.putText(frame, text, orig, cv2.FONT_HERSHEY_DUPLEX, 0.50, color, 1, cv2.LINE_AA)
+def draw_text(frame, text, orig, color=(255, 255, 255), scale=0.75, thickness=1):
+  cv2.putText(frame, text, orig, cv2.FONT_HERSHEY_PLAIN, scale, color, thickness, cv2.LINE_AA)
   return frame
+
+def get_text_size(text, scale=0.75, thickness=1):
+  size = cv2.getTextSize(text, cv2.FONT_HERSHEY_PLAIN, scale, thickness)
+  width, height = size[0]
+  return (width, height)
 
 def draw_line(frame, orig, dest, color=(255, 255, 255), thickness=1):
     cv2.line(frame, orig, dest, color, thickness, cv2.LINE_AA)
