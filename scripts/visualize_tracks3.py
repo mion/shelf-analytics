@@ -9,7 +9,7 @@ import cv2
 
 from tnt import load_json, load_frames
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
-from tracking2 import Transition
+from tracking2 import Track, Transition
 from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords
 
 AVAILABLE_BBOX_OUTLINE_COLOR = (192, 192, 192)
@@ -24,13 +24,13 @@ TRANSITION_TRACKED_BBOX_OUTLINE_COLOR = (0, 150, 250)
 TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS = 1
 
 class TrackingVisualizationTool:
-    def __init__(self, frames, tracking_result):
+    def __init__(self, frames, tracks):
         self.frames = frames
-        self.tracking_result = tracking_result
+        self.tracks = tracks
         # the render function uses the `state` variable to
         # draw the image to be displayed, and nothing else
         self.state = {}
-        self.state['track_id'] = 1
+        self.state['track_id'] = 0
         self.state['frame_index'] = 0
         self.state['footer_view'] = 1
     
@@ -56,8 +56,15 @@ class TrackingVisualizationTool:
                     frame = draw_bbox_outline(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR, DESELECTED_TRACKED_BBOX_OUTLINE_THICKNESS)
         return frame
     
+    def get_fresh_frame(self, index):
+        orig_frame = self.frames[index]
+        orig_height, orig_width, orig_channels = orig_frame.shape
+        frame = np.zeros((orig_height, orig_width, orig_channels), np.uint8)
+        frame[0:(orig_height - 1), 0:(orig_width - 1)] = orig_frame[0:(orig_height - 1), 0:(orig_width - 1)]
+        return frame
+    
     def render(self):
-        frame = self.frames[self.state['frame_index']]
+        frame = self.get_fresh_frame(self.state['frame_index'])
         # begintest
         past_bbox = BBox([90, 90, 300, 200], BBoxFormat.x1_y1_w_h)
         past_bbox.id = 120
@@ -76,26 +83,28 @@ class TrackingVisualizationTool:
     
     def on_change_frame_index(self, new_value):
         self.state['frame_index'] = new_value
+
+    def on_change_track_id(self, new_value):
+        self.state['track_id'] = new_value
     
     def start(self):
-        rendered_image = self.render()
         cv2.namedWindow('shan', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('shan', 800, 200)
-        cv2.createTrackbar('frame index', 'shan', 0, len(self.frames), self.on_change_frame_index)
+        cv2.createTrackbar('Frame Index', 'shan', 0, len(self.frames) - 1, self.on_change_frame_index)
+        cv2.createTrackbar('Track ID', 'shan', 0, len(self.tracks) - 1, self.on_change_track_id)
         while(1):
-            cv2.imshow('Current frame', rendered_image)
+            cv2.imshow('Current frame', self.render())
             k = cv2.waitKey(1) & 0xFF
             if k == 27:
                 break
             if k == 2: # left
                 if self.state['frame_index'] > 0:
                     self.state['frame_index'] -= 1
-                    cv2.setTrackbarPos('frame index', 'shan', self.state['frame_index'])
+                    cv2.setTrackbarPos('Frame Index', 'shan', self.state['frame_index'])
             if k == 3: # right
                 if self.state['frame_index'] < (len(self.frames) - 1):
                     self.state['frame_index'] += 1
-                    cv2.setTrackbarPos('frame index', 'shan', self.state['frame_index'])
-            rendered_image = self.render()
+                    cv2.setTrackbarPos('Frame Index', 'shan', self.state['frame_index'])
         cv2.destroyAllWindows()
 
 if __name__ == '__main__':
@@ -110,5 +119,11 @@ if __name__ == '__main__':
     # tracking_result = load_json(args.tracking_result_path)
     tracking_result = {}
 
-    tool = TrackingVisualizationTool(frames, tracking_result)
+    tracks = [
+        Track(),
+        Track(),
+        Track()
+    ]
+
+    tool = TrackingVisualizationTool(frames, tracks)
     tool.start()
