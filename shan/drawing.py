@@ -16,9 +16,24 @@ def draw_bbox_outline(frame, bbox, color=(255, 255, 255), thickness=1):
     return frame
 
 def draw_bbox_coords(frame, bbox, color=(255, 255, 255)):
-    coords_text = "({0},{1}) {2}x{3}".format(str(bbox.x1), str(bbox.y1), str(bbox.width), str(bbox.height))
+    coords_text = "({0},{1}) {2}x{3} {4:.2f}".format(str(bbox.x1), str(bbox.y1), str(bbox.width), str(bbox.height), bbox.score)
     text_width, _ = get_text_size(coords_text)
     frame = draw_text(frame, coords_text, (bbox.center[0] - int(text_width / 2), bbox.center[1]), color)
+    return frame
+
+def draw_bbox_header(frame, bbox, transition, bg_color=(0, 0, 0), fg_color=(255, 255, 255)):
+    header_text = '{' + ','.join([str(track_id) for track_id in bbox.parent_track_ids]) + '}'
+    if transition is not None:
+        header_text += ' (' + transition.kind + ')'
+    padding = 2
+    _, text_height = get_text_size(header_text)
+    cv2.rectangle(frame, 
+                (bbox.x1, bbox.y1), 
+                (bbox.x1 + bbox.width, bbox.y1 + text_height + (3 * padding)), 
+                bg_color, 
+                cv2.FILLED, 
+                cv2.LINE_AA)
+    frame = draw_text(frame, header_text, (bbox.x1, bbox.y1 + text_height + (2 * padding)), fg_color)
     return frame
 
 def draw_calibration_config(frame, cfg):

@@ -10,7 +10,7 @@ import cv2
 from tnt import load_json, load_frames
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tracking2 import Track, Transition
-from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords
+from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords, draw_bbox_header
 from frame_bundle import FrameBundle
 
 AVAILABLE_BBOX_OUTLINE_COLOR = (192, 192, 192)
@@ -55,9 +55,11 @@ class TrackingVisualizationTool:
                     # actual bbox
                     frame = draw_bbox_outline(frame, bbox, SELECTED_TRACKED_BBOX_OUTLINE_COLOR, SELECTED_TRACKED_BBOX_OUTLINE_THICKNESS)
                     frame = draw_bbox_coords(frame, bbox, SELECTED_TRACKED_BBOX_OUTLINE_COLOR)
+                    frame = draw_bbox_header(frame, bbox, transition, bg_color=(50, 50, 50), fg_color=SELECTED_TRACKED_BBOX_OUTLINE_COLOR)
                 else:
                     frame = draw_bbox_outline(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR, DESELECTED_TRACKED_BBOX_OUTLINE_THICKNESS)
                     frame = draw_bbox_coords(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
+                    frame = draw_bbox_header(frame, bbox, transition=None, bg_color=(25, 25, 25), fg_color=DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
         return frame
     
     def get_fresh_frame(self, index):

@@ -16,7 +16,7 @@ class BoundingBox:
         self.id = BoundingBox.next_bbox_id
         BoundingBox.next_bbox_id += 1
         self.filtering_results = []
-        self.score = None
+        self.score = 0.0
         self.parent_track_ids = []
         # IMPORTANT: OpenCV expects tuples, not lists.
         #            Also, tuples will be used as indexes so
