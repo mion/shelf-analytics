@@ -72,7 +72,9 @@ class TrackingVisualizationTool:
         return final_frame
     
     def render_stacked_tracks_footer(self, frame):
-        return frame
+        footer_height = 200
+        frame_with_footer = draw_footer(frame, footer_height)
+        return frame_with_footer
 
     def render_footer(self, frame):
         if self.state['footer_view'] == TrackingVisualizationTool.FOOTER_VIEW_CALIBRATION:
@@ -114,11 +116,15 @@ class TrackingVisualizationTool:
     def on_change_track_id(self, new_value):
         self.state['track_id'] = new_value
     
+    def on_change_footer_view(self, new_value):
+        self.state['footer_view'] = new_value
+    
     def start(self):
         cv2.namedWindow('shan', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('shan', 800, 200)
         cv2.createTrackbar('Frame Index', 'shan', 0, len(self.frames) - 1, self.on_change_frame_index)
         cv2.createTrackbar('Track ID', 'shan', 0, len(self.tracks) - 1, self.on_change_track_id)
+        cv2.createTrackbar('Footer View', 'shan', 0, 1, self.on_change_footer_view)
         while(1):
             cv2.imshow('Current frame', self.render())
             k = cv2.waitKey(1) & 0xFF
