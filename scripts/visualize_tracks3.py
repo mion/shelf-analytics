@@ -76,23 +76,40 @@ class TrackingVisualizationTool:
         tracks = [Track(), Track(), Track()]
         tracks[0].add(100, None, None)
         tracks[0].add(300, None, None)
+        tracks[0].id = 0
         tracks[1].add(50, None, None)
         tracks[1].add(450, None, None)
+        tracks[1].id = 1
         tracks[2].add(600, None, None)
         tracks[2].add(1000, None, None)
+        tracks[2].id = 2
         #endtest
         frame_height, frame_width, _ = frame.shape
         footer_height = 200
         frame_with_footer = draw_footer(frame, footer_height)
-        padding = 20
+        padding = 10
+        space_after_label = 5
+        space_between_tracks = 10
         max_text = "Frame {}".format(len(self.frames) - 1)
-        space_after_label = 10
         label_max_size = get_text_size(max_text)[0] + space_after_label
         line_max_width = frame_width - (2 * padding) - label_max_size
         text = "Frame {}".format(str(self.state['frame_index']))
         _, text_height = get_text_size(text)
-        frame_with_footer = draw_text(frame_with_footer, text, (padding, frame_height + padding + text_height))
-        frame_with_footer = draw_line_right_of(frame_with_footer, (padding + label_max_size, frame_height + padding + text_height), line_max_width)
+        current_y = frame_height + padding + text_height
+        line_start_x = padding + label_max_size
+        text_start_x = padding
+        frame_with_footer = draw_text(frame_with_footer, text, (text_start_x, current_y))
+        frame_with_footer = draw_line_right_of(frame_with_footer, (line_start_x, current_y), line_max_width)
+        for track in tracks:
+            text = 'Track #' + str(track.id)
+            _, text_height = get_text_size(text)
+            current_y += space_between_tracks + text_height
+            frame_with_footer = draw_text(frame_with_footer, text, (text_start_x, current_y))
+            if not track.is_empty():
+                start_i, end_i = track.get_start_end_indexes()
+                line_perc_width = int(((end_i - start_i) / len(self.frames)) * line_max_width)
+                line_perc_x = line_start_x + int((start_i / len(self.frames)) * line_max_width)
+                frame_with_footer = draw_line_right_of(frame_with_footer, (line_perc_x, current_y), line_perc_width)
         return frame_with_footer
 
     def render_footer(self, frame):
