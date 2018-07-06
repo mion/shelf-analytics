@@ -10,7 +10,7 @@ import cv2
 from tnt import load_json, load_frames
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tracking2 import Track, Transition
-from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords, draw_bbox_header
+from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords, draw_bbox_header, draw_calibration_config, draw_footer, draw_text
 from frame_bundle import FrameBundle
 
 AVAILABLE_BBOX_OUTLINE_COLOR = (192, 192, 192)
@@ -25,15 +25,18 @@ TRANSITION_TRACKED_BBOX_OUTLINE_COLOR = (0, 150, 250)
 TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS = 1
 
 class TrackingVisualizationTool:
-    def __init__(self, frames, tracks):
+    FOOTER_VIEW_CALIBRATION = 0
+    FOOTER_VIEW_STACKED_TRACKS = 1
+    def __init__(self, frames, tracks, config):
         self.frames = frames
         self.tracks = tracks
+        self.config = config
         # the render function uses the `state` variable to
         # draw the image to be displayed, and nothing else
         self.state = {}
         self.state['track_id'] = 0
         self.state['frame_index'] = 0
-        self.state['footer_view'] = 1
+        self.state['footer_view'] = TrackingVisualizationTool.FOOTER_VIEW_CALIBRATION
     
     def render_bboxes(self, frame, bboxes, transition_by_bbox_track_ids):
         for bbox in bboxes:
@@ -62,6 +65,23 @@ class TrackingVisualizationTool:
                     frame = draw_bbox_header(frame, bbox, transition=None, bg_color=(25, 25, 25), fg_color=DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
         return frame
     
+    def render_calibration_footer(self, frame):
+        footer_height = 200
+        frame_with_footer = draw_footer(frame, footer_height)
+        final_frame = draw_calibration_config(frame_with_footer, footer_height, cfg)
+        return final_frame
+    
+    def render_stacked_tracks_footer(self, frame):
+        return frame
+
+    def render_footer(self, frame):
+        if self.state['footer_view'] == TrackingVisualizationTool.FOOTER_VIEW_CALIBRATION:
+            return self.render_calibration_footer(frame)
+        elif self.state['footer_view'] == TrackingVisualizationTool.FOOTER_VIEW_STACKED_TRACKS:
+            return self.render_stacked_tracks_footer(frame)
+        else:
+            raise RuntimeError('invalid selected footer view')
+
     def get_fresh_frame(self, index):
         orig_frame = self.frames[index]
         orig_height, orig_width, orig_channels = orig_frame.shape
@@ -84,6 +104,7 @@ class TrackingVisualizationTool:
             (123, 1): Transition('snapped', past_bbox, past_bbox.distance_to(bboxes[0]))
         }
         # endtest
+        frame = self.render_footer(frame)
         frame = self.render_bboxes(frame, bboxes, transition_by_bbox_track_ids)
         return frame
     
@@ -149,5 +170,5 @@ if __name__ == '__main__':
     # frame_bundles[1].bboxes.append(BBox([120, 110, 50, 100], BBoxFormat.x1_y1_w_h))
     # frame_bundles[2].bboxes.append(BBox([140, 120, 50, 100], BBoxFormat.x1_y1_w_h))
 
-    tool = TrackingVisualizationTool(frames, tracks)
+    tool = TrackingVisualizationTool(frames, tracks, cfg)
     tool.start()

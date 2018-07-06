@@ -1,3 +1,4 @@
+import pdb
 import cv2
 import numpy as np
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
@@ -36,20 +37,22 @@ def draw_bbox_header(frame, bbox, transition, bg_color=(0, 0, 0), fg_color=(255,
     frame = draw_text(frame, header_text, (bbox.x1, bbox.y1 + text_height + (2 * padding)), fg_color)
     return frame
 
-def draw_calibration_config(frame, cfg):
-    frame_height, frame_width, _ = frame.shape
+def draw_calibration_config(frame_with_footer, footer_height, cfg):
+    frame_with_footer_height, frame_width, _ = frame_with_footer.shape
+    frame_height = frame_with_footer_height - footer_height
     columns_count = 0
     for key, _ in cfg.items():
         if key.endswith('DISTANCE'):
             columns_count += 1
-    column_width = frame_width / columns_count
+    column_width = int(frame_width / columns_count)
     padding = 10
     x, y = (0, frame_height + padding)
     for key, value in cfg.items():
-        frame = draw_text(frame, key, (x + padding, y + padding))
-        frame = draw_line(frame, (x + padding, y + 2 * padding), (x + padding + value, y + 2 * padding), thickness=2)
-        x += column_width
-    return frame
+        if key.endswith('DISTANCE'):
+            frame_with_footer = draw_text(frame_with_footer, key, (x + padding, y + padding))
+            frame_with_footer = draw_line(frame_with_footer, (x + padding, y + 2 * padding), (x + padding + value, y + 2 * padding), thickness=2)
+            x += column_width
+    return frame_with_footer
 
 def draw_text(frame, text, orig, color=(255, 255, 255), scale=0.75, thickness=1):
   cv2.putText(frame, text, orig, cv2.FONT_HERSHEY_PLAIN, scale, color, thickness, cv2.LINE_AA)
