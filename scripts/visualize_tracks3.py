@@ -39,8 +39,10 @@ class TrackingVisualizationTool:
         for bbox in bboxes:
             if bbox.is_available():
                 frame = draw_bbox_outline(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR, AVAILABLE_BBOX_OUTLINE_THICKNESS)
+                frame = draw_bbox_coords(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR)
             elif bbox.is_filtered():
                 frame = draw_bbox_outline(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR, FILTERED_BBOX_OUTLINE_THICKNESS)
+                frame = draw_bbox_coords(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR)
             else:
                 if bbox.is_child_of(self.state['track_id']):
                     # transition
@@ -55,6 +57,7 @@ class TrackingVisualizationTool:
                     frame = draw_bbox_coords(frame, bbox, SELECTED_TRACKED_BBOX_OUTLINE_COLOR)
                 else:
                     frame = draw_bbox_outline(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR, DESELECTED_TRACKED_BBOX_OUTLINE_THICKNESS)
+                    frame = draw_bbox_coords(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
         return frame
     
     def get_fresh_frame(self, index):
