@@ -11,6 +11,7 @@ from tnt import load_json, load_frames
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tracking2 import Track, Transition
 from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords
+from frame_bundle import FrameBundle
 
 AVAILABLE_BBOX_OUTLINE_COLOR = (192, 192, 192)
 AVAILABLE_BBOX_OUTLINE_THICKNESS = 1
@@ -107,6 +108,9 @@ class TrackingVisualizationTool:
                     cv2.setTrackbarPos('Frame Index', 'shan', self.state['frame_index'])
         cv2.destroyAllWindows()
 
+def _create_bbox(x, y):
+    pass
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('video_path', help='path to the video')
@@ -117,13 +121,28 @@ if __name__ == '__main__':
 
     frames = load_frames(args.video_path)
     # tracking_result = load_json(args.tracking_result_path)
-    tracking_result = {}
-
+    # Assemble test setup
+    bboxes_per_frame = [[] for frame in frames]
+    scores_per_frame = [[] for frame in frames]
+    frame_bundles = []
+    frame_index = 0
+    for frame in frames:
+        fb = FrameBundle(frame, frame_index, bboxes_per_frame[frame_index], scores_per_frame[frame_index])
+        frame_bundles.append(fb)
+        frame_index += 1
     tracks = [
         Track(),
         Track(),
         Track()
     ]
+    # add one bbox on frame 0
+    b1 = BBox([100, 100, 50, 100], BBoxFormat.x1_y1_w_h)
+    b1.score = 0.987
+    frame_bundles[0].bboxes.append(b1)
+    tracks[0].add(0, b1, Transition('first', b1, 0))
+    # b2 = BBox([300, 300, 50, 100], BBo
+    # frame_bundles[1].bboxes.append(BBox([120, 110, 50, 100], BBoxFormat.x1_y1_w_h))
+    # frame_bundles[2].bboxes.append(BBox([140, 120, 50, 100], BBoxFormat.x1_y1_w_h))
 
     tool = TrackingVisualizationTool(frames, tracks)
     tool.start()
