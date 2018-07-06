@@ -10,7 +10,7 @@ import cv2
 from tnt import load_json, load_frames
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tracking2 import Track, Transition
-from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords, draw_bbox_header, draw_calibration_config, draw_footer, draw_text
+from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords, draw_bbox_header, draw_calibration_config, draw_footer, draw_text, get_text_size, draw_line, draw_line_right_of
 from frame_bundle import FrameBundle
 
 AVAILABLE_BBOX_OUTLINE_COLOR = (192, 192, 192)
@@ -72,8 +72,27 @@ class TrackingVisualizationTool:
         return final_frame
     
     def render_stacked_tracks_footer(self, frame):
+        #begintest
+        tracks = [Track(), Track(), Track()]
+        tracks[0].add(100, None, None)
+        tracks[0].add(300, None, None)
+        tracks[1].add(50, None, None)
+        tracks[1].add(450, None, None)
+        tracks[2].add(600, None, None)
+        tracks[2].add(1000, None, None)
+        #endtest
+        frame_height, frame_width, _ = frame.shape
         footer_height = 200
         frame_with_footer = draw_footer(frame, footer_height)
+        padding = 20
+        max_text = "Frame {}".format(len(self.frames) - 1)
+        space_after_label = 10
+        label_max_size = get_text_size(max_text)[0] + space_after_label
+        line_max_width = frame_width - (2 * padding) - label_max_size
+        text = "Frame {}".format(str(self.state['frame_index']))
+        _, text_height = get_text_size(text)
+        frame_with_footer = draw_text(frame_with_footer, text, (padding, frame_height + padding + text_height))
+        frame_with_footer = draw_line_right_of(frame_with_footer, (padding + label_max_size, frame_height + padding + text_height), line_max_width)
         return frame_with_footer
 
     def render_footer(self, frame):

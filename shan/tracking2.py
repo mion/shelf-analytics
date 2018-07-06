@@ -22,6 +22,18 @@ class Track:
     def add(self, index, bbox, transition):
         self.steps.append((index, bbox, transition))
     
+    def is_empty(self):
+        return len(self.steps) == 0
+    
+    def get_start_end_indexes(self):
+        if self.is_empty():
+            raise RuntimeError('trying to get start and end indexes from empty track')
+        first_step = self.steps[0]
+        last_step = self.steps[len(self.steps) - 1]
+        start_index, _, _ = first_step
+        end_index, _, _ = last_step
+        return (start_index, end_index)
+    
     def to_dict(self):
         return [{'index': i, 'bbox': [int(n) for n in b.to_tuple(BBoxFormat.y1_x1_y2_x2)], 'transition': t.to_dict()} for i, b, t in self.steps]
 

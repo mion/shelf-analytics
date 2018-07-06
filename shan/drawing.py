@@ -67,6 +67,9 @@ def draw_line(frame, orig, dest, color=(255, 255, 255), thickness=1):
     cv2.line(frame, orig, dest, color, thickness, cv2.LINE_AA)
     return frame
 
+def draw_line_right_of(frame, orig, length, color=(255, 255, 255), thickness=1):
+    return draw_line(frame, orig, (orig[0] + length, orig[1]), color, thickness)
+
 def draw_footer(frame, height):
     frame_height, frame_width, frame_channels = frame.shape
     frame_with_footer = np.zeros((frame_height + height, frame_width, frame_channels), np.uint8)
