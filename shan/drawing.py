@@ -16,10 +16,10 @@ def draw_bbox_outline(frame, bbox, color=(255, 255, 255), thickness=1):
     cv2.rectangle(frame, (bbox.x1, bbox.y1), (bbox.x2, bbox.y2), color, thickness)
     return frame
 
-def draw_bbox_coords(frame, bbox, color=(255, 255, 255)):
+def draw_bbox_coords(frame, bbox, color=(255, 255, 255), offset_y=0):
     coords_text = "({0},{1}) {2}x{3} {4:.2f}".format(str(bbox.x1), str(bbox.y1), str(bbox.width), str(bbox.height), bbox.score)
     text_width, _ = get_text_size(coords_text)
-    frame = draw_text(frame, coords_text, (bbox.center[0] - int(text_width / 2), bbox.center[1]), color)
+    frame = draw_text(frame, coords_text, (bbox.center[0] - int(text_width / 2), bbox.center[1] + offset_y), color)
     return frame
 
 def draw_bbox_header(frame, bbox, transition, bg_color=(0, 0, 0), fg_color=(255, 255, 255)):

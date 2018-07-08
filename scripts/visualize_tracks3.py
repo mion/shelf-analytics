@@ -1,3 +1,4 @@
+import pdb
 import os
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'shan'))
@@ -15,7 +16,7 @@ from frame_bundle import FrameBundle
 
 AVAILABLE_BBOX_OUTLINE_COLOR = (192, 192, 192)
 AVAILABLE_BBOX_OUTLINE_THICKNESS = 1
-FILTERED_BBOX_OUTLINE_COLOR = (128, 128, 128)
+FILTERED_BBOX_OUTLINE_COLOR = (64, 64, 64)
 FILTERED_BBOX_OUTLINE_THICKNESS = 1
 DESELECTED_TRACKED_BBOX_OUTLINE_COLOR = (255, 255, 255)
 DESELECTED_TRACKED_BBOX_OUTLINE_THICKNESS = 2
@@ -32,11 +33,24 @@ class TrackingVisualizationTool:
         self.frames = [fb.frame for fb in self.frame_bundles]
         self.tracks = tracks
         self.config = config
-        # helper dict
+        # helper transition dict
         self.transition_by_bbox_track_ids = {}
         for track in self.tracks:
             for _, bbox, transition in track.steps:
                 self.transition_by_bbox_track_ids[(bbox.id, track.id)] = transition
+        # helper bbox dict with bboxes that are inside tracks only
+        self.bboxes_by_frame_index = {}
+        self.bboxes_by_id = {}
+        for index in range(len(self.frames)):
+            self.bboxes_by_frame_index[index] = []
+            for bbox in self.frame_bundles[index].bboxes:
+                self.bboxes_by_id[bbox.id] = bbox
+                self.bboxes_by_frame_index[index].append(bbox)
+        for track in self.tracks:
+            for frame_index, bbox, transition in track.steps:
+                if bbox.id not in self.bboxes_by_id:
+                    self.bboxes_by_frame_index[frame_index].append(bbox)
+                    self.bboxes_by_id[bbox.id] = bbox
         # the render function uses the `state` variable to
         # draw the image to be displayed, and nothing else
         self.state = {}
@@ -45,13 +59,15 @@ class TrackingVisualizationTool:
         self.state['footer_view'] = TrackingVisualizationTool.FOOTER_VIEW_CALIBRATION
     
     def render_bboxes(self, frame, bboxes, transition_by_bbox_track_ids):
+        # if self.state['frame_index'] == 465:
+        #     pdb.set_trace()
         for bbox in bboxes:
             if bbox.is_available():
                 frame = draw_bbox_outline(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR, AVAILABLE_BBOX_OUTLINE_THICKNESS)
-                frame = draw_bbox_coords(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR)
+                frame = draw_bbox_coords(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR, offset_y=20)
             elif bbox.is_filtered():
                 frame = draw_bbox_outline(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR, FILTERED_BBOX_OUTLINE_THICKNESS)
-                frame = draw_bbox_coords(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR)
+                frame = draw_bbox_coords(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR, offset_y=20)
             else:
                 if bbox.is_child_of(self.state['track_id']):
                     # transition
@@ -80,7 +96,7 @@ class TrackingVisualizationTool:
     def render_stacked_tracks_footer(self, frame): # FIXME refactor
         TEXT_SCALE = 0.5
         frame_height, frame_width, _ = frame.shape
-        footer_height = 200
+        footer_height = 300
         frame_with_footer = draw_footer(frame, footer_height)
         padding = 5
         space_after_label = 2
@@ -131,29 +147,17 @@ class TrackingVisualizationTool:
     
     def render(self):
         frame = self.get_fresh_frame(self.state['frame_index'])
-        # begintest
-        # past_bbox = BBox([90, 90, 300, 200], BBoxFormat.x1_y1_w_h)
-        # past_bbox.id = 120
-        # past_bbox.parent_track_ids.append(1)
-        # bboxes = [
-        #     BBox([100, 100, 300, 200], BBoxFormat.x1_y1_w_h)    
-        # ]
-        # bboxes[0].id = 123
-        # bboxes[0].parent_track_ids.append(1)
-        # transition_by_bbox_track_ids = {
-        #     (123, 1): Transition('snapped', past_bbox, past_bbox.distance_to(bboxes[0]))
-        # }
-        # endtest
         frame = self.render_footer(frame)
-        bboxes = self.frame_bundles[self.state['frame_index']].bboxes
-        frame = self.render_bboxes(frame, bboxes, self.transition_by_bbox_track_ids)
+        # bboxes = self.frame_bundles[self.state['frame_index']].bboxes
+        frame = self.render_bboxes(frame, self.bboxes_by_frame_index[self.state['frame_index']], self.transition_by_bbox_track_ids)
         return frame
     
     def on_change_frame_index(self, new_value):
         self.state['frame_index'] = new_value
 
     def on_change_track_id(self, new_value):
-        self.state['track_id'] = new_value
+        self.state['track_id'] = new_value + 1
+        print('Track ID = {}'.format(self.state['track_id']))
     
     def on_change_footer_view(self, new_value):
         self.state['footer_view'] = new_value
@@ -162,7 +166,7 @@ class TrackingVisualizationTool:
         cv2.namedWindow('shan', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('shan', 800, 200)
         cv2.createTrackbar('Frame Index', 'shan', 0, len(self.frames) - 1, self.on_change_frame_index)
-        cv2.createTrackbar('Track ID', 'shan', 1, len(self.tracks), self.on_change_track_id)
+        cv2.createTrackbar('Track ID', 'shan', 0, len(self.tracks) - 1, self.on_change_track_id)
         cv2.createTrackbar('Footer View', 'shan', 0, 1, self.on_change_footer_view)
         while(1):
             cv2.imshow('Current frame', self.render())
