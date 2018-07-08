@@ -78,3 +78,21 @@ class BoundingBox:
     
     def is_child_of(self, track_id):
         return track_id in self.parent_track_ids
+    
+    def to_json(self):
+        return {
+            'id': self.id,
+            'y1_x1_y2_x2': self.to_tuple(BoundingBoxFormat.y1_x1_y2_x2),
+            'filtering_results': self.filtering_results,
+            'score': self.score,
+            'parent_track_ids': self.parent_track_ids
+        }
+    
+    @staticmethod
+    def from_json(json):
+        bbox = BoundingBox(json['y1_x1_y2_x2'], BoundingBoxFormat.y1_x1_y2_x2)
+        bbox.id = json['id']
+        bbox.score = json['score']
+        bbox.filtering_results = json['filtering_results']
+        bbox.parent_track_ids = json['parent_track_ids']
+        return bbox

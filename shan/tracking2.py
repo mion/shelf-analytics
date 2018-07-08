@@ -4,6 +4,7 @@ from cvutil import create_object_tracker
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tnt import load_json
 from frame_bundle import FrameBundle
+import json
 
 cfg = load_json('shan/calibration-config.json')
 
@@ -11,6 +12,66 @@ def extract_tracks(frame_bundles, max_track_count):
     analyzer = HumanTrackAnalyzer(frame_bundles)
     tracks = analyzer.find_all_tracks(max_track_count)
     return [track.to_dict() for track in tracks]
+
+def compute_tracking_result(frame_bundles, max_track_count):
+    analyzer = HumanTrackAnalyzer(frame_bundles)
+    tracks = analyzer.find_all_tracks(max_track_count)
+    return TrackingResult(tracks, frame_bundles)
+
+class TrackingResult: #FIXME refactor
+    def __init__(self, tracks=None, frame_bundles=None):
+        self.tracks = [] if tracks is None else tracks
+        self.frame_bundles = [] if frame_bundles is None else frame_bundles
+    
+    def save_as_json(self, path):
+        result = {}
+        result['frame_bundles'] = []
+        for bundle in self.frame_bundles:
+            result['frame_bundles'].append({
+                'frame_index': bundle.frame_index,
+                'bboxes': [bbox.to_json() for bbox in bundle.bboxes]
+            })
+        result['tracks'] = []
+        for track in self.tracks:
+            result['tracks'].append(track.to_json())
+        with open(path, 'w')  as output_file:
+            json.dump(result, output_file)
+    
+    def load_from_json(self, frames, path):
+        self.tracks = []
+        self.frame_bundles = []
+        result = load_json(path)
+        bbox_by_id = {}
+        for bundle_json in result['frame_bundles']:
+            idx = int(bundle_json['frame_index'])
+            frame_bundle = FrameBundle(frames[idx], idx, [], [])
+            for bbox_json in bundle_json['bboxes']:
+                bbox = BBox.from_json(bbox_json)
+                # bbox = BBox(bbox_json['y1_x1_y2_x2'], BBoxFormat.y1_x1_y2_x2)
+                # bbox.id = bbox_json['id']
+                # bbox.score = bbox_json['score']
+                # bbox.filtering_results = bbox_json['filtering_results']
+                # bbox.parent_track_ids = bbox_json['parent_track_ids']
+                frame_bundle.bboxes.append(bbox)
+                bbox_by_id[bbox.id] = bbox
+            self.frame_bundles.append(frame_bundle)
+        for track_json in result['tracks']:
+            track = Track()
+            track.id = track_json['id']
+            for step_json in track_json['steps']:
+                index, bbox_json, transition_json = step_json
+                bbox = None
+                if bbox_json['id'] in bbox_by_id:
+                    bbox = bbox_by_id[bbox_json['id']]
+                else:
+                    bbox = BBox.from_json(bbox_json)
+                    bbox_by_id[bbox.id] = bbox
+                orig_bbox = BBox.from_json(transition_json['from_bbox'])
+                if orig_bbox not in bbox_by_id:
+                    bbox_by_id[orig_bbox.id] = orig_bbox
+                transition = Transition(transition_json['type'], bbox_by_id[orig_bbox.id], transition_json['distance'])
+                track.add(index, bbox, transition)
+            self.tracks.append(track)
 
 class Track:
     next_track_id = 1
@@ -36,6 +97,12 @@ class Track:
     
     def to_dict(self):
         return [{'index': i, 'bbox': [int(n) for n in b.to_tuple(BBoxFormat.y1_x1_y2_x2)], 'transition': t.to_dict()} for i, b, t in self.steps]
+    
+    def to_json(self):
+        return {
+            'id': self.id,
+            'steps': [[index, bbox.to_json(), transition.to_json()] for index, bbox, transition in self.steps]
+        }
 
 class Transition:
     def __init__(self, kind, orig_bbox, distance):
@@ -47,6 +114,13 @@ class Transition:
         return {
             'type': self.kind,
             'from_bbox': [int(n) for n in self.orig_bbox.to_tuple(BBoxFormat.y1_x1_y2_x2)],
+            'distance': self.distance
+        }
+    
+    def to_json(self):
+        return {
+            'type': self.kind,
+            'from_bbox': self.orig_bbox.to_json(),
             'distance': self.distance
         }
 
