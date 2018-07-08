@@ -84,27 +84,35 @@ class TrackingVisualizationTool:
         tracks[2].add(1000, None, None)
         tracks[2].id = 2
         #endtest
+        TEXT_SCALE = 0.5
         frame_height, frame_width, _ = frame.shape
         footer_height = 200
         frame_with_footer = draw_footer(frame, footer_height)
-        padding = 10
-        space_after_label = 5
-        space_between_tracks = 10
+        padding = 5
+        space_after_label = 2
+        space_between_tracks = 5
+        # draw frame line
         max_text = "Frame {}".format(len(self.frames) - 1)
-        label_max_size = get_text_size(max_text)[0] + space_after_label
+        label_max_size = get_text_size(max_text, scale=TEXT_SCALE)[0] + space_after_label
         line_max_width = frame_width - (2 * padding) - label_max_size
         text = "Frame {}".format(str(self.state['frame_index']))
-        _, text_height = get_text_size(text)
+        _, text_height = get_text_size(text, scale=TEXT_SCALE)
         current_y = frame_height + padding + text_height
         line_start_x = padding + label_max_size
         text_start_x = padding
-        frame_with_footer = draw_text(frame_with_footer, text, (text_start_x, current_y))
+        frame_with_footer = draw_text(frame_with_footer, text, (text_start_x, current_y), scale=TEXT_SCALE)
         frame_with_footer = draw_line_right_of(frame_with_footer, (line_start_x, current_y), line_max_width)
+        # draw marker
+        MARKER_SIZE = 5
+        marker_perc = self.state['frame_index'] / len(self.frames)
+        marker_offset_x = int(marker_perc * line_max_width)
+        frame_with_footer = draw_line(frame_with_footer, (line_start_x + marker_offset_x, current_y - MARKER_SIZE), (line_start_x + marker_offset_x, current_y), color=(0, 0, 255), thickness=3)
+        # draw tracks
         for track in tracks:
             text = 'Track #' + str(track.id)
-            _, text_height = get_text_size(text)
+            _, text_height = get_text_size(text, scale=TEXT_SCALE)
             current_y += space_between_tracks + text_height
-            frame_with_footer = draw_text(frame_with_footer, text, (text_start_x, current_y))
+            frame_with_footer = draw_text(frame_with_footer, text, (text_start_x, current_y), scale=TEXT_SCALE)
             if not track.is_empty():
                 start_i, end_i = track.get_start_end_indexes()
                 line_perc_width = int(((end_i - start_i) / len(self.frames)) * line_max_width)
