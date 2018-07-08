@@ -73,6 +73,13 @@ class BoundingBox:
                 return True
         return False
     
+    def get_filtering_results_label(self):
+        label_parts = []
+        for result in self.filtering_results:
+            if result['filtered'] is True:
+                label_parts.append(result['type'])
+        return '/'.join(label_parts)
+    
     def is_available(self):
         return len(self.parent_track_ids) == 0
     

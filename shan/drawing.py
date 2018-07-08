@@ -17,7 +17,7 @@ def draw_bbox_outline(frame, bbox, color=(255, 255, 255), thickness=1):
     return frame
 
 def draw_bbox_coords(frame, bbox, color=(255, 255, 255), offset_y=0):
-    coords_text = "({0},{1}) {2}x{3} {4:.2f}".format(str(bbox.x1), str(bbox.y1), str(bbox.width), str(bbox.height), bbox.score)
+    coords_text = "({0},{1}) {2}x{3} {4:.2f} {5}".format(str(bbox.x1), str(bbox.y1), str(bbox.width), str(bbox.height), bbox.score, bbox.get_filtering_results_label())
     text_width, _ = get_text_size(coords_text)
     frame = draw_text(frame, coords_text, (bbox.center[0] - int(text_width / 2), bbox.center[1] + offset_y), color)
     return frame
