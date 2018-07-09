@@ -59,8 +59,6 @@ class TrackingVisualizationTool:
         self.state['footer_view'] = TrackingVisualizationTool.FOOTER_VIEW_CALIBRATION
     
     def render_bboxes(self, frame, bboxes, transition_by_bbox_track_ids):
-        # if self.state['frame_index'] == 465:
-        #     pdb.set_trace()
         for bbox in bboxes:
             if bbox.is_available():
                 frame = draw_bbox_outline(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR, AVAILABLE_BBOX_OUTLINE_THICKNESS)
@@ -75,7 +73,7 @@ class TrackingVisualizationTool:
                     if key not in transition_by_bbox_track_ids:
                         raise RuntimeError('pair (bboxID, selected trackID) not found in transition_by_bbox_track_ids where bboxID={0}, trackID={1}'.format(str(bbox.id), str(self.state['track_id'])))
                     transition = transition_by_bbox_track_ids[key]
-                    frame = draw_bbox_outline(frame, transition.orig_bbox, TRANSITION_TRACKED_BBOX_OUTLINE_COLOR, TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS)
+                    # frame = draw_bbox_outline(frame, transition.orig_bbox, TRANSITION_TRACKED_BBOX_OUTLINE_COLOR, TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS)
                     frame = draw_bbox_line_between_centers(frame, transition.orig_bbox, bbox, TRANSITION_TRACKED_BBOX_OUTLINE_COLOR, TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS)
                     # actual bbox
                     frame = draw_bbox_outline(frame, bbox, SELECTED_TRACKED_BBOX_OUTLINE_COLOR, SELECTED_TRACKED_BBOX_OUTLINE_THICKNESS)
