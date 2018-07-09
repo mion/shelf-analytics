@@ -36,7 +36,6 @@ def merge_tracks(tracking_result):
                 continue
             result = cv2.compareHist(histograms[base_track.id], histograms[track.id], cv2.HISTCMP_CORREL)
             print("\twith Track #{} = {}".format(str(track.id), str(result)))
-    # pdb.set_trace()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

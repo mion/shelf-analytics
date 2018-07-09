@@ -5,6 +5,7 @@ from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tnt import load_json
 from frame_bundle import FrameBundle
 import json
+import math
 
 cfg = load_json('shan/calibration-config.json')
 
@@ -124,6 +125,14 @@ class Transition:
             'distance': self.distance
         }
 
+def normalized_direction(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    dx = x2 - x1
+    dy = y2 - y1
+    norm = math.sqrt((dx * dx) + (dy * dy))
+    return (dx / norm, dy / norm)
+
 class HumanTrackAnalyzer:
     """
     A track represents a bounding box that was identified as being the
@@ -186,9 +195,10 @@ class HumanTrackAnalyzer:
         self.add_to_track(track, start_index, last_bbox, Transition('first', last_bbox, 0))
 
         print("tracking human:")
-        for index in range(start_index + 1, self.get_frames_count()):
-            # if track.id == 5 and index == 823:
-            #     pdb.set_trace()
+
+        # for index in range(start_index + 1, self.get_frames_count()):
+        index = start_index + 1
+        while index < self.get_frames_count():
             current_frame = self.get_frame_at(index)
             ok, xywh_tuple = self.tracker.update(current_frame)
             if ok: # tracker manage to keep track of a bbox, let's try to snap onto it
@@ -212,10 +222,78 @@ class HumanTrackAnalyzer:
                     last_bbox = far_snap_bbox
                 else:
                     print("\ttrack lost at frame {0}".format(index))
-                    break
+                    LOOK_AHEAD_MAX_SNAP_DISTANCE = 50
+                    target_index, target_bbox = self.look_ahead(track, index, max_front_hops=4, max_back_hops=20, threshold_distance=LOOK_AHEAD_MAX_SNAP_DISTANCE)
+                    if target_index is not None and target_bbox is not None:
+                        print("\t\tlook ahead found target {} at index {}".format(str(target_bbox), str(target_index)))
+                        delta_per_hop = (last_bbox.distance_to(target_bbox) / ((target_index - index) + 1))
+                        dir_vec = normalized_direction(last_bbox.center, target_bbox.center) 
+                        print("\t\twalking {} pixels in direction ({},{})".format(str(delta_per_hop), str(dir_vec[0]), str(dir_vec[1])))
+                        curr_x = last_bbox.x1
+                        curr_y = last_bbox.y1
+                        past_bbox = last_bbox
+                        print("\t\tstarting on frame {} at ({},{})".format(str(index), str(curr_x), str(curr_y)))
+                        for idx in range(index, target_index):
+                            curr_x += int(dir_vec[0] * delta_per_hop)
+                            curr_y += int(dir_vec[1] * delta_per_hop)
+                            interpolated_bbox = BBox([curr_x, curr_y, last_bbox.width, last_bbox.height], BBoxFormat.x1_y1_w_h)
+                            self.add_to_track(track, idx, interpolated_bbox, Transition('interpol', past_bbox, past_bbox.distance_to(interpolated_bbox)))
+                            print("\t\t(interpol) at frame {} moved to {} (track {})".format(str(idx), str(interpolated_bbox), str(track.id)))
+                            past_bbox = interpolated_bbox
+                        self.tracker = self.start_tracker(self.frame_bundles[target_index - 1].frame, past_bbox)
+                        last_bbox = past_bbox
+                        index = target_index - 1
+                    else:
+                        print("\t\tlook ahead FAILED")
+                        break
+            index += 1
         self.tracks.append(track)
         print("done tracking human, tracks found: {0}".format(str(len(self.tracks))))
         return True
+    
+    def look_ahead(self, track, base_index, max_front_hops, max_back_hops, threshold_distance):
+        start_i = len(track.steps) - max_back_hops
+        avg_vel_x = 0
+        avg_vel_y = 0
+        back_hops = 0
+        for i in range(start_i if start_i >= 0 else 0, len(track.steps) - 1):
+            _, bbox, _ = track.steps[i]
+            _, next_bbox, _ = track.steps[i + 1]
+            avg_vel_x += (next_bbox.center[0] - bbox.center[0])
+            avg_vel_y += (next_bbox.center[1] - bbox.center[1])
+            back_hops += 1
+        if back_hops > 0:
+            avg_vel_x = int(avg_vel_x / back_hops)
+            avg_vel_y = int(avg_vel_y / back_hops)
+        CORRECTION_FACTOR = 2.5 # bc bboxes change shape
+        avg_vel = (CORRECTION_FACTOR * avg_vel_x, CORRECTION_FACTOR * avg_vel_y)
+        print("\t\t\tavg vel for the past {} hops is ({}, {})".format(back_hops, avg_vel[0], avg_vel[1]))
+        _, tail_bbox, _ = track.steps[len(track.steps) - 1]
+        translocated_center = [tail_bbox.center[0], tail_bbox.center[1]]
+        target_bbox = None
+        target_index = None
+        for index in range(base_index, min(base_index + max_front_hops + 1, len(self.frame_bundles))):
+            translocated_center[0] += avg_vel[0]
+            translocated_center[1] += avg_vel[1]
+            print("\t\t\tat frame {} looking for candidates around ({})".format(index, translocated_center))
+            # search for the closest candidate
+            closest_distance = 9999999
+            closest_bbox = None
+            for bbox in self.frame_bundles[index].bboxes:
+                if bbox.is_filtered() or not bbox.is_available():
+                    continue
+                distance = bbox.distance_to_point(translocated_center)
+                if distance < threshold_distance and distance < closest_distance:
+                    closest_bbox = bbox
+                    closest_distance = distance
+            if closest_bbox is not None:
+                target_bbox = closest_bbox
+                target_index = index
+                break
+        if target_bbox is not None and target_index is not None:
+            return (target_index, target_bbox)
+        else:
+            return (None, None)
 
     def find_bbox_to_snap(self, index, base_bbox, max_snap_distance):
         closest_distance = 9999999 # FIXME

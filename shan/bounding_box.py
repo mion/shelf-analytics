@@ -59,6 +59,13 @@ class BoundingBox:
         dy = dest_y - orig_y
         return math.sqrt((dx * dx) + (dy * dy))
     
+    def distance_to_point(self, point):
+        dest_x, dest_y = point
+        orig_x, orig_y = self.center
+        dx = dest_x - orig_x
+        dy = dest_y - orig_y
+        return math.sqrt((dx * dx) + (dy * dy))
+    
     def intersection_area(self, bbox):
         x1 = max(self.x1, bbox.x1)
         y1 = max(self.y1, bbox.y1)
@@ -113,3 +120,6 @@ class BoundingBox:
         bbox.filtering_results = json['filtering_results']
         bbox.parent_track_ids = json['parent_track_ids']
         return bbox
+    
+    # @staticmethod
+    # def moved_by(base_bbox, offset_x, offset_y):
