@@ -19,7 +19,7 @@ def cut_bbox_image(frame, bbox):
     return img
 
 def merge_tracks(tracking_result):
-    histogram_by_track_id = {}
+    histograms = {}
     for track in tracking_result.tracks:
         images = []
         for index, bbox, _ in track.steps:
@@ -28,8 +28,15 @@ def merge_tracks(tracking_result):
         # See: https://www.pyimagesearch.com/2014/07/14/3-ways-compare-histograms-using-opencv-python/
         hist = cv2.calcHist(images, [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256])
         hist = cv2.normalize(hist, hist).flatten() # fix for cv2, see: https://github.com/mconigliaro/smtptester/issues/2
-        histogram_by_track_id[track.id] = hist
-    pdb.set_trace()
+        histograms[track.id] = hist
+    for base_track in tracking_result.tracks:
+        print("Comparing histograms for Track #{}".format(str(base_track.id)))
+        for track in tracking_result.tracks:
+            if base_track.id == track.id:
+                continue
+            result = cv2.compareHist(histograms[base_track.id], histograms[track.id], cv2.HISTCMP_CORREL)
+            print("\twith Track #{} = {}".format(str(track.id), str(result)))
+    # pdb.set_trace()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
