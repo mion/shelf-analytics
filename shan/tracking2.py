@@ -149,8 +149,12 @@ class HumanTrackAnalyzer:
         return len(self.frame_bundles)
 
     def start_tracker(self, frame, bbox):
+        if self.tracker is not None:
+            self.tracker.clear()
         tracker = create_object_tracker('KCF')
-        tracker.init(frame, bbox.to_tuple(BBoxFormat.x1_y1_w_h))
+        ok = tracker.init(frame, bbox.to_tuple(BBoxFormat.x1_y1_w_h))
+        if not ok:
+            raise RuntimeError('failed to init OpenCV tracker')
         return tracker
     
     def add_to_track(self, track, index, bbox, transition):
