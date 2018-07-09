@@ -34,13 +34,14 @@ if __name__ == '__main__':
     
     print('Analyzing tracks...')
     # tracks = extract_tracks(frame_bundles, cfg['MAX_TRACKS'])
-    tracking_result = compute_tracking_result(frame_bundles, cfg['MAX_TRACKS'])
+    tracking_result, analyzer = compute_tracking_result(frame_bundles, cfg['MAX_TRACKS'])
 
     print('Exporting tracking result...')
     output_file_path = os.path.join(args.output_dir_path, 'tracking-result.json')
     tracking_result.save_as_json(output_file_path)
-    # print('Exporting tracks...')
-    # output_file_path = os.path.join(args.output_dir_path, "tracks.json")
-    # with open(output_file_path, "w") as tracks_file:
-    #     json.dump(tracks, tracks_file)
+    print('Exporting tracks...')
+    tracks = [track.to_dict() for track in analyzer.tracks]
+    output_file_path = os.path.join(args.output_dir_path, "tracks.json")
+    with open(output_file_path, "w") as tracks_file:
+        json.dump(tracks, tracks_file)
     

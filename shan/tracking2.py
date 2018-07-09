@@ -17,7 +17,7 @@ def extract_tracks(frame_bundles, max_track_count):
 def compute_tracking_result(frame_bundles, max_track_count):
     analyzer = HumanTrackAnalyzer(frame_bundles)
     tracks = analyzer.find_all_tracks(max_track_count)
-    return TrackingResult(tracks, frame_bundles)
+    return (TrackingResult(tracks, frame_bundles), analyzer)
 
 class TrackingResult: #FIXME refactor
     def __init__(self, tracks=None, frame_bundles=None):
