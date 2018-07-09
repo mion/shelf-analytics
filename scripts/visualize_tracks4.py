@@ -4,6 +4,7 @@ import sys
 sys.path.append(os.path.join(os.getcwd(), 'shan'))
 sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
 
+import subprocess
 import argparse
 import numpy as np
 import cv2
@@ -25,6 +26,19 @@ SELECTED_TRACKED_BBOX_OUTLINE_COLOR = (255, 225, 75)
 SELECTED_TRACKED_BBOX_OUTLINE_THICKNESS = 2
 TRANSITION_TRACKED_BBOX_OUTLINE_COLOR = (0, 150, 250)
 TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS = 1
+
+def draw_bbox_simple_header(frame, bbox, bg_color=(0, 0, 0), fg_color=(255, 255, 255)):
+    header_text = 'Customer #' + ','.join([str(track_id) for track_id in bbox.parent_track_ids])
+    padding = 2
+    _, text_height = get_text_size(header_text)
+    cv2.rectangle(frame, 
+                (bbox.x1, bbox.y1), 
+                (bbox.x1 + bbox.width, bbox.y1 + text_height + (3 * padding)), 
+                bg_color, 
+                cv2.FILLED, 
+                cv2.LINE_AA)
+    frame = draw_text(frame, header_text, (bbox.x1, bbox.y1 + text_height + (2 * padding)), fg_color)
+    return frame
 
 class TrackingVisualizationTool:
     def __init__(self, frame_bundles, tracks, config):
@@ -55,27 +69,27 @@ class TrackingVisualizationTool:
         for bbox in bboxes:
             if bbox.is_available():
                 frame = draw_bbox_outline(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR, AVAILABLE_BBOX_OUTLINE_THICKNESS)
-                frame = draw_bbox_coords(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR, offset_y=20)
+                # frame = draw_bbox_coords(frame, bbox, AVAILABLE_BBOX_OUTLINE_COLOR, offset_y=20)
             elif bbox.is_filtered():
                 frame = draw_bbox_outline(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR, FILTERED_BBOX_OUTLINE_THICKNESS)
-                frame = draw_bbox_coords(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR, offset_y=20)
+                # frame = draw_bbox_coords(frame, bbox, FILTERED_BBOX_OUTLINE_COLOR, offset_y=20)
             else:
                 if len(bbox.parent_track_ids) > 0:
                     # transition
                     key = (bbox.id, bbox.parent_track_ids[0])
                     if key not in transition_by_bbox_track_ids:
                         raise RuntimeError('pair (bboxID, selected trackID) not found in transition_by_bbox_track_ids where bboxID={0}, trackID={1}'.format(str(bbox.id), str(self.state['track_id'])))
-                    transition = transition_by_bbox_track_ids[key]
+                    # transition = transition_by_bbox_track_ids[key]
                     # frame = draw_bbox_outline(frame, transition.orig_bbox, TRANSITION_TRACKED_BBOX_OUTLINE_COLOR, TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS)
-                    frame = draw_bbox_line_between_centers(frame, transition.orig_bbox, bbox, TRANSITION_TRACKED_BBOX_OUTLINE_COLOR, TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS)
+                    # frame = draw_bbox_line_between_centers(frame, transition.orig_bbox, bbox, TRANSITION_TRACKED_BBOX_OUTLINE_COLOR, TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS)
                     # actual bbox
                     frame = draw_bbox_outline(frame, bbox, SELECTED_TRACKED_BBOX_OUTLINE_COLOR, SELECTED_TRACKED_BBOX_OUTLINE_THICKNESS)
-                    frame = draw_bbox_coords(frame, bbox, SELECTED_TRACKED_BBOX_OUTLINE_COLOR)
-                    frame = draw_bbox_header(frame, bbox, transition, bg_color=(50, 50, 50), fg_color=SELECTED_TRACKED_BBOX_OUTLINE_COLOR)
+                    # frame = draw_bbox_coords(frame, bbox, SELECTED_TRACKED_BBOX_OUTLINE_COLOR)
+                    frame = draw_bbox_simple_header(frame, bbox, bg_color=(50, 50, 50), fg_color=SELECTED_TRACKED_BBOX_OUTLINE_COLOR)
                 else:
                     frame = draw_bbox_outline(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR, DESELECTED_TRACKED_BBOX_OUTLINE_THICKNESS)
-                    frame = draw_bbox_coords(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
-                    frame = draw_bbox_header(frame, bbox, transition=None, bg_color=(25, 25, 25), fg_color=DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
+                    # frame = draw_bbox_coords(frame, bbox, DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
+                    frame = draw_bbox_simple_header(frame, bbox, bg_color=(25, 25, 25), fg_color=DESELECTED_TRACKED_BBOX_OUTLINE_COLOR)
         return frame
     
     def render_stacked_tracks_footer(self, frame, frame_index): # FIXME refactor
@@ -102,9 +116,10 @@ class TrackingVisualizationTool:
         marker_perc = frame_index / len(self.frames)
         marker_offset_x = int(marker_perc * line_max_width)
         frame_with_footer = draw_line(frame_with_footer, (line_start_x + marker_offset_x, current_y - MARKER_SIZE), (line_start_x + marker_offset_x, current_y), color=(0, 0, 255), thickness=3)
+        frame_with_footer = draw_line(frame_with_footer, (line_start_x + marker_offset_x, current_y + frame_height), (line_start_x + marker_offset_x, current_y), color=(0, 0, 255), thickness=1)
         # draw tracks
         for track in self.tracks:
-            text = 'Track #' + str(track.id)
+            text = 'Customer #' + str(track.id)
             _, text_height = get_text_size(text, scale=TEXT_SCALE)
             current_y += space_between_tracks + text_height
             frame_with_footer = draw_text(frame_with_footer, text, (text_start_x, current_y), scale=TEXT_SCALE)
@@ -144,3 +159,6 @@ if __name__ == '__main__':
         img = tool.render(index)
         save_image(img, "tracked-frame-{:07}.png".format(index), args.output_dir_path)
         print("Saved frame {:07}".format(index))
+    print("Creating video...")
+
+    result = subprocess.call('ffmpeg -framerate 10 -pattern_type glob -i "{}/*.png" -c:v libx264 -r 10 -pix_fmt yuv420p tracked-video.mp4'.format(args.output_dir_path), shell=True)
