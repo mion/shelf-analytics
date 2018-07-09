@@ -64,6 +64,9 @@ def show_image(img, window_title='Image'):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def crop_image(img, x, y, w, h):
+    return img[y:y+h, x:x+w]
+
 def draw_label_on_frame(frame, text, x, y, bg_color=(50, 50, 50), text_color=(255, 255, 255)):
     font = cv2.FONT_HERSHEY_PLAIN
     font_scale = 1.0
