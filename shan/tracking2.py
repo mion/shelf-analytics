@@ -183,8 +183,8 @@ class HumanTrackAnalyzer:
 
         print("tracking human:")
         for index in range(start_index + 1, self.get_frames_count()):
-            if track.id == 5 and index == 823:
-                pdb.set_trace()
+            # if track.id == 5 and index == 823:
+            #     pdb.set_trace()
             current_frame = self.get_frame_at(index)
             ok, xywh_tuple = self.tracker.update(current_frame)
             if ok: # tracker manage to keep track of a bbox, let's try to snap onto it
@@ -232,8 +232,9 @@ class HumanTrackAnalyzer:
                 continue
             if bbox.intersection_area(base_bbox) is None: # no intersection
                 continue
-            intersection_area_perc = bbox.intersection_area(base_bbox) / base_bbox.area
-            if intersection_area_perc > INTERSECTION_AREA_PERC_THRESHOLD:
+            area_perc = bbox.intersection_area(base_bbox) / base_bbox.area
+            area_perc_vice_versa = bbox.intersection_area(base_bbox) / bbox.area
+            if area_perc > INTERSECTION_AREA_PERC_THRESHOLD or area_perc_vice_versa > INTERSECTION_AREA_PERC_THRESHOLD:
                 return True
         return False
 
