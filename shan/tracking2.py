@@ -133,6 +133,11 @@ class HumanTrackAnalyzer:
         self.frame_bundles = frame_bundles
         self.tracks = []
         self.tracker = None
+        self.bboxes_per_frame = []
+        for index in range(len(self.frame_bundles)):
+            self.bboxes_per_frame.append([])
+            for bbox in self.frame_bundles[index].bboxes:
+                self.bboxes_per_frame[index].append(bbox)
 
     def get_frame_at(self, index):
         return self.frame_bundles[index].frame
@@ -151,6 +156,8 @@ class HumanTrackAnalyzer:
     def add_to_track(self, track, index, bbox, transition):
         track.add(index, bbox, transition)
         bbox.parent_track_ids.append(track.id)
+        if bbox.id not in [b.id for b in self.bboxes_per_frame[index]]:
+            self.bboxes_per_frame[index].append(bbox)
 
     def find_all_tracks(self, max_track_count):
         track_count = 0
@@ -176,6 +183,8 @@ class HumanTrackAnalyzer:
 
         print("tracking human:")
         for index in range(start_index + 1, self.get_frames_count()):
+            if track.id == 5 and index == 823:
+                pdb.set_trace()
             current_frame = self.get_frame_at(index)
             ok, xywh_tuple = self.tracker.update(current_frame)
             if ok: # tracker manage to keep track of a bbox, let's try to snap onto it
@@ -195,7 +204,7 @@ class HumanTrackAnalyzer:
                 if far_snap_bbox is not None:
                     print("\t(retaken) at frame {0} moved to bbox {1}".format(index, far_snap_bbox))
                     self.add_to_track(track, index, far_snap_bbox, Transition('retaken', last_bbox, far_snap_distance))
-                    self.tracker = self.start_tracker(current_frame, snap_bbox)
+                    self.tracker = self.start_tracker(current_frame, far_snap_bbox)
                     last_bbox = far_snap_bbox
                 else:
                     print("\ttrack lost at frame {0}".format(index))
@@ -215,10 +224,22 @@ class HumanTrackAnalyzer:
                 closest_bbox = bbox
                 closest_distance = distance
         return (closest_bbox, closest_distance)
+    
+    def is_in_intersection(self, base_bbox, index):
+        INTERSECTION_AREA_PERC_THRESHOLD = 0.50
+        for bbox in self.bboxes_per_frame[index]:
+            if bbox.id == base_bbox.id: # same bbox
+                continue
+            if bbox.intersection_area(base_bbox) is None: # no intersection
+                continue
+            intersection_area_perc = bbox.intersection_area(base_bbox) / base_bbox.area
+            if intersection_area_perc > INTERSECTION_AREA_PERC_THRESHOLD:
+                return True
+        return False
 
     def find_available_bbox(self):
         for index in range(self.get_frames_count()):
             for bbox in self.get_bboxes_at(index):
-                if not bbox.is_filtered() and bbox.is_available():
+                if not bbox.is_filtered() and bbox.is_available() and not self.is_in_intersection(bbox, index):
                     return (index, bbox)
         return None

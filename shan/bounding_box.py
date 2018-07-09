@@ -58,6 +58,16 @@ class BoundingBox:
         dx = dest_x - orig_x
         dy = dest_y - orig_y
         return math.sqrt((dx * dx) + (dy * dy))
+    
+    def intersection_area(self, bbox):
+        x1 = max(self.x1, bbox.x1)
+        y1 = max(self.y1, bbox.y1)
+        x2 = min(self.x2, bbox.x2)
+        y2 = min(self.y2, bbox.y2)
+        if x1 < x2 and y1 < y2:
+            return (x2 - x1) * (y2 - y1)
+        else:
+            return None
 
     def to_tuple(self, bbox_format):
         if bbox_format == BoundingBoxFormat.x1_y1_w_h:
