@@ -12,14 +12,18 @@ from frame_bundle import load_frame_bundles
 from bounding_box_filter import BoundingBoxFilter as BBoxFilter
 from tracking2 import compute_tracking_result
 
-cfg = load_json('shan/calibration-config.json')
+MAX_TRACKS = 40
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('video_path', help='path to the video')
+    parser.add_argument('calib_path', help='path to the calibration JSON file')
     parser.add_argument('tags_path', help='path to a tags JSON file')
     parser.add_argument('output_dir_path', help='path to the output directory where a JSON file with the tracks will be saved')
     args = parser.parse_args()
+
+    print('Loading calibration JSON...')
+    calib = load_json(args.calib_path)
     
     print('Loading tags...')
     tags = load_json(args.tags_path)
@@ -33,8 +37,7 @@ if __name__ == '__main__':
         bbox_filter.filter_frame_bundle(frame_bundle)
     
     print('Analyzing tracks...')
-    # tracks = extract_tracks(frame_bundles, cfg['MAX_TRACKS'])
-    tracking_result, analyzer = compute_tracking_result(frame_bundles, cfg['MAX_TRACKS'])
+    tracking_result, analyzer = compute_tracking_result(calib, frame_bundles, MAX_TRACKS)
 
     print('Exporting tracking result...')
     output_file_path = os.path.join(args.output_dir_path, 'tracking-result.json')

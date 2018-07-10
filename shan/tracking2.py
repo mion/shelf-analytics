@@ -7,15 +7,8 @@ from frame_bundle import FrameBundle
 import json
 import math
 
-cfg = load_json('shan/calibration-config.json')
-
-def extract_tracks(frame_bundles, max_track_count):
-    analyzer = HumanTrackAnalyzer(frame_bundles)
-    tracks = analyzer.find_all_tracks(max_track_count)
-    return [track.to_dict() for track in tracks]
-
-def compute_tracking_result(frame_bundles, max_track_count):
-    analyzer = HumanTrackAnalyzer(frame_bundles)
+def compute_tracking_result(calib, frame_bundles, max_track_count):
+    analyzer = HumanTrackAnalyzer(calib, frame_bundles)
     tracks = analyzer.find_all_tracks(max_track_count)
     return (TrackingResult(tracks, frame_bundles), analyzer)
 
@@ -138,7 +131,8 @@ class HumanTrackAnalyzer:
     A track represents a bounding box that was identified as being the
     same person across a sequence of frames.
     """
-    def __init__(self, frame_bundles):
+    def __init__(self, calib, frame_bundles):
+        self.calib = calib
         self.frame_bundles = frame_bundles
         self.tracks = []
         self.tracker = None
@@ -203,7 +197,7 @@ class HumanTrackAnalyzer:
             ok, xywh_tuple = self.tracker.update(current_frame)
             if ok: # tracker manage to keep track of a bbox, let's try to snap onto it
                 tracker_bbox = BBox(xywh_tuple, BBoxFormat.x1_y1_w_h)
-                snap_bbox, snap_distance = self.find_bbox_to_snap(index, tracker_bbox, cfg['MAX_SNAP_DISTANCE'])
+                snap_bbox, snap_distance = self.find_bbox_to_snap(index, tracker_bbox, self.calib['MAX_SNAP_DISTANCE'])
                 if snap_bbox is not None:
                     print("\t(snapped) at frame {0} moved to bbox {1}".format(index, snap_bbox))
                     self.add_to_track(track, index, snap_bbox, Transition('snapped', last_bbox, snap_distance))
@@ -214,7 +208,7 @@ class HumanTrackAnalyzer:
                     self.add_to_track(track, index, tracker_bbox, Transition('tracked', last_bbox, last_bbox.distance_to(tracker_bbox)))
                     last_bbox = tracker_bbox
             else: # tracker failed, try to find some available bbox nearby
-                far_snap_bbox, far_snap_distance = self.find_bbox_to_snap(index, last_bbox, cfg['MAX_TRACKER_FAILED_SNAP_DISTANCE'])
+                far_snap_bbox, far_snap_distance = self.find_bbox_to_snap(index, last_bbox, self.calib['MAX_TRACKER_FAILED_SNAP_DISTANCE'])
                 if far_snap_bbox is not None:
                     print("\t(retaken) at frame {0} moved to bbox {1}".format(index, far_snap_bbox))
                     self.add_to_track(track, index, far_snap_bbox, Transition('retaken', last_bbox, far_snap_distance))
