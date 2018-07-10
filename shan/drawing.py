@@ -4,8 +4,6 @@ import numpy as np
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tnt import load_json
 
-cfg = load_json('shan/calibration-config.json')
-
 TRANSITION_COLOR = (0, 155, 255)
 
 def draw_bbox_line_between_centers(frame, orig_bbox, dest_bbox, color=(255, 255, 255), thickness=1):

@@ -28,11 +28,11 @@ TRANSITION_TRACKED_BBOX_OUTLINE_THICKNESS = 1
 class TrackingVisualizationTool:
     FOOTER_VIEW_CALIBRATION = 0
     FOOTER_VIEW_STACKED_TRACKS = 1
-    def __init__(self, frame_bundles, tracks, config):
+    def __init__(self, frame_bundles, tracks, calib):
         self.frame_bundles = frame_bundles
         self.frames = [fb.frame for fb in self.frame_bundles]
         self.tracks = tracks
-        self.config = config
+        self.calib = calib
         # helper transition dict
         self.transition_by_bbox_track_ids = {}
         for track in self.tracks:
@@ -88,7 +88,7 @@ class TrackingVisualizationTool:
     def render_calibration_footer(self, frame):
         footer_height = 200
         frame_with_footer = draw_footer(frame, footer_height)
-        final_frame = draw_calibration_config(frame_with_footer, footer_height, cfg)
+        final_frame = draw_calibration_config(frame_with_footer, footer_height, self.calib)
         return final_frame
     
     def render_stacked_tracks_footer(self, frame): # FIXME refactor
@@ -184,6 +184,7 @@ class TrackingVisualizationTool:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('video_path', help='path to the video')
+    parser.add_argument('calib_path', help='path to the calibration JSON file')
     parser.add_argument('tracking_result_path', help='path to a tracking result JSON file')
     args = parser.parse_args()
 
@@ -191,30 +192,6 @@ if __name__ == '__main__':
     tr = TrackingResult()
     tr.load_from_json(frames, args.tracking_result_path)
 
-    # tracking_result = load_json(args.tracking_result_path)
-    # # Assemble test setup
-    # bboxes_per_frame = [[] for frame in frames]
-    # scores_per_frame = [[] for frame in frames]
-    # frame_bundles = []
-    # frame_index = 0
-    # for frame in frames:
-    #     fb = FrameBundle(frame, frame_index, bboxes_per_frame[frame_index], scores_per_frame[frame_index])
-    #     frame_bundles.append(fb)
-    #     frame_index += 1
-    # tracks = [
-    #     Track(),
-    #     Track(),
-    #     Track()
-    # ]
-    # # add one bbox on frame 0
-    # b1 = BBox([100, 100, 50, 100], BBoxFormat.x1_y1_w_h)
-    # b1.score = 0.987
-    # frame_bundles[0].bboxes.append(b1)
-    # tracks[0].add(0, b1, Transition('first', b1, 0))
-    # # b2 = BBox([300, 300, 50, 100], BBo
-    # # frame_bundles[1].bboxes.append(BBox([120, 110, 50, 100], BBoxFormat.x1_y1_w_h))
-    # # frame_bundles[2].bboxes.append(BBox([140, 120, 50, 100], BBoxFormat.x1_y1_w_h))
-
-    cfg = load_json('shan/calibration-config.json')
-    tool = TrackingVisualizationTool(tr.frame_bundles, tr.tracks, cfg)
+    calib = load_json(args.calib_path)
+    tool = TrackingVisualizationTool(tr.frame_bundles, tr.tracks, calib)
     tool.start()
