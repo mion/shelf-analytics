@@ -32,7 +32,7 @@ if __name__ == '__main__':
     frame_bundles = load_frame_bundles(args.video_path, tags)
 
     print('Filtering bounding boxes inside frame bundles...')
-    bbox_filter = BBoxFilter()
+    bbox_filter = BBoxFilter(calib)
     for frame_bundle in frame_bundles:
         bbox_filter.filter_frame_bundle(frame_bundle)
     
