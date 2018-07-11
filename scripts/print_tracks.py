@@ -147,14 +147,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('video_path', help='path to the video')
     parser.add_argument('tracking_result_path', help='path to a tracking result JSON file')
+    parser.add_argument('calib_path', help='path to the calibration JSON file')
     parser.add_argument('output_dir_path', help='path to the output directory')
     args = parser.parse_args()
 
     frames = load_frames(args.video_path)
     tr = TrackingResult()
     tr.load_from_json(frames, args.tracking_result_path)
-    cfg = load_json('shan/calibration-config.json')
-    tool = TrackingVisualizationTool(tr.frame_bundles, tr.tracks, cfg)
+    calib = load_json(args.calib_path)
+    tool = TrackingVisualizationTool(tr.frame_bundles, tr.tracks, calib)
     for index in range(len(frames)):
         img = tool.render(index)
         save_image(img, "tracked-frame-{:07}.png".format(index), args.output_dir_path)
