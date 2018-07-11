@@ -80,7 +80,7 @@ def print_plots(dir_path, iaot, b_ord, b_crit_freq):
         plt.plot(y)
         plt.savefig(dir_path + '/smooth.png')
         plt.clf()
-        print('Saved plot: ' + dir_path + '/smooth.png')
+        print('\t\t\tSaved plot: ' + dir_path + '/smooth.png')
     except Exception as exc:
         print('ERROR: failed to plot smooth graph. ({})'.format(str(exc)))
 
@@ -115,7 +115,7 @@ def extract_walked_event(iaot, fps, min_duration, min_area):
         if not small_area_found:
             return {
                 "type": "walked",
-                "frame_index": t + int(min_frames_t / 2)
+                "index": t + int(min_frames_t / 2)
             }
     return None
 
@@ -138,7 +138,7 @@ def extract_pondered_event(iaot, fps, min_duration, min_area):
         if not small_area_found:
             return {
                 "type": "walked",
-                "frame_index": t + int(min_frames_t / 2)
+                "index": t + int(min_frames_t / 2)
             }
     return None
 
@@ -181,7 +181,7 @@ if __name__ == '__main__':
                     print("\t\t\tExtracted {} peaks...".format(len(peaks))) 
                     evt = extract_interacted_event(peaks, INTERACTED_MIN_DURATION_MS, INTERACTED_MIN_AREA)
                     if evt is not None:
-                        print("\t\t\tINTERACTED at frame {}".format(evt["frame_index"]))
+                        print("\t\t\tINTERACTED at frame {}".format(evt["index"]))
                         evt.update({
                             'roi_name': roi_name,
                             'track': track_idx
@@ -198,7 +198,7 @@ if __name__ == '__main__':
                 if evt2 is None:
                     print("\t\t\t NO EVENT found")
                 else:
-                    print("\t\t\tWALKED at frame {}".format(evt2["frame_index"]))
+                    print("\t\t\tWALKED at frame {}".format(evt2["index"]))
                     evt2.update({
                         'roi_name': roi_name,
                         'track': track_idx
