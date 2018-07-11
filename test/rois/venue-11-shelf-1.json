@@ -1,0 +1,32 @@
+[
+  {
+    "name": "left_front",
+    "bbox": [33, 8, 241, 163],
+    "type": "aisle"
+  },
+  {
+    "name": "left_shelf",
+    "bbox": [239, 9, 420, 151],
+    "type": "shelf"
+  },
+  {
+    "name": "middle_front",
+    "bbox": [235, 157, 421, 410],
+    "type": "aisle"
+  },
+  {
+    "name": "middle_shelf",
+    "bbox": [235, 157, 421, 410],
+    "type": "shelf"
+  },
+  {
+    "name": "right_front",
+    "bbox": [99, 398, 229, 629],
+    "type": "aisle"
+  },
+  {
+    "name": "right_shelf",
+    "bbox": [229, 405, 430, 630],
+    "type": "shelf"
+  }
+]
