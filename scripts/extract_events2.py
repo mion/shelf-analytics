@@ -182,6 +182,10 @@ if __name__ == '__main__':
                     evt = extract_interacted_event(peaks, INTERACTED_MIN_DURATION_MS, INTERACTED_MIN_AREA)
                     if evt is not None:
                         print("\t\t\tINTERACTED at frame {}".format(evt["frame_index"]))
+                        evt.update({
+                            'roi_name': roi_name,
+                            'track': track_idx
+                        })
                         events.append(evt)
                     else:
                         print("\t\t\tNO EVENT found")
@@ -194,7 +198,11 @@ if __name__ == '__main__':
                 if evt2 is None:
                     print("\t\t\t NO EVENT found")
                 else:
-                    print("\t\t\tWALKED at frame {}".format(evt["frame_index"]))
+                    print("\t\t\tWALKED at frame {}".format(evt2["frame_index"]))
+                    evt2.update({
+                        'roi_name': roi_name,
+                        'track': track_idx
+                    })
                     events.append(evt2)
             else:
                 print("\t\tTYPE is not aisle")
@@ -208,4 +216,6 @@ if __name__ == '__main__':
             #         print("\t\t\tPONDERED for {} miliseconds starting at frame {}".format(evt["duration"], evt["frame_index"]))
             # else:
             #     print("\t\tTYPE is not aisle")
-    print(json.dumps(events))
+    output_file_path = os.path.join('/Users/gvieira/shan/{}/data'.format(video_id), "events.json")
+    with open(output_file_path, "w") as events_file:
+        json.dump(events, events_file)
