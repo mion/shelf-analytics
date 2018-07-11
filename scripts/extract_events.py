@@ -77,7 +77,11 @@ def extract_events(rois, intersection_area_over_time):
   bbox_by_roi_name = {}
   for roi in rois:
     bbox_by_roi_name[roi["name"]] = roi["bbox"]
-  
+  #
+  # bbox_by_roi_name = {
+  #   "roi_1": [10, 300, 112, 482]
+  # }
+  #
   events = []
   for track_index in range(len(intersection_area_over_time)):
     intersections_by_name = intersection_area_over_time[track_index]
