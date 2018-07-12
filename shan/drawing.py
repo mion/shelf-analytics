@@ -14,6 +14,7 @@ def draw_bbox_outline(frame, bbox, color=(255, 255, 255), thickness=1):
     cv2.rectangle(frame, (bbox.x1, bbox.y1), (bbox.x2, bbox.y2), color, thickness)
     return frame
 
+# FIXME rename to draw_bbox_props
 def draw_bbox_coords(frame, bbox, color=(255, 255, 255), offset_y=0):
     coords_text = "({0},{1}) {2}x{3} {4:.2f} {5}".format(str(bbox.x1), str(bbox.y1), str(bbox.width), str(bbox.height), bbox.score, bbox.get_filtering_results_label())
     text_width, _ = get_text_size(coords_text)
