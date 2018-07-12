@@ -49,6 +49,14 @@ def load_bboxes_per_frame(tags):
             bboxes_per_frame[i].append(BBox(bbox, BBoxFormat.y1_x1_y2_x2))
     return bboxes_per_frame
 
+def make_events_per_frame(events):
+    events_per_frame = {}
+    for evt in events:
+        if evt['index'] not in events_per_frame:
+            events_per_frame[evt['index']] = []
+        events_per_frame[evt['index']].append(evt)
+    return events_per_frame
+
 def filter_bounding_boxes_with_score_below(tags, min_value):
     """
     `min_value` is a float between 0 and 1
