@@ -158,64 +158,40 @@ if __name__ == '__main__':
     output_events_path = "/Users/gvieira/shan/{}/data/events.json".format(video_id)
 
     events = []
-    os.mkdir('/Users/gvieira/shan/{}/events'.format(video_id))
     for roi in rois:
         roi_name = roi['name']
-        print('- Roi "{}"'.format(roi_name))
-        os.mkdir('/Users/gvieira/shan/{}/events/{}'.format(video_id, roi_name))
+        print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
         for track_idx in range(len(tracks)):
-            print('\t- Track #{}'.format(str(track_idx + 1)))
+            print('\tTrack #{}'.format(str(track_idx + 1)))
             track = tracks[track_idx]
-            # INTERACTED
-            print("\t\t- INTERACTED")
             if roi['type'] == 'shelf':
-                track_dir_path = '/Users/gvieira/shan/{}/events/{}/track-{}'.format(video_id, roi["name"], str(track_idx + 1))
-                os.mkdir(track_dir_path)
-                print_plots(track_dir_path, iaots[track_idx][roi_name], BUTTER_ORDER, BUTTER_CRIT_FREQ)
+                # INTERACTED
                 peaks, err = extract_peaks(iaots[track_idx][roi_name], VIDEO_FPS, BUTTER_ORDER, BUTTER_CRIT_FREQ, PEAK_MIN_HEIGHT, PEAK_WIDTH)
-                if peaks is None:
-                    print('\t\t\tFAILED to extract peaks')
-                elif len(peaks) == 0:
-                    print('\t\t\tZERO peaks were extracted')
+                if peaks is None or len(peaks) == 0:
+                    print('\t\tNo peaks were found, no event')
                 else:
-                    print("\t\t\tExtracted {} peaks...".format(len(peaks))) 
                     evt = extract_interacted_event(peaks, INTERACTED_MIN_DURATION_MS, INTERACTED_MIN_AREA)
                     if evt is not None:
-                        print("\t\t\tINTERACTED at frame {}".format(evt["index"]))
+                        print('\t\tEvent "interacted" at frame {}'.format(evt["index"]))
                         evt.update({
                             'roi_name': roi_name,
                             'track': track_idx
                         })
                         events.append(evt)
                     else:
-                        print("\t\t\tNO EVENT found")
-            else:
-                print("\t\tTYPE is not shelf")
-            # WALKED
-            print("\t\t- WALKED")
-            if roi['type'] == 'aisle':
-                evt2 = extract_walked_event(iaots[track_idx][roi_name], VIDEO_FPS, WALKED_MIN_DURATION_MS, WALKED_MIN_AREA)
-                if evt2 is None:
-                    print("\t\t\t NO EVENT found")
+                        print('\t\tNo "interacted" event')
+            elif roi['type'] == 'aisle':
+                # WALKED
+                evt = extract_walked_event(iaots[track_idx][roi_name], VIDEO_FPS, WALKED_MIN_DURATION_MS, WALKED_MIN_AREA)
+                if evt is None:
+                    print('\t\tNo "walked" event')
                 else:
-                    print("\t\t\tWALKED at frame {}".format(evt2["index"]))
-                    evt2.update({
+                    print('\t\tEvent "walked" at frame {}'.format(evt["index"]))
+                    evt.update({
                         'roi_name': roi_name,
                         'track': track_idx
                     })
-                    events.append(evt2)
-            else:
-                print("\t\tTYPE is not aisle")
-            # PONDERED
-            # print("\t\t- PONDERED")
-            # if roi['type'] == 'aisle':
-            #     evt3 = extract_pondered_event(iaots[track_idx][roi_name], VIDEO_FPS, PONDERED_MIN_DURATION_MS, PONDERED_MIN_AREA)
-            #     if evt2 is None:
-            #         print("\t\t\t NO EVENT found")
-            #     else:
-            #         print("\t\t\tPONDERED for {} miliseconds starting at frame {}".format(evt["duration"], evt["frame_index"]))
-            # else:
-            #     print("\t\tTYPE is not aisle")
+                    events.append(evt)
     output_file_path = os.path.join('/Users/gvieira/shan/{}/data'.format(video_id), "events.json")
     with open(output_file_path, "w") as events_file:
         json.dump(events, events_file)
