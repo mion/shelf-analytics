@@ -10,17 +10,19 @@ import numpy
 from scipy.signal import find_peaks, peak_widths, lfilter, lfilter_zi, filtfilt, butter
 from tnt import load_json
 
-BUTTER_CRIT_FREQ = 0.05
-BUTTER_ORDER = 1
-PEAK_MIN_HEIGHT = 300
-PEAK_WIDTH = 7
 VIDEO_FPS = 10
-INTERACTED_MIN_DURATION_MS = 1800
-INTERACTED_MIN_AREA = 1300
-WALKED_MIN_DURATION_MS = 1000
-WALKED_MIN_AREA = 4500
-PONDERED_MIN_DURATION_MS = 3000
-PONDERED_MIN_AREA = 4000
+DEFAULT_CONFIG = {
+    "BUTTER_CRIT_FREQ": 0.05,
+    "BUTTER_ORDER": 1,
+    "PEAK_MIN_HEIGHT": 300,
+    "PEAK_WIDTH": 7,
+    "INTERACTED_MIN_DURATION_MS": 1800,
+    "INTERACTED_MIN_AREA": 1300,
+    "WALKED_MIN_DURATION_MS": 1000,
+    "WALKED_MIN_AREA": 4500,
+    "PONDERED_MIN_DURATION_MS": 3000,
+    "PONDERED_MIN_AREA": 4000
+}
 
 def smooth_without_delay(xn, order, crit_freq):
     b, a = butter(order, crit_freq)
@@ -142,6 +144,25 @@ def extract_pondered_event(iaot, fps, min_duration, min_area):
             }
     return None
 
+def extract_event(roi_type, iaot, fps, config):
+    if roi_type == 'shelf':
+        # INTERACTED
+        peaks, _ = extract_peaks(iaot, fps, config['BUTTER_ORDER'], config['BUTTER_CRIT_FREQ'], config['PEAK_MIN_HEIGHT'], config['PEAK_WIDTH'])
+        if peaks is None or len(peaks) == 0:
+            return None
+        evt = extract_interacted_event(peaks, config['INTERACTED_MIN_DURATION_MS'], config['INTERACTED_MIN_AREA'])
+        if evt is not None:
+            return evt
+        else:
+            return None
+    elif roi_type == 'aisle':
+        # WALKED
+        evt = extract_walked_event(iaot, fps, config['WALKED_MIN_DURATION_MS'], config['WALKED_MIN_AREA'])
+        if evt is not None:
+            return evt
+        else:
+            return None
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('video_id', help='a video id of the form "video-33-p_04"')
@@ -162,36 +183,18 @@ if __name__ == '__main__':
         roi_name = roi['name']
         print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
         for track_idx in range(len(tracks)):
-            print('\tTrack #{}'.format(str(track_idx + 1)))
             track = tracks[track_idx]
-            if roi['type'] == 'shelf':
-                # INTERACTED
-                peaks, err = extract_peaks(iaots[track_idx][roi_name], VIDEO_FPS, BUTTER_ORDER, BUTTER_CRIT_FREQ, PEAK_MIN_HEIGHT, PEAK_WIDTH)
-                if peaks is None or len(peaks) == 0:
-                    print('\t\tNo peaks were found, no event')
-                else:
-                    evt = extract_interacted_event(peaks, INTERACTED_MIN_DURATION_MS, INTERACTED_MIN_AREA)
-                    if evt is not None:
-                        print('\t\tEvent "interacted" at frame {}'.format(evt["index"]))
-                        evt.update({
-                            'roi_name': roi_name,
-                            'track': track_idx
-                        })
-                        events.append(evt)
-                    else:
-                        print('\t\tNo "interacted" event')
-            elif roi['type'] == 'aisle':
-                # WALKED
-                evt = extract_walked_event(iaots[track_idx][roi_name], VIDEO_FPS, WALKED_MIN_DURATION_MS, WALKED_MIN_AREA)
-                if evt is None:
-                    print('\t\tNo "walked" event')
-                else:
-                    print('\t\tEvent "walked" at frame {}'.format(evt["index"]))
-                    evt.update({
-                        'roi_name': roi_name,
-                        'track': track_idx
-                    })
-                    events.append(evt)
+            event = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
+            if event is not None:
+                print('\tTrack #{}: event "{}" at frame {}'.format(str(track_idx + 1), event['type'], str(event['index'])))
+                event.update({
+                    'roi_name': roi_name,
+                    'track': track_idx
+                })
+                events.append(event)
+            else:
+                print('\tTrack #{}: no event'.format(str(track_idx + 1)))
+
     output_file_path = os.path.join('/Users/gvieira/shan/{}/data'.format(video_id), "events.json")
     with open(output_file_path, "w") as events_file:
         json.dump(events, events_file)
