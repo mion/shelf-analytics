@@ -19,7 +19,7 @@ DEFAULT_CONFIG = {
     "INTERACTED_MIN_DURATION_MS": 1800,
     "INTERACTED_MIN_AREA": 1300,
     "WALKED_MIN_DURATION_MS": 1000,
-    "WALKED_MIN_AREA": 4500,
+    "WALKED_MIN_AREA": 2500,
     "PONDERED_MIN_DURATION_MS": 3000,
     "PONDERED_MIN_AREA": 4000
 }
@@ -99,10 +99,10 @@ def extract_interacted_event(peaks, min_duration, min_area):
     return None
 
 def extract_walked_event(iaot, fps, min_duration, min_area):
-    frame_indexe_over_time = []
+    frame_indexes_over_time = []
     area_over_time = []
     for i in range(len(iaot)):
-        frame_indexe_over_time.append(iaot[i]["index"])
+        frame_indexes_over_time.append(iaot[i]["index"])
         area_over_time.append(iaot[i]["area"])
     min_frames_t = int((min_duration / 1000) * fps)
     # min_frames_t = 2 sec x (10 fr / sec) = 20 frames
@@ -110,14 +110,14 @@ def extract_walked_event(iaot, fps, min_duration, min_area):
         if area_over_time[t] < min_area:
             continue
         small_area_found = False
-        for p in range(t, len(area_over_time) - min_frames_t):
+        for p in range(t, min(t + min_frames_t, len(area_over_time))):
             if area_over_time[p] < min_area:
                 small_area_found = True
                 break
         if not small_area_found:
             return {
                 "type": "walked",
-                "index": t + int(min_frames_t / 2)
+                "index": frame_indexes_over_time[t]
             }
     return None
 
