@@ -139,6 +139,7 @@ def extract_event(roi_type, iaot, fps, config):
     elif roi_type == 'aisle':
         # PONDERED
         pondered_evt = extract_walked_event(iaot, fps, config['PONDERED_MIN_DURATION_MS'], config['PONDERED_MIN_AREA'])
+        pondered_evt.update({"type": "pondered"})
         if pondered_evt is not None:
             pondered_evt.update({"type": "pondered"})
             return (pondered_evt, None)
