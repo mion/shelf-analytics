@@ -19,7 +19,7 @@ def split_frames(input_path, output_dir, ext):
   frame_number_format = '%07d' # FIXME count total number of frames beforehand
   output_path = os.path.join(output_dir, "frame-{0}.{1}".format(frame_number_format, ext))
   cmd_template = "ffmpeg -i {0} {1} -hide_banner"
-  # [!] WARNING: shell=True is dangerous
+  # NOTE: shell=True is dangerous
   cmd = cmd_template.format(input_path, output_path)
   result = subprocess.call(cmd, shell=True)
   return result == 0
