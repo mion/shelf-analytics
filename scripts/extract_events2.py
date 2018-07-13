@@ -173,8 +173,6 @@ if __name__ == '__main__':
         print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
         for track_idx in range(len(tracks)):
             track = tracks[track_idx]
-            # if track_idx == 0 and roi_name == 'middle_shelf':
-            #     pdb.set_trace()
             event, err = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
             if event is not None:
                 print('\tTrack #{}: event "{}" at frame {}'.format(str(track_idx + 1), event['type'], str(event['index'])))
