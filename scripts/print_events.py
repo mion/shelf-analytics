@@ -33,6 +33,7 @@ def render_frame_with_events(frame, index, rois, bboxes_in_frame, events_in_fram
     curr_y = PADDING
     frame = draw_sidebar_right(frame, 400)
     events = past_events + events_in_frame
+    events.reverse() # show later events first
     for evt in events:
         text = 'frame {} ({}): "{}" by customer #{}'.format(str(evt['index']), evt['roi_name'], evt['type'], evt['track'] + 1)
         frame = draw_text(frame, text, (start_x, curr_y), color=(0, 255, 0))

@@ -8,8 +8,13 @@ OUTPUT_PATH=/Users/gvieira/shan/$1/frames/events
 echo "Cleaning up..."
 rm -rf ~/shan/$1/events.json
 rm -rf ~/shan/$1/frames/events/*
-echo "Extracting events..."
-python scripts/extract_events2.py $1 $ROIS_PATH
-echo "Printing events..."
-python scripts/print_events.py $VIDEO_PATH $ROIS_PATH $TR_PATH $EVENTS_PATH $OUTPUT_PATH
-echo "DONE!"
+if [ -z "$2" ]; then
+  echo "Extracting events..."
+  python scripts/extract_events2.py $1 $ROIS_PATH
+  echo "Printing events..."
+  python scripts/print_events.py $VIDEO_PATH $ROIS_PATH $TR_PATH $EVENTS_PATH $OUTPUT_PATH
+  echo "DONE!"
+else
+  echo "Debugging extraction of events..."
+  python -m pdb scripts/extract_events2.py $1 $ROIS_PATH
+fi

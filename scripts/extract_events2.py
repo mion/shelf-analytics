@@ -1,3 +1,4 @@
+import pdb
 import os
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'shan'))
@@ -20,8 +21,8 @@ DEFAULT_CONFIG = {
     "INTERACTED_MIN_AREA": 1300,
     "WALKED_MIN_DURATION_MS": 1000,
     "WALKED_MIN_AREA": 2500,
-    "PONDERED_MIN_DURATION_MS": 3000,
-    "PONDERED_MIN_AREA": 4000
+    "PONDERED_MIN_DURATION_MS": 3500,
+    "PONDERED_MIN_AREA": 2500
 }
 
 def smooth_without_delay(xn, order, crit_freq):
@@ -38,14 +39,14 @@ def smooth_without_delay(xn, order, crit_freq):
 
 def extract_peaks(iaot, fps, b_ord, b_crit_freq, peak_height, peak_width):
     x = []
-    y = []
+    area_over_time = []
     for i in range(len(iaot)):
         x.append(iaot[i]["index"])
-        y.append(iaot[i]["area"])
+        area_over_time.append(iaot[i]["area"])
     x = numpy.array(x)
-    y = numpy.array(y)
+    area_over_time = numpy.array(area_over_time)
     try:
-        smooth_y = smooth_without_delay(x, b_ord, b_crit_freq)
+        smooth_y = smooth_without_delay(area_over_time, b_ord, b_crit_freq)
         indexes, props = find_peaks(smooth_y, height=peak_height, width=peak_width)
         peaks = []
         for i in range(len(indexes)):
@@ -87,17 +88,18 @@ def print_plots(dir_path, iaot, b_ord, b_crit_freq):
         print('ERROR: failed to plot smooth graph. ({})'.format(str(exc)))
 
 def extract_interacted_event(peaks, min_duration, min_area):
-    for peak in peaks:
-            frame_index = peak['frame_index']
-            duration_ms = peaks["duration_ms"]
-            intersection_area_in_pixels = peak["intersection_area_in_pixels"]
+    for pk in peaks:
+            frame_index = pk['frame_index']
+            duration_ms = pk["duration_ms"]
+            intersection_area_in_pixels = pk["intersection_area_in_pixels"]
             if duration_ms > min_duration and intersection_area_in_pixels > min_area:
                 return {
-                    "frame_index": frame_index,
-                    "event_type": "interacted"
+                    "index": int(frame_index),
+                    "type": "interacted"
                 }
     return None
 
+# also used for `pondered` events
 def extract_walked_event(iaot, fps, min_duration, min_area):
     frame_indexes_over_time = []
     area_over_time = []
@@ -121,47 +123,29 @@ def extract_walked_event(iaot, fps, min_duration, min_area):
             }
     return None
 
-def extract_pondered_event(iaot, fps, min_duration, min_area):
-    frame_indexe_over_time = []
-    area_over_time = []
-    for i in range(len(iaot)):
-        frame_indexe_over_time.append(iaot[i]["index"])
-        area_over_time.append(iaot[i]["area"])
-    min_frames_t = int((min_duration / 1000) * fps)
-    # min_frames_t = 2 sec x (10 fr / sec) = 20 frames
-    for t in range(len(area_over_time)):
-        if area_over_time[t] < min_area:
-            continue
-        small_area_found = False
-        for p in range(t, len(area_over_time) - min_frames_t):
-            if area_over_time[p] < min_area:
-                small_area_found = True
-                break
-        if not small_area_found:
-            return {
-                "type": "walked",
-                "index": t + int(min_frames_t / 2)
-            }
-    return None
-
 def extract_event(roi_type, iaot, fps, config):
     if roi_type == 'shelf':
         # INTERACTED
         peaks, _ = extract_peaks(iaot, fps, config['BUTTER_ORDER'], config['BUTTER_CRIT_FREQ'], config['PEAK_MIN_HEIGHT'], config['PEAK_WIDTH'])
         if peaks is None or len(peaks) == 0:
-            return None
+            err = "peaks is null" if peaks is None else "peaks is empty"
+            return (None, err)
         evt = extract_interacted_event(peaks, config['INTERACTED_MIN_DURATION_MS'], config['INTERACTED_MIN_AREA'])
         if evt is not None:
-            return evt
+            return (evt, None)
         else:
-            return None
+            return (None, "had peaks but FAILED to extract interacted event")
     elif roi_type == 'aisle':
+        # PONDERED
+        pondered_evt = extract_walked_event(iaot, fps, config['PONDERED_MIN_DURATION_MS'], config['PONDERED_MIN_AREA'])
+        if pondered_evt is not None:
+            return (pondered_evt, None)
         # WALKED
         evt = extract_walked_event(iaot, fps, config['WALKED_MIN_DURATION_MS'], config['WALKED_MIN_AREA'])
         if evt is not None:
-            return evt
+            return (evt, None)
         else:
-            return None
+            return (None, "no pondered nor walked event")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -184,7 +168,9 @@ if __name__ == '__main__':
         print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
         for track_idx in range(len(tracks)):
             track = tracks[track_idx]
-            event = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
+            # if track_idx == 0 and roi_name == 'middle_shelf':
+            #     pdb.set_trace()
+            event, err = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
             if event is not None:
                 print('\tTrack #{}: event "{}" at frame {}'.format(str(track_idx + 1), event['type'], str(event['index'])))
                 event.update({
@@ -193,7 +179,7 @@ if __name__ == '__main__':
                 })
                 events.append(event)
             else:
-                print('\tTrack #{}: no event'.format(str(track_idx + 1)))
+                print('\tTrack #{}: error "{}"'.format(str(track_idx + 1), err))
 
     output_file_path = os.path.join('/Users/gvieira/shan/{}/data'.format(video_id), "events.json")
     with open(output_file_path, "w") as events_file:
