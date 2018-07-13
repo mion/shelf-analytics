@@ -35,8 +35,8 @@ if __name__ == "__main__":
   if has_ffmpeg_installed():
     success = False
     if args.ext == 'all':
-      success = split_frames(args.input_path, args.output_dir, '.png')
-      success = split_frames(args.input_path, args.output_dir, '.jpg')
+      success = split_frames(args.input_path, args.output_dir, 'png')
+      success = split_frames(args.input_path, args.output_dir, 'jpg')
     else:
       success = split_frames(args.input_path, args.output_dir, args.ext)
     if success:
