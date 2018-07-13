@@ -29,11 +29,16 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("input_path", help="input video file path")
   parser.add_argument("output_dir", help="output directory")
-  parser.add_argument("--ext", default="png", help="frame image file extension: png (default) or jpg")
+  parser.add_argument("--ext", default="all", help="frame image file extension: 'png', 'jpg' or 'all' (default)")
   args = parser.parse_args()
 
   if has_ffmpeg_installed():
-    success = split_frames(args.input_path, args.output_dir, args.ext)
+    success = False
+    if args.ext == 'all':
+      success = split_frames(args.input_path, args.output_dir, '.png')
+      success = split_frames(args.input_path, args.output_dir, '.jpg')
+    else:
+      success = split_frames(args.input_path, args.output_dir, args.ext)
     if success:
       print(green("DONE! Image files created in output directory."))
     else:
