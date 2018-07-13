@@ -37,11 +37,12 @@ def draw_bbox_header(frame, bbox, transition, bg_color=(0, 0, 0), fg_color=(255,
     return frame
 
 def draw_bbox_with_title(frame, bbox, title_text, text_color=(255, 255, 255), outline_color=(255, 255, 255), thickness=1, title_bg_color=None):
+    PADDING = 5
     frame = draw_bbox_outline(frame, bbox, outline_color, thickness=thickness)
     title_width, title_height = get_text_size(title_text)
     if title_bg_color is not None:
-        frame = cv2.rectangle(frame, (bbox.x1, bbox.y1), (bbox.x1 + title_width, bbox.y1 + title_height + 5), title_bg_color, cv2.FILLED, cv2.LINE_AA)
-    frame = draw_text(frame, title_text, (bbox.x1, bbox.y1 + title_height), color=text_color)
+        frame = cv2.rectangle(frame, (bbox.x1, bbox.y1), (bbox.x1 + title_width, bbox.y1 + title_height + 2*PADDING), title_bg_color, cv2.FILLED, cv2.LINE_AA)
+    frame = draw_text(frame, title_text, (bbox.x1 + PADDING, bbox.y1 + PADDING + title_height), color=text_color)
     return frame
 
 def draw_calibration_config(frame_with_footer, footer_height, cfg):

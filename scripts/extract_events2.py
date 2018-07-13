@@ -26,6 +26,7 @@ DEFAULT_CONFIG = {
 }
 
 def smooth_without_delay(xn, order, crit_freq):
+    # Butterworth filter
     b, a = butter(order, crit_freq)
     # Apply the filter to xn.  Use lfilter_zi to choose the initial condition
     # of the filter.
