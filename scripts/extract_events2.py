@@ -51,7 +51,7 @@ def extract_peaks(iaot, fps, b_ord, b_crit_freq, peak_height, peak_width):
         indexes, props = find_peaks(smooth_y, height=peak_height, width=peak_width)
         peaks = []
         for i in range(len(indexes)):
-            frame_index = indexes[i]
+            frame_index = iaot[indexes[i]]["index"]
             duration_in_frames = props["widths"][i]
             intersection_area_in_pixels = props["peak_heights"][i]
             duration_ms = int(1000 * (duration_in_frames / fps))
@@ -139,6 +139,7 @@ def extract_event(roi_type, iaot, fps, config):
     elif roi_type == 'aisle':
         # PONDERED
         pondered_evt = extract_walked_event(iaot, fps, config['PONDERED_MIN_DURATION_MS'], config['PONDERED_MIN_AREA'])
+        pondered_evt.update({"type": "pondered"})
         if pondered_evt is not None:
             return (pondered_evt, None)
         # WALKED
