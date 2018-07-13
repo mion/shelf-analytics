@@ -113,7 +113,10 @@ def extract_walked_event(iaot, fps, min_duration, min_area):
         if area_over_time[t] < min_area:
             continue
         small_area_found = False
-        for p in range(t, min(t + min_frames_t, len(area_over_time))):
+        for p in range(t, t + min_frames_t):
+            if p >= len(area_over_time):
+                small_area_found = True # not enough distance...
+                break
             if area_over_time[p] < min_area:
                 small_area_found = True
                 break
