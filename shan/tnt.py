@@ -7,6 +7,7 @@ import shutil
 import json
 import cv2
 import cvutil
+import skimage
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 
@@ -45,6 +46,17 @@ def count_frames(path):
     if frames is None:
         raise RuntimeError('failed to load frames from video at: {}'.format(path))
     return len(frames)
+
+def load_images(path, extension):
+    """Load every image in this path that have this extension, 
+    returns an array.
+    """
+    file_names = next(os.walk(path))[2]
+    image_file_paths = []
+    for fname in file_names:
+        if fname.endswith(extension):
+            image_file_paths.append(os.path.join(path, fname))
+    return [skimage.io.imread(img_path) for img_path in image_file_paths]
 
 def load_bboxes_per_frame(tags):
     bboxes_per_frame = []
