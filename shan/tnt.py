@@ -39,6 +39,13 @@ def load_frames(path):
         return None
     return cvutil.read_frames_from_video(video)
 
+def count_frames(path): 
+    # FIXME: this is VERY SLOW, we should find a way to count faster
+    frames = load_frames(path)
+    if frames is None:
+        raise RuntimeError('failed to load frames from video at: {}'.format(path))
+    return len(frames)
+
 def load_bboxes_per_frame(tags):
     bboxes_per_frame = []
     for i in range(len(tags["frames"])):

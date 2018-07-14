@@ -1,7 +1,6 @@
 """
-Shelf Analytics
-Start the transcoder worker that pulls transcoding jobs indefinitely from
-a distributed queue (RabbitMQ) and processes them.
+The transcoder worker transforms a video in a given format and FPS, into
+another video with other format and desired FPS.
 
 Copyright (c) 2018 TonetoLabs.
 Author: Gabriel Luis Vieira (gluisvieira@gmail.com)
@@ -36,7 +35,7 @@ def process_job(channel, method, properties, message):
     channel.basic_ack(delivery_tag = method.delivery_tag)
 
 def add_job(input_video_path, output_video_path, fps):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=TRANSCODER_QUEUE_HOST))
     channel = connection.channel()
     channel.queue_declare(queue=TRANSCODER_QUEUE_NAME, durable=TRANSCODER_QUEUE_DURABLE)
     job = {
