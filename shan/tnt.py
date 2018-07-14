@@ -10,8 +10,6 @@ import cvutil
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 
-DEFAULT_TRANSCODED_VIDEO_NAME = "video"
-
 def has_ffmpeg_installed():
     return shutil.which("ffmpeg") != None
 
