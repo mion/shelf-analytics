@@ -1,3 +1,28 @@
+# Last time I left this worker running, I got this error at the end of 2 jobs.
+
+# Traceback (most recent call last):
+#   File "workers/detector.py", line 64, in <module>
+#     start_worker()
+#   File "workers/detector.py", line 53, in start_worker
+#     channel.start_consuming()
+#   File "/Users/gvieira/code/ai/lib/python3.6/site-packages/pika/adapters/blocking_connection.py", line 1780, in start_consuming
+#     self.connection.process_data_events(time_limit=None)
+#   File "/Users/gvieira/code/ai/lib/python3.6/site-packages/pika/adapters/blocking_connection.py", line 716, in process_data_events
+#     self._dispatch_channel_events()
+#   File "/Users/gvieira/code/ai/lib/python3.6/site-packages/pika/adapters/blocking_connection.py", line 518, in _dispatch_channel_events
+#     impl_channel._get_cookie()._dispatch_events()
+#   File "/Users/gvieira/code/ai/lib/python3.6/site-packages/pika/adapters/blocking_connection.py", line 1403, in _dispatch_events
+#     evt.body)
+#   File "workers/detector.py", line 23, in process_job
+#     channel.basic_ack(delivery_tag = method.delivery_tag)
+#   File "/Users/gvieira/code/ai/lib/python3.6/site-packages/pika/adapters/blocking_connection.py", line 1988, in basic_ack
+#     self._flush_output()
+#   File "/Users/gvieira/code/ai/lib/python3.6/site-packages/pika/adapters/blocking_connection.py", line 1250, in _flush_output
+#     *waiters)
+#   File "/Users/gvieira/code/ai/lib/python3.6/site-packages/pika/adapters/blocking_connection.py", line 474, in _flush_output
+#     result.reason_text)
+# pika.exceptions.ConnectionClosed: (-1, "BrokenPipeError(32, 'Broken pipe')")
+#
 import os
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'shan'))
