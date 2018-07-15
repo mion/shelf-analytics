@@ -21,7 +21,7 @@ import model as modellib
 import visualize
 
 from colorize import red, green, yellow
-from tnt import extract_video_fps, extract_video_name, has_ffmpeg_installed, DEFAULT_TRANSCODED_VIDEO_NAME
+from tnt import extract_video_fps, extract_video_name, has_ffmpeg_installed
 
 
 class InferenceConfig(coco.CocoConfig):
