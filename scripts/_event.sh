@@ -1,6 +1,6 @@
 #!/bin/bash
 set -o errexit
-ROIS_PATH=/Users/gvieira/code/toneto/shan/test/rois/venue-11-shelf-1.json
+ROIS_PATH=/Users/gvieira/code/toneto/shan/test/rois/v11s1.json
 DATA_PATH=/Users/gvieira/shan/$1/data
 TAGS_PATH=/Users/gvieira/shan/$1/data/tags.json
 CALIB_PATH=/Users/gvieira/code/toneto/shan/test/calib-configs/venue-11-shelf-1-fps-10.json
