@@ -3,3 +3,4 @@ __pycache__
 *.h5
 *.pyc
 node_modules/
+tagger/public/shan

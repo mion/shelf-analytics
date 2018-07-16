@@ -1,6 +1,47 @@
 var ongoingTouches = [];
 
+function getImages(cb) {
+  $.get('/videos/video-31-p_09', {}, function (data) {
+    cb(data.images);
+  })
+}
+
+function loadImage(path, callback) {
+  var image = new Image();
+  image.src = '/' + path;
+  image.onload = function () {
+    callback(image);
+    image.style.display = 'none';
+  };
+}
+
+function loadImages(imageURLS, cb, images) {
+  if (imageURLS.length == 0) {
+    console.log('Done!')
+    cb(images);
+  } else {
+    var url = imageURLS.pop();
+    console.log('Loading: ' + url);
+    loadImage(url, (img) => {
+      images.push(img);
+      loadImages(imageURLS, cb, images);
+    })
+  }
+}
+
 function startup() {
+  var el = document.getElementsByTagName("canvas")[0];
+  var ctx = el.getContext("2d");
+
+  var frameImages = [];
+  getImages(function (imageURLs) {
+    console.log(imageURLs)
+    loadImages(imageURLs, function (images) {
+      frameImages = images;
+      window.images = images;
+      ctx.drawImage(images[0], 0, 0)
+    }, [])
+  })
   var el = document.getElementsByTagName("canvas")[0];
   el.addEventListener("touchstart", handleStart, false);
   el.addEventListener("touchend", handleEnd, false);
@@ -15,7 +56,7 @@ function handleStart(evt) {
   var el = document.getElementsByTagName("canvas")[0];
   var ctx = el.getContext("2d");
   var touches = evt.changedTouches;
-        
+
   for (var i = 0; i < touches.length; i++) {
     log("touchstart:" + i + "...");
     ongoingTouches.push(copyTouch(touches[i]));
@@ -101,7 +142,7 @@ function handleCancel(evt) {
   evt.preventDefault();
   log("touchcancel.");
   var touches = evt.changedTouches;
-  
+
   for (var i = 0; i < touches.length; i++) {
     var idx = ongoingTouchIndexById(touches[i].identifier);
     ongoingTouches.splice(idx, 1);  // remove it; we're done
@@ -127,7 +168,7 @@ function copyTouch(touch) {
 function ongoingTouchIndexById(idToFind) {
   for (var i = 0; i < ongoingTouches.length; i++) {
     var id = ongoingTouches[i].identifier;
-    
+
     if (id == idToFind) {
       return i;
     }
