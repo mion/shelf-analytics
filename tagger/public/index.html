@@ -3,10 +3,11 @@
     <title>Shelf Analytics™ - TonetoLabs</title>
     <link rel="stylesheet" href="tagger.css">
   </head>
-  <body>
-    <h1>TonetoLabs</h1>
-    <h2>Sistema de Administração</h2>
-    <p>Por favor entre com seu login e senha.</p>
+  <body onload="startup()">
+    <canvas id="canvas" width="600" height="600">
+      Browser does not support canvas.
+    </canvas>
+    <pre id="log"></pre>
     <script src="tagger.js"></script>
   </body>
 </html>
