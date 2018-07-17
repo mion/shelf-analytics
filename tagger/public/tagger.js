@@ -1,6 +1,11 @@
 show('initializing...');
 
 var ongoingTouches = [];
+var _currFrameIdx = 0;
+var _frameImages = [];
+var _overlayCanvas = document.getElementById('img')
+var _videoCanvas = document.getElementById('canvas')
+var VIDEO_PADDING = 75
 
 function getImages(cb) {
   $.get('/videos/video-31-p_09', {}, function (data) {
@@ -33,10 +38,15 @@ function loadImages(imageURLS, cb, images) {
   }
 }
 
-var _currFrameIdx = 0;
-var _frameImages = [];
 
 function startup() {
+  var overlayCtx = _overlayCanvas.getContext('2d')
+  overlayCtx.canvas.width = window.innerWidth
+  overlayCtx.canvas.height = window.innerHeight
+  var videoCtx = _videoCanvas.getContext('2d')
+  videoCtx.canvas.width = window.innerWidth
+  videoCtx.canvas.height = window.innerHeight
+
   var el = document.getElementById('img')
   var ctx = el.getContext("2d");
 
@@ -46,8 +56,9 @@ function startup() {
     loadImages(_.reverse(imageURLs), function (images) {
       _frameImages = images;
       window.images = images;
-      ctx.drawImage(images[0], 0, 0)
+      // ctx.drawImage(images[0], 0, 0)
       // document.getElementById('img').src = images[0].src;
+      renderFrame(0)
       console.log('image', images[0]);
       initialize();
     }, [])
@@ -63,7 +74,7 @@ function renderFrame(idx) {
   }
   var el = document.getElementById('img')
   var ctx = el.getContext("2d");
-  ctx.drawImage(_frameImages[idx], 0, 0);
+  ctx.drawImage(_frameImages[idx], VIDEO_PADDING, VIDEO_PADDING);
 }
 
 var _playing = false
@@ -103,10 +114,13 @@ function initialize() {
   slider.oninput = function () {
     show('slider: ' + slider.value)
     _currFrameIdx = slider.value
-    var el = document.getElementById('img')
-    var ctx = el.getContext("2d");
-    ctx.drawImage(_frameImages[_currFrameIdx], 0, 0);
+    // var el = document.getElementById('img')
+    // var ctx = el.getContext("2d");
+    // ctx.drawImage(_frameImages[_currFrameIdx], 0, 0);
+    renderFrame(_currFrameIdx)
   }
+  slider.max = _frameImages.length - 1
+  slider.value = 0
   show("initialized.");
   initPlayer()
 }
@@ -139,7 +153,7 @@ function handleStart(evt) {
         window._speed = 75
       }
       // show((new Date()).getMilliseconds())
-    }, 750)
+    }, 500)
   }
 
   // if (ongoingTouches.length == 1) {
@@ -150,6 +164,7 @@ function handleStart(evt) {
 var _lastOngoingTouchX = null;
 
 function drawTaggingRect() {
+    var overlayCtx = _overlayCanvas.getContext('2d')
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     var PADDING = 30;
@@ -165,8 +180,8 @@ function drawTaggingRect() {
     var orig = {x: p1.x, y: p2.y}
     var w = (p2.x - p1.x);
     var h = (p1.y - p2.y);
-    ctx.clearRect(0, 0, 600, 600);
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.65)'
+    ctx.clearRect(0, 0, overlayCtx.canvas.width, overlayCtx.canvas.height);
+    ctx.fillStyle = 'rgba(255, 255, 0, 0.35)'
     ctx.fillRect(orig.x + PADDING, orig.y + PADDING, w - 2*PADDING, h - 2*PADDING);
     // show(`P1=(${p1.x},${p1.y}) P2=(${p2.x}, ${p2.y})`)
 }
@@ -204,7 +219,12 @@ function handleMove(evt) {
       _lastOngoingTouchX = ongoingTouches[0].pageX;
     }
     var deltaX = ongoingTouches[0].pageX - _lastOngoingTouchX;
-    _currFrameIdx += (deltaX > 0 ? 1 : -1)
+    var spd = 1;
+    var overlayCtx = _overlayCanvas.getContext('2d')
+    if (ongoingTouches[0].pageY > (overlayCtx.canvas.height / 2)) {
+      spd = 5;
+    }
+    _currFrameIdx += (deltaX > 0 ? spd : -spd)
     if (_currFrameIdx < 0) {
       _currFrameIdx = 0;
     } else if (_currFrameIdx >= _frameImages.length) {
@@ -212,9 +232,10 @@ function handleMove(evt) {
     }
     show('one finger: ' + deltaX);
     // document.getElementById('img').src = _frameImages[_currFrameIdx].src;
-    var el = document.getElementById('img')
-    var ctx = el.getContext("2d");
-    ctx.drawImage(_frameImages[_currFrameIdx], 0, 0);
+    // var el = document.getElementById('img')
+    // var ctx = el.getContext("2d");
+    // ctx.drawImage(_frameImages[_currFrameIdx], 0, 0);
+    renderFrame(_currFrameIdx)
     slider.value = _currFrameIdx
     _lastOngoingTouchX = ongoingTouches[0].pageX
   } else if (ongoingTouches.length == 2) {
