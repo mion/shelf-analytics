@@ -20,6 +20,7 @@ function loadImage(path, callback) {
 function loadImages(imageURLS, cb, images) {
   if (imageURLS.length == 0) {
     console.log('Done!')
+    show('Done!')
     cb(images);
   } else {
     var url = imageURLS.pop();
@@ -36,21 +37,57 @@ var _currFrameIdx = 0;
 var _frameImages = [];
 
 function startup() {
-  var el = document.getElementsByTagName("canvas")[0];
+  var el = document.getElementById('img')
   var ctx = el.getContext("2d");
 
   show('Loading images...')
   getImages(function (imageURLs) {
     console.log(imageURLs)
-    loadImages(imageURLs, function (images) {
+    loadImages(_.reverse(imageURLs), function (images) {
       _frameImages = images;
       window.images = images;
-      // ctx.drawImage(images[0], 0, 0)
-      document.getElementById('img').src = images[0].src;
+      ctx.drawImage(images[0], 0, 0)
+      // document.getElementById('img').src = images[0].src;
       console.log('image', images[0]);
       initialize();
     }, [])
   })
+}
+
+var slider = document.getElementById('slider')
+var _playInterval = null;
+
+function renderFrame(idx) {
+  if (idx >= _frameImages.length) {
+    return;
+  }
+  var el = document.getElementById('img')
+  var ctx = el.getContext("2d");
+  ctx.drawImage(_frameImages[idx], 0, 0);
+}
+
+var _playing = false
+var _BEAT = 25;
+var _speed = 125;
+var _delta = 0;
+
+function initPlayer() {
+  _playInterval = window.setInterval(function () {
+    if (_playing && (_delta >= _speed)) {
+      _delta = 0;
+      renderFrame(_currFrameIdx++)
+    }
+    _delta += _BEAT;
+  }, _BEAT);
+}
+
+function startPlaying(ms) {
+  _speed = ms
+  _playing = true
+}
+
+function stopPlaying() {
+  _playing = false
 }
 
 function initialize() {
@@ -59,7 +96,15 @@ function initialize() {
   el.addEventListener("touchend", handleEnd, false);
   el.addEventListener("touchcancel", handleCancel, false);
   el.addEventListener("touchmove", handleMove, false);
-  log("initialized.");
+  slider.oninput = function () {
+    show('slider: ' + slider.value)
+    _currFrameIdx = slider.value
+    var el = document.getElementById('img')
+    var ctx = el.getContext("2d");
+    ctx.drawImage(_frameImages[_currFrameIdx], 0, 0);
+  }
+  show("initialized.");
+  initPlayer()
 }
 
 function handleStart(evt) {
@@ -72,20 +117,46 @@ function handleStart(evt) {
   for (var i = 0; i < touches.length; i++) {
     log("touchstart:" + i + "...");
     ongoingTouches.push(copyTouch(touches[i]));
-    var color = colorForTouch(touches[i]);
-    ctx.beginPath();
-    ctx.arc(touches[i].pageX, touches[i].pageY, 4, 0, 2 * Math.PI, false);  // a circle at the start
-    ctx.fillStyle = color;
-    ctx.fill();
-    log("touchstart:" + i + ".");
+    // var color = colorForTouch(touches[i]);
+    // ctx.beginPath();
+    // ctx.arc(touches[i].pageX, touches[i].pageY, 4, 0, 2 * Math.PI, false);  // a circle at the start
+    // ctx.fillStyle = color;
+    // ctx.fill();
+    // log("touchstart:" + i + ".");
   }
 
-  if (ongoingTouches.length == 1) {
-    _lastOngoingTouchX = ongoingTouches[0].pageX;
+  if (ongoingTouches.length == 2) {
+    startPlaying(75)
   }
+
+  // if (ongoingTouches.length == 1) {
+  //   _lastOngoingTouchX = ongoingTouches[0].pageX;
+  // }
 }
 
 var _lastOngoingTouchX = null;
+
+function drawTaggingRect() {
+    var el = document.getElementsByTagName("canvas")[0];
+    var ctx = el.getContext("2d");
+    var PADDING = 30;
+    var p1, p2;
+    if (ongoingTouches[0].pageX < ongoingTouches[1].pageX) {
+      p1 = {x: ongoingTouches[0].pageX, y: ongoingTouches[0].pageY}
+      p2 = {x: ongoingTouches[1].pageX, y: ongoingTouches[1].pageY}
+    } else {
+      p1 = {x: ongoingTouches[1].pageX, y: ongoingTouches[1].pageY}
+      p2 = {x: ongoingTouches[0].pageX, y: ongoingTouches[0].pageY}
+    }
+    // assuming right hand usage
+    var orig = {x: p1.x, y: p2.y}
+    var w = (p2.x - p1.x);
+    var h = (p1.y - p2.y);
+    ctx.clearRect(0, 0, 600, 600);
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.65)'
+    ctx.fillRect(orig.x + PADDING, orig.y + PADDING, w - 2*PADDING, h - 2*PADDING);
+    show(`P1=(${p1.x},${p1.y}) P2=(${p2.x}, ${p2.y})`)
+}
 
 function handleMove(evt) {
   evt.preventDefault();
@@ -116,27 +187,26 @@ function handleMove(evt) {
   }
 
   if (ongoingTouches.length == 1) {
-    if (_lastOngoingTouchX) {
-      var deltaX = ongoingTouches[0].pageX - _lastOngoingTouchX;
-      var dx = deltaX / 10; // sensivity
-      _currFrameIdx += dx;
-      if (_currFrameIdx < 0) {
-        _currFrameIdx = 0;
-      } else if (_currFrameIdx >= _frameImages.length) {
-        _currFrameIdx = _frameImages.length - 1;
-      }
-      show('one finger: ' + deltaX);
-      document.getElementById('img').src = _frameImages[_currFrameIdx].src;
+    if (!_lastOngoingTouchX) {
+      _lastOngoingTouchX = ongoingTouches[0].pageX;
     }
+    var deltaX = ongoingTouches[0].pageX - _lastOngoingTouchX;
+    _currFrameIdx += (deltaX > 0 ? 1 : -1)
+    if (_currFrameIdx < 0) {
+      _currFrameIdx = 0;
+    } else if (_currFrameIdx >= _frameImages.length) {
+      _currFrameIdx = _frameImages.length - 1;
+    }
+    show('one finger: ' + deltaX);
+    // document.getElementById('img').src = _frameImages[_currFrameIdx].src;
+    var el = document.getElementById('img')
+    var ctx = el.getContext("2d");
+    ctx.drawImage(_frameImages[_currFrameIdx], 0, 0);
+    slider.value = _currFrameIdx
+    _lastOngoingTouchX = ongoingTouches[0].pageX
   } else if (ongoingTouches.length == 2) {
     show('two fingers')
-    var x = ongoingTouches[0].pageX;
-    var y = ongoingTouches[0].pageY;
-    var w = (ongoingTouches[1].pageX - x);
-    var h = (ongoingTouches[1].pageY - y);
-    ctx.clearRect(0, 0, 600, 600);
-    ctx.fillRect(x, y, w, h);
-    show(`(${x},${y}) ${w}x${h}`)
+    drawTaggingRect();
   } else {
     show('')
   }
@@ -154,16 +224,20 @@ function handleEnd(evt) {
     var idx = ongoingTouchIndexById(touches[i].identifier);
 
     if (idx >= 0) {
-      ctx.lineWidth = 4;
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(ongoingTouches[idx].pageX, ongoingTouches[idx].pageY);
-      ctx.lineTo(touches[i].pageX, touches[i].pageY);
-      ctx.fillRect(touches[i].pageX - 4, touches[i].pageY - 4, 8, 8);  // and a square at the end
+      // ctx.lineWidth = 4;
+      // ctx.fillStyle = color;
+      // ctx.beginPath();
+      // ctx.moveTo(ongoingTouches[idx].pageX, ongoingTouches[idx].pageY);
+      // ctx.lineTo(touches[i].pageX, touches[i].pageY);
+      // ctx.fillRect(touches[i].pageX - 4, touches[i].pageY - 4, 8, 8);  // and a square at the end
       ongoingTouches.splice(idx, 1);  // remove it; we're done
     } else {
       log("can't figure out which touch to end");
     }
+  }
+
+  if (ongoingTouches.length < 2) {
+    stopPlaying();
   }
 }
 
@@ -175,6 +249,10 @@ function handleCancel(evt) {
   for (var i = 0; i < touches.length; i++) {
     var idx = ongoingTouchIndexById(touches[i].identifier);
     ongoingTouches.splice(idx, 1);  // remove it; we're done
+  }
+
+  if (ongoingTouches.length < 2) {
+    stopPlaying();
   }
 }
 

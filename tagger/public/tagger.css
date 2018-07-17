@@ -56,6 +56,7 @@ table {
 
 body {
   font-family: sans-serif;
+	overflow: hidden;
 }
 
 #canvas {
@@ -73,6 +74,13 @@ body {
 }
 
 #log {
+	position: absolute;
+	bottom: 5px;
+	left: 25px;
+}
+
+#slider {
+	width: 300px;
 	position: absolute;
 	bottom: 25px;
 	left: 25px;
