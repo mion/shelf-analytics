@@ -1,11 +1,13 @@
 show('initializing...');
 
+var VIDEO_PADDING = 75
 var ongoingTouches = [];
 var _currFrameIdx = 0;
 var _frameImages = [];
-var _overlayCanvas = document.getElementById('img')
-var _videoCanvas = document.getElementById('canvas')
-var VIDEO_PADDING = 75
+var _overlayCanvas = document.getElementById('canvas')
+var _videoCanvas = document.getElementById('img')
+var _tracks = []
+var _currTrackIdx = 0
 
 function getImages(cb) {
   $.get('/videos/video-31-p_09', {}, function (data) {
@@ -38,7 +40,6 @@ function loadImages(imageURLS, cb, images) {
   }
 }
 
-
 function startup() {
   var overlayCtx = _overlayCanvas.getContext('2d')
   overlayCtx.canvas.width = window.innerWidth
@@ -58,6 +59,7 @@ function startup() {
       window.images = images;
       // ctx.drawImage(images[0], 0, 0)
       // document.getElementById('img').src = images[0].src;
+      _tracks.push(new Array(_frameImages.length))
       renderFrame(0)
       console.log('image', images[0]);
       initialize();
@@ -75,6 +77,11 @@ function renderFrame(idx) {
   var el = document.getElementById('img')
   var ctx = el.getContext("2d");
   ctx.drawImage(_frameImages[idx], VIDEO_PADDING, VIDEO_PADDING);
+  if (_tracks[_currTrackIdx][_currFrameIdx] && (ongoingTouches.length < 2)) {
+    var rect = _tracks[_currTrackIdx][_currFrameIdx]
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'
+    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h)
+  }
 }
 
 var _playing = false
@@ -165,8 +172,9 @@ var _lastOngoingTouchX = null;
 
 function drawTaggingRect() {
     var overlayCtx = _overlayCanvas.getContext('2d')
-    var el = document.getElementsByTagName("canvas")[0];
-    var ctx = el.getContext("2d");
+    var ctx = overlayCtx;
+    // var el = document.getElementsByTagName("canvas")[0];
+    // var ctx = el.getContext("2d");
     var PADDING = 30;
     var p1, p2;
     if (ongoingTouches[0].pageX < ongoingTouches[1].pageX) {
@@ -184,6 +192,17 @@ function drawTaggingRect() {
     ctx.fillStyle = 'rgba(255, 255, 0, 0.35)'
     ctx.fillRect(orig.x + PADDING, orig.y + PADDING, w - 2*PADDING, h - 2*PADDING);
     // show(`P1=(${p1.x},${p1.y}) P2=(${p2.x}, ${p2.y})`)
+    _tracks[_currTrackIdx][_currFrameIdx] = {
+      x: orig.x + PADDING,
+      y: orig.y + PADDING,
+      w: w - 2*PADDING,
+      h: h - 2*PADDING
+    }
+}
+
+function clearTaggingRect() {
+    var ctx = _overlayCanvas.getContext('2d')
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
 function handleMove(evt) {
@@ -273,6 +292,7 @@ function handleEnd(evt) {
   if (ongoingTouches.length < 2) {
     stopPlaying();
     window.clearInterval(_accelInterval)
+    clearTaggingRect()
   }
 }
 
@@ -289,6 +309,7 @@ function handleCancel(evt) {
   if (ongoingTouches.length < 2) {
     stopPlaying();
     window.clearInterval(_accelInterval)
+    clearTaggingRect()
   }
 }
 
