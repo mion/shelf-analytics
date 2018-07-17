@@ -1,3 +1,5 @@
+show('initializing...');
+
 var ongoingTouches = [];
 
 function getImages(cb) {
@@ -22,6 +24,7 @@ function loadImages(imageURLS, cb, images) {
   } else {
     var url = imageURLS.pop();
     console.log('Loading: ' + url);
+    show('Loading: ' + url);
     loadImage(url, (img) => {
       images.push(img);
       loadImages(imageURLS, cb, images);
@@ -29,17 +32,22 @@ function loadImages(imageURLS, cb, images) {
   }
 }
 
+var _currFrameIdx = 0;
+var _frameImages = [];
+
 function startup() {
   var el = document.getElementsByTagName("canvas")[0];
   var ctx = el.getContext("2d");
 
-  var frameImages = [];
+  show('Loading images...')
   getImages(function (imageURLs) {
     console.log(imageURLs)
     loadImages(imageURLs, function (images) {
-      frameImages = images;
+      _frameImages = images;
       window.images = images;
-      ctx.drawImage(images[0], 0, 0)
+      // ctx.drawImage(images[0], 0, 0)
+      document.getElementById('img').src = images[0].src;
+      console.log('image', images[0]);
       initialize();
     }, [])
   })
@@ -71,7 +79,13 @@ function handleStart(evt) {
     ctx.fill();
     log("touchstart:" + i + ".");
   }
+
+  if (ongoingTouches.length == 1) {
+    _lastOngoingTouchX = ongoingTouches[0].pageX;
+  }
 }
+
+var _lastOngoingTouchX = null;
 
 function handleMove(evt) {
   evt.preventDefault();
@@ -84,31 +98,42 @@ function handleMove(evt) {
     var idx = ongoingTouchIndexById(touches[i].identifier);
 
     if (idx >= 0) {
-      log("continuing touch "+idx);
-      ctx.beginPath();
-      log("ctx.moveTo(" + ongoingTouches[idx].pageX + ", " + ongoingTouches[idx].pageY + ");");
-      ctx.moveTo(ongoingTouches[idx].pageX, ongoingTouches[idx].pageY);
-      log("ctx.lineTo(" + touches[i].pageX + ", " + touches[i].pageY + ");");
-      ctx.lineTo(touches[i].pageX, touches[i].pageY);
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = color;
-      ctx.stroke();
+      // log("continuing touch "+idx);
+      // ctx.beginPath();
+      // log("ctx.moveTo(" + ongoingTouches[idx].pageX + ", " + ongoingTouches[idx].pageY + ");");
+      // ctx.moveTo(ongoingTouches[idx].pageX, ongoingTouches[idx].pageY);
+      // log("ctx.lineTo(" + touches[i].pageX + ", " + touches[i].pageY + ");");
+      // ctx.lineTo(touches[i].pageX, touches[i].pageY);
+      // ctx.lineWidth = 4;
+      // ctx.strokeStyle = color;
+      // ctx.stroke();
 
       ongoingTouches.splice(idx, 1, copyTouch(touches[i]));  // swap in the new touch record
-      log(".");
+      // log(".");
     } else {
       log("can't figure out which touch to continue");
     }
   }
 
   if (ongoingTouches.length == 1) {
-    show('one finger')
+    if (_lastOngoingTouchX) {
+      var deltaX = ongoingTouches[0].pageX - _lastOngoingTouchX;
+      var dx = deltaX / 10; // sensivity
+      _currFrameIdx += dx;
+      if (_currFrameIdx < 0) {
+        _currFrameIdx = 0;
+      } else if (_currFrameIdx >= _frameImages.length) {
+        _currFrameIdx = _frameImages.length - 1;
+      }
+      show('one finger: ' + deltaX);
+      document.getElementById('img').src = _frameImages[_currFrameIdx].src;
+    }
   } else if (ongoingTouches.length == 2) {
     show('two fingers')
     var x = ongoingTouches[0].pageX;
     var y = ongoingTouches[0].pageY;
-    var w = Math.abs(ongoingTouches[1].pageX - x);
-    var h = Math.abs(ongoingTouches[1].pageY - y);
+    var w = (ongoingTouches[1].pageX - x);
+    var h = (ongoingTouches[1].pageY - y);
     ctx.clearRect(0, 0, 600, 600);
     ctx.fillRect(x, y, w, h);
     show(`(${x},${y}) ${w}x${h}`)

@@ -57,3 +57,23 @@ table {
 body {
   font-family: sans-serif;
 }
+
+#canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 3;
+}
+
+#img {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+}
+
+#log {
+	position: absolute;
+	bottom: 25px;
+	left: 25px;
+}
