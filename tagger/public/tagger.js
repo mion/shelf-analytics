@@ -68,21 +68,25 @@ function renderFrame(idx) {
 
 var _playing = false
 var _BEAT = 25;
-var _speed = 125;
-var _delta = 0;
+window._speed = 125;
+window._delta = 0;
+
+var _accelInterval;
 
 function initPlayer() {
   _playInterval = window.setInterval(function () {
-    if (_playing && (_delta >= _speed)) {
-      _delta = 0;
+    if (_playing && (window._delta >= window._speed)) {
+      window._delta = 0;
       renderFrame(_currFrameIdx++)
+    } else {
+      window._delta += _BEAT;
     }
-    _delta += _BEAT;
+    // show(window._speed)
   }, _BEAT);
 }
 
 function startPlaying(ms) {
-  _speed = ms
+  window._speed = ms
   _playing = true
 }
 
@@ -126,7 +130,16 @@ function handleStart(evt) {
   }
 
   if (ongoingTouches.length == 2) {
-    startPlaying(75)
+    startPlaying(250)
+    _accelInterval = window.setInterval(function () {
+      var s = window._speed - 25;
+      if (s >= 75) {
+        window._speed = s
+      } else {
+        window._speed = 75
+      }
+      // show((new Date()).getMilliseconds())
+    }, 750)
   }
 
   // if (ongoingTouches.length == 1) {
@@ -155,7 +168,7 @@ function drawTaggingRect() {
     ctx.clearRect(0, 0, 600, 600);
     ctx.fillStyle = 'rgba(255, 0, 0, 0.65)'
     ctx.fillRect(orig.x + PADDING, orig.y + PADDING, w - 2*PADDING, h - 2*PADDING);
-    show(`P1=(${p1.x},${p1.y}) P2=(${p2.x}, ${p2.y})`)
+    // show(`P1=(${p1.x},${p1.y}) P2=(${p2.x}, ${p2.y})`)
 }
 
 function handleMove(evt) {
@@ -205,7 +218,7 @@ function handleMove(evt) {
     slider.value = _currFrameIdx
     _lastOngoingTouchX = ongoingTouches[0].pageX
   } else if (ongoingTouches.length == 2) {
-    show('two fingers')
+    // show('two fingers')
     drawTaggingRect();
   } else {
     show('')
@@ -238,6 +251,7 @@ function handleEnd(evt) {
 
   if (ongoingTouches.length < 2) {
     stopPlaying();
+    window.clearInterval(_accelInterval)
   }
 }
 
@@ -253,6 +267,7 @@ function handleCancel(evt) {
 
   if (ongoingTouches.length < 2) {
     stopPlaying();
+    window.clearInterval(_accelInterval)
   }
 }
 
