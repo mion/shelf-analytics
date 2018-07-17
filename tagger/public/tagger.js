@@ -40,8 +40,12 @@ function startup() {
       frameImages = images;
       window.images = images;
       ctx.drawImage(images[0], 0, 0)
+      initialize();
     }, [])
   })
+}
+
+function initialize() {
   var el = document.getElementsByTagName("canvas")[0];
   el.addEventListener("touchstart", handleStart, false);
   el.addEventListener("touchend", handleEnd, false);
