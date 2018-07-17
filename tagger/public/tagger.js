@@ -81,7 +81,7 @@ function initPlayer() {
     } else {
       window._delta += _BEAT;
     }
-    // show(window._speed)
+    show(window._speed)
   }, _BEAT);
 }
 
