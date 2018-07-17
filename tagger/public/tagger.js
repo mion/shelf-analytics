@@ -175,7 +175,7 @@ function drawTaggingRect() {
     var ctx = overlayCtx;
     // var el = document.getElementsByTagName("canvas")[0];
     // var ctx = el.getContext("2d");
-    var PADDING = 30;
+    var PADDING = 15;
     var p1, p2;
     if (ongoingTouches[0].pageX < ongoingTouches[1].pageX) {
       p1 = {x: ongoingTouches[0].pageX, y: ongoingTouches[0].pageY}
