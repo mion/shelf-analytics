@@ -8,7 +8,7 @@ var _overlayCanvas = document.getElementById('canvas')
 var _videoCanvas = document.getElementById('img')
 var _tracks = []
 var _currTrackIdx = 0
-var _currVideoId = 'video-31-p_09'
+var _currVideoId
 
 function getNextVideo(cb) {
   $.get('/next-video', {}, function (data) {
@@ -50,6 +50,7 @@ function addTrack() {
 }
 
 function saveTrack() {
+  show(`Saving ${_tracks.length} tracks for video ${_currVideoId}...`)
   var tracksData = _tracks.map(function (track) {
     return track.map(function (rect) {
       return {
@@ -69,9 +70,15 @@ function saveTrack() {
     success: function (data) {
       if (data.success) {
         alert('Track saved!')
+        show('Track saved.')
       } else {
         alert('ERROR: track was not saved.')
+        show('ERROR: track was NOT saved.')
       }
+    },
+    error: function (req, status, error) {
+      alert(`Request failed (${status}): ${error}`)
+      show('ERROR: track was NOT saved, network error.')
     }
   });
 }
@@ -157,7 +164,6 @@ function initPlayer() {
     } else {
       window._delta += _BEAT;
     }
-    show(window._speed)
   }, _BEAT);
 }
 
@@ -311,7 +317,7 @@ function handleMove(evt) {
     } else if (_currFrameIdx >= _frameImages.length) {
       _currFrameIdx = _frameImages.length - 1;
     }
-    show('one finger: ' + deltaX);
+    // show('one finger: ' + deltaX);
     // document.getElementById('img').src = _frameImages[_currFrameIdx].src;
     // var el = document.getElementById('img')
     // var ctx = el.getContext("2d");
@@ -323,7 +329,7 @@ function handleMove(evt) {
     // show('two fingers')
     drawTaggingRect();
   } else {
-    show('')
+    // show('')
   }
 }
 

@@ -76,29 +76,20 @@ app.get('/next-video', function (req, res) {
   })
 })
 
-// app.get('/videos/:id', function (req, res) {
-//   fs.readdir(SHAN_PATH + '/' + req.params.id + '/frames/low', function (err, items) {
-//     if (err) {
-//       res.json({error: err})
-//     } else {
-//       res.json({images: items.map((name) => 'shan/' + req.params.id + '/frames/low/' + name)})
-//     }
-//   })
-// })
-
 app.post('/save/:id', function (req, res) {
-  console.log('content-type', req.get('Content-type'))
-  console.log('Body for video ID ' + req.params.id)
-  console.log(req.body)
+  console.log('Saving video ID ' + req.params.id + '...')
   if (req.body.tracks && req.body.tracks.length > 0) {
     fs.writeFile(ANOT_PATH + '/' + req.params.id + '.json', JSON.stringify(req.body), 'utf8', function (err) {
       if (err) {
+        console.log('Failed to save: ', err)
         res.json({success: false, error: err})
       } else {
+        console.log('Successfully saved track!!!')
         res.json({success: true})
       }
     })
   } else {
+    console.log('Failed to save: empty track payload')
     res.json({success: false, error: 'empty track payload'})
   }
 })
