@@ -3,10 +3,11 @@ const app = express()
 const fs = require('fs')
 
 SHAN_PATH = '/Users/gvieira/code/toneto/shan/tagger/public/shan'
-VIDS_PATH = '/Users/gvieira/shan-videos'
+VIDS_PATH = '/Users/gvieira/shan'
 ANOT_PATH = '/Users/gvieira/shan-annotations'
 
 app.use(express.static('public'))
+app.use(express.static(VIDS_PATH))
 app.use(express.json())
 
 function readVideoIdsAt(path, cb) {
@@ -16,7 +17,15 @@ function readVideoIdsAt(path, cb) {
     } else {
       var ids = []
       for (var i = 0; i < items.length; i++) {
-        var videoId = items[i].split('.')[0]
+        if ( ! items[i].startsWith('video')) {
+          continue;
+        }
+        var videoId
+        if (items[i].indexOf('.') != -1) {
+          videoId = items[i].split('.')[0]
+        } else {
+          videoId = items[i]
+        }
         ids.push(videoId)
       }
       cb(null, ids)
@@ -51,20 +60,31 @@ app.get('/next-video', function (req, res) {
     if (err) {
       res.json({success: false, error: err})
     } else {
-      res.json({success: true, untaggedVideoIds: untaggedVideoIds})
+      if (untaggedVideoIds.length > 0) {
+        var videoId = untaggedVideoIds[0]
+        fs.readdir(VIDS_PATH + '/' + videoId + '/frames/low', function (err, items) {
+          if (err) {
+            res.json({success: false, error: err})
+          } else {
+            res.json({success: true, videoId: videoId, images: items.map((name) => videoId + '/frames/low/' + name)})
+          }
+        })
+      } else {
+        res.json({success: false, error: 'no_more_videos'})
+      }
     }
   })
 })
 
-app.get('/videos/:id', function (req, res) {
-  fs.readdir(SHAN_PATH + '/' + req.params.id + '/frames/low', function (err, items) {
-    if (err) {
-      res.json({error: err})
-    } else {
-      res.json({images: items.map((name) => 'shan/' + req.params.id + '/frames/low/' + name)})
-    }
-  })
-})
+// app.get('/videos/:id', function (req, res) {
+//   fs.readdir(SHAN_PATH + '/' + req.params.id + '/frames/low', function (err, items) {
+//     if (err) {
+//       res.json({error: err})
+//     } else {
+//       res.json({images: items.map((name) => 'shan/' + req.params.id + '/frames/low/' + name)})
+//     }
+//   })
+// })
 
 app.post('/save/:id', function (req, res) {
   console.log('content-type', req.get('Content-type'))

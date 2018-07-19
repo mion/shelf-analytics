@@ -10,9 +10,9 @@ var _tracks = []
 var _currTrackIdx = 0
 var _currVideoId = 'video-31-p_09'
 
-function getImages(cb) {
-  $.get('/videos/video-31-p_09', {}, function (data) {
-    cb(data.images);
+function getNextVideo(cb) {
+  $.get('/next-video', {}, function (data) {
+    cb(data.videoId, data.images);
   })
 }
 
@@ -102,7 +102,8 @@ function startup() {
   var ctx = el.getContext("2d");
 
   show('Loading images...')
-  getImages(function (imageURLs) {
+  getNextVideo(function (videoId, imageURLs) {
+    _currVideoId = videoId
     console.log(imageURLs)
     loadImages(_.reverse(imageURLs), function (images) {
       _frameImages = images;
