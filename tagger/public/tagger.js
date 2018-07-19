@@ -53,11 +53,15 @@ function saveTrack() {
   show(`Saving ${_tracks.length} tracks for video ${_currVideoId}...`)
   var tracksData = _tracks.map(function (track) {
     return track.map(function (rect) {
-      return {
-        x: rect.x + VIDEO_PADDING,
-        y: rect.y + VIDEO_PADDING,
-        w: rect.w,
-        h: rect.h
+      if (rect) {
+        return {
+          x: rect.x - VIDEO_PADDING,
+          y: rect.y - VIDEO_PADDING,
+          w: rect.w,
+          h: rect.h
+        }
+      } else {
+        return null
       }
     })
   })

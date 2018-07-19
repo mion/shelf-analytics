@@ -1,3 +1,4 @@
+# This code is throw-away copypasta from the track viz tool
 import pdb
 import os
 import sys
