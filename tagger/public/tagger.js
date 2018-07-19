@@ -8,6 +8,7 @@ var _overlayCanvas = document.getElementById('canvas')
 var _videoCanvas = document.getElementById('img')
 var _tracks = []
 var _currTrackIdx = 0
+var _currVideoId = 'video-31-p_09'
 
 function getImages(cb) {
   $.get('/videos/video-31-p_09', {}, function (data) {
@@ -49,7 +50,30 @@ function addTrack() {
 }
 
 function saveTrack() {
-
+  var tracksData = _tracks.map(function (track) {
+    return track.map(function (rect) {
+      return {
+        x: rect.x + VIDEO_PADDING,
+        y: rect.y + VIDEO_PADDING,
+        w: rect.w,
+        h: rect.h
+      }
+    })
+  })
+  $.ajax({
+    type: 'POST',
+    url: '/save/' + _currVideoId,
+    data: JSON.stringify({tracks: tracksData}),
+    dataType: 'json',
+    contentType: 'application/json; charset=utf-8',
+    success: function (data) {
+      if (data.success) {
+        alert('Track saved!')
+      } else {
+        alert('ERROR: track was not saved.')
+      }
+    }
+  });
 }
 
 function trimStart() {
