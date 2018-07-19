@@ -40,6 +40,32 @@ function loadImages(imageURLS, cb, images) {
   }
 }
 
+function addTrack() {
+  _tracks.push(new Array(_frameImages.length))
+  _currTrackIdx += 1
+  var nextTrackId = _tracks.length
+  $('#tracks-list').append(`<li>Track ${nextTrackId}</li>`)
+  alert('New track created.')
+}
+
+function saveTrack() {
+
+}
+
+function trimStart() {
+  for (var i = _currFrameIdx; i >= 0; i--) {
+    _tracks[_currTrackIdx][i] = undefined
+  }
+  alert('Trimmed until start.')
+}
+
+function trimEnd() {
+  for (var i = _currFrameIdx; i < _frameImages.length; i++) {
+    _tracks[_currTrackIdx][i] = undefined
+  }
+  alert('Trimmed until end.')
+}
+
 function startup() {
   var overlayCtx = _overlayCanvas.getContext('2d')
   overlayCtx.canvas.width = window.innerWidth
@@ -70,6 +96,17 @@ function startup() {
 var slider = document.getElementById('slider')
 var _playInterval = null;
 
+function drawTrackedRects() {
+  var ctx = _videoCanvas.getContext('2d')
+  for (var i = 0; i < _tracks.length; i++) {
+    if (_tracks[i][_currFrameIdx] && (ongoingTouches.length < 2)) {
+      var rect = _tracks[i][_currFrameIdx]
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)'
+      ctx.strokeRect(rect.x, rect.y, rect.w, rect.h)
+    }
+  }
+}
+
 function renderFrame(idx) {
   if (idx >= _frameImages.length) {
     return;
@@ -77,11 +114,7 @@ function renderFrame(idx) {
   var el = document.getElementById('img')
   var ctx = el.getContext("2d");
   ctx.drawImage(_frameImages[idx], VIDEO_PADDING, VIDEO_PADDING);
-  if (_tracks[_currTrackIdx][_currFrameIdx] && (ongoingTouches.length < 2)) {
-    var rect = _tracks[_currTrackIdx][_currFrameIdx]
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'
-    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h)
-  }
+  drawTrackedRects()
 }
 
 var _playing = false
@@ -113,6 +146,10 @@ function stopPlaying() {
 }
 
 function initialize() {
+  $('#add-button').on('click', addTrack)
+  $('#save-button').on('click', saveTrack)
+  $('#trim-start-button').on('click', trimStart)
+  $('#trim-end-button').on('click', trimEnd)
   var el = document.getElementsByTagName("canvas")[0];
   el.addEventListener("touchstart", handleStart, false);
   el.addEventListener("touchend", handleEnd, false);

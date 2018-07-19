@@ -95,6 +95,48 @@ body {
 	left: 25px;
 }
 
+#tracks-sidebar {
+	z-index: 5;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 125px;
+	background-color: #DDD;
+	text-align: center;
+	padding: 10px;
+}
+
+#tracks-sidebar > ul {
+	width: 100%;
+	margin-bottom: 20px;
+}
+
+#tracks-list > li {
+	width: 100%;
+	padding: 4px;
+	font-size: 12px;
+	background-color: #BBB;
+	border: 1px solid black;
+}
+
+.button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+		width: 100%;
+		border-radius: 15px;
+}
+
+.button:active {
+  background-color: #3e8e41;
+  transform: translateY(4px);
+}
+
 .slider {
     -webkit-appearance: none;
     width: 100%;
