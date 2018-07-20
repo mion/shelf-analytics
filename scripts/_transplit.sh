@@ -14,3 +14,5 @@ echo "Transcoding video at $RAW_VIDEOS_PATH/$VIDEO_ID.mp4"
 python scripts/transcode.py $RAW_VIDEOS_PATH/$VIDEO_ID.mp4 $VIDEO_PATH/videos/$VIDEO_ID-fps-10.mp4 --fps 10
 echo "Splitting frames..."
 python scripts/split_frames.py $VIDEO_PATH/videos/$VIDEO_ID-fps-10.mp4 $VIDEO_PATH/frames/raw
+echo "Detecting objects..."
+python scripts/detect_objects.py $VIDEO_PATH/frames/raw $VIDEO_PATH/frames/tagged visual
