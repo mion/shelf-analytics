@@ -5,7 +5,6 @@ In order to debug or calibrate the segmenter, run this:
 
 Then read the 'segment.log' while keeping the PNG file open so you can visualize what's going on.
 """
-import pdb
 import os
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'shan'))
@@ -45,7 +44,6 @@ if __name__ == '__main__':
     ap.add_argument('-d', '--diff_thresh', default=DEFAULT_DIFF_THRESH, type=int, help='area delta diff threshold to consider two frames equal, thus being static (default: {:d})'.format(DEFAULT_DIFF_THRESH))
     ap.add_argument('-v', '--verbose', action='store_true', help='print area delta and area delta diff for each frame; also print a plot of the area delta over time')
     args = vars(ap.parse_args())
-    # pdb.set_trace()
     verbose = args.get('verbose')
     video_path = args.get('video')
     fps = args.get('fps')
