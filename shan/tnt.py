@@ -34,6 +34,10 @@ def load_json(path):
     with open(path, "r") as tags_file:
         return json.loads(tags_file.read())
 
+def save_json(obj, path):
+    with open(path, "w") as jsonfile:
+        json.dump(obj, jsonfile)
+
 def load_frames(path):
     video = cv2.VideoCapture(path)
     if not video.isOpened():
