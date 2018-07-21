@@ -21,4 +21,6 @@ for frame in tags['frames']:
     correct_frame_index = int(parts[len(parts) -1]) - 1
     frame['frame_index'] = correct_frame_index
 
+tags['frames'] = sorted(tags['frames'], key=lambda fr: fr['frame_index'])
+
 save_json(tags, args.output_tags_path)
