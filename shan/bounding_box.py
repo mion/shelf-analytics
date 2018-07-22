@@ -15,6 +15,7 @@ class BoundingBox:
     def __init__(self, raw_bbox, bbox_format):
         self.id = BoundingBox.next_bbox_id
         BoundingBox.next_bbox_id += 1
+        self.frame_index = None # currently being used in 'find_detection_failures' script only
         self.filtering_results = []
         self.score = 0.0
         self.parent_track_ids = []
