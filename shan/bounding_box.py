@@ -67,6 +67,9 @@ class BoundingBox:
         dy = dest_y - orig_y
         return math.sqrt((dx * dx) + (dy * dy))
     
+    def has_intersection_with(self, bbox):
+        return self.intersection_area(bbox) is not None
+    
     def intersection_area(self, bbox):
         x1 = max(self.x1, bbox.x1)
         y1 = max(self.y1, bbox.y1)
