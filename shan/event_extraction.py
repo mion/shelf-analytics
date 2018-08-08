@@ -151,10 +151,10 @@ def extract_event(roi_type, iaot, fps, config):
         else:
             return (None, "no pondered nor walked event")
 
-def extract_all_events(iaot_path, tracks_path, rois_path):
-    rois = load_json(rois_path)
-    iaot = load_json(iaot_path)
-    tracks = load_json(tracks_path)
+def extract_all_events(iaot, tracks, rois):
+    # rois = load_json(rois_path)
+    # iaot = load_json(iaot_path)
+    # tracks = load_json(tracks_path)
     events = []
     for roi in rois:
         roi_name = roi['name']
@@ -172,38 +172,3 @@ def extract_all_events(iaot_path, tracks_path, rois_path):
             else:
                 print('\tTrack #{}: error "{}"'.format(str(track_idx + 1), err))
     return events
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    # parser.add_argument('video_id', help='a video id of the form "video-33-p_04"')
-    parser.add_argument('iaot_path', help='path to the iaot JSON file')
-    parser.add_argument('tracks_path', help='path to the tracks JSON file')
-    parser.add_argument('rois_path', help='path to the rois JSON file')
-    parser.add_argument('output_path', help='path to the output events JSON file')
-    args = parser.parse_args()
-
-    # video_id = args.video_id # "video-33-p_04"
-    # iaot_path = "/Users/gvieira/shan/{}/data/iaot.json".format(video_id)
-    # tracks_path = "/Users/gvieira/shan/{}/data/tracks.json".format(video_id)
-    # output_events_path = "/Users/gvieira/shan/{}/data/events.json".format(video_id)
-    # events = []
-    # for roi in rois:
-    #     roi_name = roi['name']
-    #     print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
-    #     for track_idx in range(len(tracks)):
-    #         track = tracks[track_idx]
-    #         event, err = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
-    #         if event is not None:
-    #             print('\tTrack #{}: event "{}" at frame {}'.format(str(track_idx + 1), event['type'], str(event['index'])))
-    #             event.update({
-    #                 'roi_name': roi_name,
-    #                 'track': track_idx
-    #             })
-    #             events.append(event)
-    #         else:
-    #             print('\tTrack #{}: error "{}"'.format(str(track_idx + 1), err))
-    events = extract_all_events(args.iaot_path, args.tracks_path, args.rois_path)
-
-    # output_file_path = os.path.join('/Users/gvieira/shan/{}/data'.format(video_id), "events.json")
-    with open(args.output_path, "w") as events_file:
-        json.dump(events, events_file)
