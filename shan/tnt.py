@@ -6,7 +6,6 @@ import os
 import shutil
 import json
 import cv2
-import cvutil
 import skimage
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
@@ -38,11 +37,25 @@ def save_json(obj, path):
     with open(path, "w") as jsonfile:
         json.dump(obj, jsonfile)
 
+def read_frames_from_video(video):
+    is_first_frame = True
+    frames = []
+    while True:
+        ok, frame = video.read()
+        if not ok and is_first_frame:
+            return None
+        elif not ok and not is_first_frame:
+            break
+        else:
+            is_first_frame = False
+            frames.append(frame)
+    return frames
+
 def load_frames(path):
     video = cv2.VideoCapture(path)
     if not video.isOpened():
         return None
-    return cvutil.read_frames_from_video(video)
+    return read_frames_from_video(video)
 
 def count_frames(path): 
     # FIXME: this is VERY SLOW, we should find a way to count faster
