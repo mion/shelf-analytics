@@ -152,6 +152,25 @@ def extract_event(roi_type, iaot, fps, config):
         else:
             return (None, "no pondered nor walked event")
 
+def extract_all_events(iaots, tracks, rois):
+    events = []
+    for roi in rois:
+        roi_name = roi['name']
+        print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
+        for track_idx in range(len(tracks)):
+            track = tracks[track_idx]
+            event, err = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
+            if event is not None:
+                print('\tTrack #{}: event "{}" at frame {}'.format(str(track_idx + 1), event['type'], str(event['index'])))
+                event.update({
+                    'roi_name': roi_name,
+                    'track': track_idx
+                })
+                events.append(event)
+            else:
+                print('\tTrack #{}: error "{}"'.format(str(track_idx + 1), err))
+    return events
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument('video_id', help='a video id of the form "video-33-p_04"')
@@ -169,23 +188,23 @@ if __name__ == '__main__':
     tracks = load_json(args.tracks_path)
 
     # output_events_path = "/Users/gvieira/shan/{}/data/events.json".format(video_id)
-
-    events = []
-    for roi in rois:
-        roi_name = roi['name']
-        print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
-        for track_idx in range(len(tracks)):
-            track = tracks[track_idx]
-            event, err = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
-            if event is not None:
-                print('\tTrack #{}: event "{}" at frame {}'.format(str(track_idx + 1), event['type'], str(event['index'])))
-                event.update({
-                    'roi_name': roi_name,
-                    'track': track_idx
-                })
-                events.append(event)
-            else:
-                print('\tTrack #{}: error "{}"'.format(str(track_idx + 1), err))
+    # events = []
+    # for roi in rois:
+    #     roi_name = roi['name']
+    #     print('Roi "{}" (type="{}")'.format(roi_name, roi['type']))
+    #     for track_idx in range(len(tracks)):
+    #         track = tracks[track_idx]
+    #         event, err = extract_event(roi['type'], iaots[track_idx][roi_name], VIDEO_FPS, DEFAULT_CONFIG)
+    #         if event is not None:
+    #             print('\tTrack #{}: event "{}" at frame {}'.format(str(track_idx + 1), event['type'], str(event['index'])))
+    #             event.update({
+    #                 'roi_name': roi_name,
+    #                 'track': track_idx
+    #             })
+    #             events.append(event)
+    #         else:
+    #             print('\tTrack #{}: error "{}"'.format(str(track_idx + 1), err))
+    events = extract_all_events(iaots, tracks, rois)
 
     # output_file_path = os.path.join('/Users/gvieira/shan/{}/data'.format(video_id), "events.json")
     with open(args.output_path, "w") as events_file:
