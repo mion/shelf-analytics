@@ -176,6 +176,7 @@ def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_pa
     # Load weights trained on MS-COCO
     model.load_weights(COCO_MODEL_PATH, by_name=True)
     ### Run object detection on every image
+    return_error = None
     for index in range(output['last_detected_frame_index'], len(images)):
         print('Detecting objects in frame {} of {}'.format(str(index), str(len(images))))
         try:
@@ -190,6 +191,10 @@ def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_pa
             output['last_detected_frame_index'] = index
         except Exception as exc:
             print('Detection failed, stopping. ERROR: ' + str(exc))
+            return_error = exc
             break
+    # save work done so far
     with open(output_file_path, 'w') as output_file:
         json.dump(output, output_file)
+
+    return return_error

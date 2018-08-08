@@ -33,11 +33,8 @@ class Detector(Worker):
         output_frames_dir_path = os.path.join(video_dir_path, 'frames/tagged')
         cmd = 'python scripts/detect_objects2.py {} {} --frames_dir_path {}'.format(raw_frames_dir_path, output_file_path, output_frames_dir_path)
         # FIXME shell=True is NOT SECURE
-        completed_proc = subprocess.run(cmd, shell=True, check=True)
-        if completed_proc.returncode == 0:
-            print("SUCCESS: detected objects for video {}".format(video_id))
-        else:
-            print("FAILURE: detect objects script returned non-zero exit status {}".format(returncode))
+        # NOTE check=True will raise an exception if exit status is not 0
+        subprocess.run(cmd, shell=True, check=True)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Object detection worker.')
