@@ -9,6 +9,13 @@ class Worker:
         self.conf = conf
         self.verbose = verbose
     
+    def missing_keys(self, job, required_keys):
+        missing = []
+        for key in required_keys:
+            if key not in job:
+                missing.append(key)
+        return missing
+    
     def process(self, job):
         raise NotImplementedError()
     
