@@ -20,7 +20,8 @@ class Recorder(Worker):
         keys = ['filename', 'duration', 'codec', 'size', 'fps']
         for key in keys:
             if key not in job:
-                print("FAILED TO RECORD: missing required key '{}' in job JSON".format(key))
+                if self.verbose:
+                    print("FAILURE: missing required key '{}' in job JSON".format(key))
                 return
         filename = job['filename']
         width = None
@@ -41,7 +42,8 @@ class Recorder(Worker):
         fourcc = cv2.VideoWriter_fourcc(*codec)
         out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
         start_time = time.perf_counter() # returns a float
-        print('Recording started with FPS {} and {}x{} resolution...'.format(fps, width, height))
+        if self.verbose:
+            print('Recording started with FPS {} and {}x{} resolution...'.format(fps, width, height))
         while(cap.isOpened()):
             ret, frame = cap.read()
             if ret == True:
@@ -53,7 +55,8 @@ class Recorder(Worker):
                 break
         cap.release()
         out.release()
-        print("DONE! Saved {:.2f}seg of video to file '{}' with codec {}".format(elapsed, filename, codec))
+        if self.verbose:
+            print("SUCCESS: saved {:.2f}seg of video to file '{}' with codec {}".format(elapsed, filename, codec))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Recorder worker.')
