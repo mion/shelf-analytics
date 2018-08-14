@@ -26,12 +26,14 @@ class DBSaver(Worker):
         missing_keys = self.missing_keys(job, ['data'])
         if len(missing_keys) > 0:
             print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
-            return
+            return False
         data = job['data']
         if ('shelf_id' in data) and ('events' in data):
             self.save_events(data['shelf_id'], data['events'])
+            return True
         else:
             print("FAILURE: invalid data to be saved:\n{}".format(json.dumps(data)))
+            return False
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

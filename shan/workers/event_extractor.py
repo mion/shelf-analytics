@@ -23,15 +23,15 @@ class EventExtractor(Worker):
     def process(self, job):
         missing_keys = self.missing_keys(job, ['tracks_path', 'rois_path', 'output_path'])
         if len(missing_keys) > 0:
-            if self.verbose:
-                print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
-            return
+            print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
+            return False
         rois = load_json(job['rois_path'])
         tracks = load_json(job['tracks_path'])
         _iaot = extract_intersection_area_over_time(tracks, rois)
         events = extract_all_events(_iaot, tracks, rois)
         with open(job['output_path'], 'w') as output_file:
             json.dump(events, output_file)
+        return True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

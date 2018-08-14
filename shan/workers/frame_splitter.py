@@ -32,10 +32,13 @@ class FrameSplitter(Worker):
         missing_keys = self.missing_keys(job, ['input_video_path', 'output_dir_path', 'ext'])
         if len(missing_keys) > 0:
             print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
-            return
+            return False
         success = split_frames(job['input_video_path'], job['output_dir_path'], job['ext'])
         if not success:
             print('FAILURE: could not split frames from input video')
+            return False
+        else:
+            return True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Frame splitter worker.')

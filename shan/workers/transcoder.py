@@ -33,10 +33,13 @@ class Transcoder(Worker):
         missing_keys = self.missing_keys(job, ['input_video_path', 'output_video_path', 'fps'])
         if len(missing_keys) > 0:
             print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
-            return
+            return False
         success = transcode(job['input_video_path'], job['output_video_path'], job['fps'])
         if not success:
             print('FAILURE: could not transcode input video file')
+            return False
+        else:
+            return True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Transcoder tool.')

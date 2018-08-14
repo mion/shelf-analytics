@@ -18,14 +18,14 @@ class Uploader(Worker):
     def process(self, job):
         missing_keys = self.missing_keys(job, ['input_file_path', 's3_bucket', 's3_key'])
         if len(missing_keys) > 0:
-            if self.verbose:
-                print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
-            return
+            print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
+            return False
         input_file_path = job['input_file_path']
         bucket = job['s3_bucket']
         key = job['s3_key']
         s3 = boto3.client('s3')
         s3.upload_file(input_file_path, bucket, key)
+        return True
 
 
 if __name__ == '__main__':

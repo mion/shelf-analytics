@@ -26,15 +26,15 @@ class Tracker(Worker):
     def process(self, job):
         missing_keys = self.missing_keys(job, ['calib_path', 'tags_path', 'video_path', 'output_file_path'])
         if len(missing_keys) > 0:
-            if self.verbose:
-                print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
-            return
+            print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
+            return False
         calib = load_json(job['calib_path'])
         tags = load_json(job['tags_path'])
         frame_bundles = load_frame_bundles(job['video_path'], tags)
         tracks = track_humans(calib, frame_bundles, MAX_TRACKS)
         with open(job['output_file_path'], 'w') as output_file:
             json.dump(tracks, output_file)
+        return True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

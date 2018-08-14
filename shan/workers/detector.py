@@ -23,9 +23,8 @@ class Detector(Worker):
     def process(self, job):
         missing_keys = self.missing_keys(job, ['video_id'])
         if len(missing_keys) > 0:
-            if self.verbose:
-                print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
-            return
+            print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
+            return False
         video_id = job['video_id']
         video_dir_path = os.path.join(SHAN_WORKSPACE_PATH, video_id)
         raw_frames_dir_path = os.path.join(video_dir_path, 'frames/raw')
@@ -35,6 +34,7 @@ class Detector(Worker):
         # FIXME shell=True is NOT SECURE
         # NOTE check=True will raise an exception if exit status is not 0
         subprocess.run(cmd, shell=True, check=True)
+        return True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Object detection worker.')
