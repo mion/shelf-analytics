@@ -24,7 +24,7 @@ class Uploader(Worker):
         bucket = job['s3_bucket']
         key = job['s3_key']
         s3 = boto3.client('s3')
-        s3.upload_file(input_file_path, bucket, key)
+        s3.upload_file(input_file_path, bucket, key, ExtraArgs={'ACL': 'public-read'})
         return True
 
 

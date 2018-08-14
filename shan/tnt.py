@@ -7,8 +7,16 @@ import shutil
 import json
 import cv2
 import skimage
+import datetime
+import time
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+
+def current_local_time_isostring():
+    # See: https://stackoverflow.com/questions/2150739/iso-time-iso-8601-in-python
+    utc_offset_sec = time.altzone if time.localtime().tm_isdst else time.timezone
+    utc_offset = datetime.timedelta(seconds=-utc_offset_sec)
+    return datetime.datetime.now().replace(tzinfo=datetime.timezone(offset=utc_offset)).isoformat()
 
 def has_ffmpeg_installed():
     return shutil.which("ffmpeg") != None

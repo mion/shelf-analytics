@@ -7,7 +7,7 @@ import pika
 class Worker:
     DEFAULT_OUTPUT_CONF = {
         'QUEUE_HOST': 'localhost',
-        'QUEUE_NAME': 'output_dev_1',
+        'QUEUE_NAME': 'output_dev_3',
         'QUEUE_DURABLE': True,
         'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
         'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
@@ -34,14 +34,17 @@ class Worker:
         success = self.process(job)
         print("[*] Processing done, acknowledging.")
         channel.basic_ack(delivery_tag = method.delivery_tag)
-        print("[*] Adding to output queue...")
-        result = {
-            'worker': self.name,
-            'success': success,
-            'job': job
-        }
-        self._add_message(result, self.output_conf['QUEUE_NAME'], self.output_conf['QUEUE_HOST'], self.output_conf['QUEUE_DURABLE'], self.output_conf['DELIVERY_MODE'])
-        print("[*] Done!")
+        if self.output_conf is not None:
+            print("[*] Adding to output queue...")
+            result = {
+                'worker': self.name,
+                'success': success,
+                'job': job
+            }
+            self._add_message(result, self.output_conf['QUEUE_NAME'], self.output_conf['QUEUE_HOST'], self.output_conf['QUEUE_DURABLE'], self.output_conf['DELIVERY_MODE'])
+            print("[*] Done!")
+        else:
+            print("[*] Output queue is NULL, all done.")
     
     def _add_message(self, msg, queue_name, queue_host, durable, delivery_mode):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_host))
