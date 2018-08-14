@@ -7,10 +7,10 @@ import transcoder
 import uploader
 import db_saver
 
-def consume(self, channel, method, properties, message):
+def consume(channel, method, properties, message):
     print("[*] Received message:\n{}".format(message))
 
-def start(self):
+def start():
     conf = worker.Worker.DEFAULT_OUTPUT_CONF
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=conf['QUEUE_HOST']))
     channel = connection.channel()
@@ -25,3 +25,6 @@ if __name__ == '__main__':
     parser.add_argument("command", help="the worker command: 'add', 'start'")
     parser.add_argument("-s", "--shelf_id", type=int, help="db ID of the Shelf to record a calibration video")
     args = parser.parse_args()
+
+    if args.command == 'start':
+        start()
