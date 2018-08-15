@@ -6,10 +6,21 @@ import os
 import shutil
 import json
 import cv2
-import cvutil
 import skimage
+import datetime
+import time
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+
+def replace_ext(path, new_ext):
+    basepath, _ = os.path.splitext(path)
+    return basepath + '.' + new_ext
+
+def current_local_time_isostring():
+    # See: https://stackoverflow.com/questions/2150739/iso-time-iso-8601-in-python
+    utc_offset_sec = time.altzone if time.localtime().tm_isdst else time.timezone
+    utc_offset = datetime.timedelta(seconds=-utc_offset_sec)
+    return datetime.datetime.now().replace(tzinfo=datetime.timezone(offset=utc_offset)).isoformat()
 
 def has_ffmpeg_installed():
     return shutil.which("ffmpeg") != None
@@ -38,11 +49,25 @@ def save_json(obj, path):
     with open(path, "w") as jsonfile:
         json.dump(obj, jsonfile)
 
+def read_frames_from_video(video):
+    is_first_frame = True
+    frames = []
+    while True:
+        ok, frame = video.read()
+        if not ok and is_first_frame:
+            return None
+        elif not ok and not is_first_frame:
+            break
+        else:
+            is_first_frame = False
+            frames.append(frame)
+    return frames
+
 def load_frames(path):
     video = cv2.VideoCapture(path)
     if not video.isOpened():
         return None
-    return cvutil.read_frames_from_video(video)
+    return read_frames_from_video(video)
 
 def count_frames(path): 
     # FIXME: this is VERY SLOW, we should find a way to count faster

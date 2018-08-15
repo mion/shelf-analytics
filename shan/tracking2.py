@@ -1,11 +1,23 @@
-import pdb
+import os
+import json
+import math
 
 from cvutil import create_object_tracker
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+from bounding_box_filter import BoundingBoxFilter as BBoxFilter
 from tnt import load_json
 from frame_bundle import FrameBundle
-import json
-import math
+
+def track_humans(calib, frame_bundles, max_tracks):
+    """Does NOT export tracking-result.json file."""
+    print('Filtering bounding boxes inside frame bundles...')
+    bbox_filter = BBoxFilter(calib)
+    for frame_bundle in frame_bundles:
+        bbox_filter.filter_frame_bundle(frame_bundle)
+    print('Analyzing tracks...')
+    _, analyzer = compute_tracking_result(calib, frame_bundles, max_tracks)
+    print('Exporting tracks...')
+    return [track.to_dict() for track in analyzer.tracks]
 
 def compute_tracking_result(calib, frame_bundles, max_track_count):
     analyzer = HumanTrackAnalyzer(calib, frame_bundles)

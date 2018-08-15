@@ -15,6 +15,7 @@ class BoundingBox:
     def __init__(self, raw_bbox, bbox_format):
         self.id = BoundingBox.next_bbox_id
         BoundingBox.next_bbox_id += 1
+        self.frame_index = None # currently being used in 'find_detection_failures' script only
         self.filtering_results = []
         self.score = 0.0
         self.parent_track_ids = []
@@ -65,6 +66,9 @@ class BoundingBox:
         dx = dest_x - orig_x
         dy = dest_y - orig_y
         return math.sqrt((dx * dx) + (dy * dy))
+    
+    def has_intersection_with(self, bbox):
+        return self.intersection_area(bbox) is not None
     
     def intersection_area(self, bbox):
         x1 = max(self.x1, bbox.x1)
