@@ -12,6 +12,10 @@ import time
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 
+def replace_ext(path, new_ext):
+    basepath, _ = os.path.splitext(path)
+    return basepath + '.' + new_ext
+
 def current_local_time_isostring():
     # See: https://stackoverflow.com/questions/2150739/iso-time-iso-8601-in-python
     utc_offset_sec = time.altzone if time.localtime().tm_isdst else time.timezone

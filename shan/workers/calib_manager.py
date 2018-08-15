@@ -81,7 +81,7 @@ def add_calibration_job(shelf_id):
     r.add_job({
         'shelf_id': shelf_id,
         'filename': os.path.join(RECORDER_OUTPUT_DIR, 'calib-{}'.format(time_str) + ext),
-        'duration': 5,
+        'duration': 10,
         'fps': 'source',
         'size': 'source',
         'codec': 'mp4v',

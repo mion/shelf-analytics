@@ -1,8 +1,12 @@
+import os
+import sys
+sys.path.append(os.path.join(os.getcwd(), 'shan'))
 import argparse
 import boto3
 
 from worker import Worker
-
+from transcoding import generate_thumbnail
+from tnt import replace_ext
 
 class Uploader(Worker):
     def __init__(self):
@@ -25,6 +29,14 @@ class Uploader(Worker):
         key = job['s3_key']
         s3 = boto3.client('s3')
         s3.upload_file(input_file_path, bucket, key, ExtraArgs={'ACL': 'public-read'})
+        # FIXME create thumbnail somewhere else
+        thumb_width = 640
+        thumb_height = 420
+        thumb_img_path = replace_ext(input_file_path, 'jpg')
+        # TODO check result
+        generate_thumbnail(input_file_path, thumb_img_path, thumb_width, thumb_height)
+        _, thumb_img_name = os.path.split(thumb_img_path)
+        s3.upload_file(thumb_img_path, bucket, thumb_img_name, ExtraArgs={'ACL': 'public-read'})
         return True
 
 

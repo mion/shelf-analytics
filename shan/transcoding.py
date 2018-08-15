@@ -23,3 +23,14 @@ def transcode(input_video_path, output_video_path, fps):
   # FIXME: using 'subprocess.call' with shell=True is not secure, search Python 3 docs for explanation.
   result = subprocess.call(cmd, shell=True)
   return result == 0
+
+def generate_thumbnail(input_video_path, output_image_path, width, height):
+  if not has_ffmpeg_installed():
+    raise RuntimeError('ffmpeg is not installed')
+  # About the ffmpeg command: 
+  # https://networking.ringofsaturn.com/Unix/extractthumbnail.php
+  cmd_template = "ffmpeg -i {0} -vframes 1 -an -s {1}x{2} -ss 1 {3}"
+  cmd = cmd_template.format(input_video_path, width, height, output_image_path)
+  # FIXME: using 'subprocess.call' with shell=True is not secure, search Python 3 docs for explanation.
+  result = subprocess.call(cmd, shell=True)
+  return result == 0
