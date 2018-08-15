@@ -76,7 +76,7 @@ class CalibManager(Worker):
 def add_calibration_job(shelf_id):
     ext = '.mov'
     curr_time = time.localtime()
-    time_str = time.strftime('%Y-%m-%d-%H-%M-%S-UTC%z', curr_time)
+    time_str = time.strftime('%Y-%m-%d-%H-%M-%S', curr_time)
     r = Recorder()
     r.add_job({
         'shelf_id': shelf_id,
