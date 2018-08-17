@@ -10,6 +10,7 @@ import pika
 
 from tnt import add_suffix_to_basename, current_local_time_isostring
 from worker import Worker
+from detector import Detector
 from recorder import Recorder
 from transcoder import Transcoder
 from uploader import Uploader
@@ -28,6 +29,18 @@ class CalibManager(Worker):
     def process(self, msg):
         print("[*] Received message:\n{}".format(msg))
         # TODO check for 'success' status
+        if 'job' not in msg:
+            print("[!] FAILURE: missing 'job' key in msg dict")
+            return True
+        if 'flow' not in msg['job']:
+            print("[!] FAILURE: missing 'flow' key in msg dict")
+            return True
+        if 'worker' not in msg:
+            print("[!] FAILURE: missing 'worker' key in msg dict")
+            return True
+        if msg['worker'] == 'db_saver':
+            print("[*] Ignoring 'db_saver' message")
+            return True
         if msg['job']['flow'] == 'calibration':
             if msg['worker'] == 'recorder':
                 print('[*] Adding output of Recorder to Transcoder...')
@@ -83,28 +96,43 @@ class CalibManager(Worker):
             else:
                 print("[!] FAILURE: unknown worker '{}'".format(msg['worker']))
         elif msg['job']['flow'] == 'experiment':
-        # worker.add_job({
-        #     'input_video_path': args.input, 
-        #     'output_dir_path': args.output, 
-        #     'ext': args.ext
-        # })
             if msg['worker'] == 'downloader':
                 print('[*] Downloader -> Frame Splitter')
                 _, fname = os.path.split(msg['job']['output_file_path'])
                 name, _ = os.path.splitext(fname)
                 main_path = os.path.join(SHAN_WS_PATH, name)
+                videos_path = os.path.join(main_path, 'videos')
                 os.mkdir(main_path)
-                os.mkdir(os.path.join(main_path, 'videos'))
+                os.mkdir(videos_path)
                 os.mkdir(os.path.join(main_path, 'data'))
                 os.mkdir(os.path.join(main_path, 'frames'))
                 os.mkdir(os.path.join(main_path, 'frames/tagged'))
                 os.mkdir(os.path.join(main_path, 'frames/raw'))
                 os.mkdir(os.path.join(main_path, 'frames/events'))
+                orig_input_video_path = msg['job']['output_file_path']
+                shutil.move(orig_input_video_path, videos_path)
+                _, video_filename = os.path.split(orig_input_video_path)
+                input_video_path = os.path.join(videos_path, video_filename)
                 w = FrameSplitter()
                 w.add_job({
-                    'input_video_path': msg['job']['output_file_path'],
+                    'flow': 'experiment',
+                    'main_path': main_path,
+                    'input_video_path': input_video_path,
                     'output_dir_path': os.path.join(main_path, 'frames/raw'),
-                    'ext': 'png'
+                    'ext': 'png',
+                })
+            elif msg['worker'] == 'frame_splitter':
+                print("[*] Frame Splitter -> Detector")
+                raw_frames_dir_path = msg['job']['output_dir_path']
+                main_path = msg['job']['main_path']
+                output_file_path = os.path.join(main_path, 'data/tags.json')
+                output_frames_dir_path = os.path.join(main_path, 'frames/tagged')
+                w = Detector()
+                w.add_job({
+                    'flow': 'experiment',
+                    'raw_frames_dir_path': raw_frames_dir_path,
+                    'output_file_path': output_file_path,
+                    'output_frames_dir_path': output_frames_dir_path
                 })
         else:
             print("[!] FAILURE: unknown flow '{}'".format(msg['flow']))
@@ -119,7 +147,7 @@ def add_calibration_job(shelf_id):
         'flow': 'calibration',
         'shelf_id': shelf_id,
         'filename': os.path.join(RECORDER_OUTPUT_DIR, 'calib-{}'.format(time_str) + ext),
-        'duration': 10,
+        'duration': 3,
         'fps': 'source',
         'size': 'source',
         'codec': 'mp4v',
@@ -130,10 +158,10 @@ def add_experiment_job(s3_key, shelf_id, calibration_video_id, rois_conf, tracki
     d = Downloader()
     s3_bucket = 'shan-develop'
     d.add_job({
+        'flow': 'experiment',
         'output_file_path': os.path.join(SHAN_WS_PATH, s3_key),
         's3_key': s3_key,
         's3_bucket': s3_bucket,
-        'flow': 'experiment',
         'shelf_id': shelf_id,
         'calibration_video_id': calibration_video_id,
         'rois_conf': rois_conf,
