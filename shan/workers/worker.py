@@ -27,13 +27,29 @@ class Worker:
     def process(self, job):
         raise NotImplementedError()
     
+    def reconnect_to_channel(self):
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.conf['QUEUE_HOST']))
+        channel = connection.channel()
+        channel.queue_declare(queue=self.conf['QUEUE_NAME'], durable=self.conf['QUEUE_DURABLE'])
+        channel.basic_qos(prefetch_count=self.conf['QUEUE_PREFETCH_COUNT'])
+        return channel
+    
     def process_job(self, channel, method, properties, message):
         job = json.loads(message)
         print("[*] Received job:", job)
         print("[*] Processing...")
         success = self.process(job)
-        print("[*] Processing done, acknowledging.")
-        channel.basic_ack(delivery_tag = method.delivery_tag)
+        print("[*] Processing done, acknowledging...")
+        try:
+            channel.basic_ack(delivery_tag = method.delivery_tag)
+            print("[*] Ack sent!")
+        except pika.exceptions.ConnectionClosed:
+            # recover the connection
+            print("[!] WARNING: connection was closed. Trying to reconnect...")
+            channel = self.reconnect_to_channel()
+            channel.basic_ack(delivery_tag = method.delivery_tag)
+            print("[*] Ack sent!")
+
         if self.output_conf is not None:
             print("[*] Adding to output queue...")
             result = {
@@ -45,7 +61,7 @@ class Worker:
             print("[*] Done!")
         else:
             print("[*] Output queue is NULL, all done.")
-    
+
     def _add_message(self, msg, queue_name, queue_host, durable, delivery_mode):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_host))
         channel = connection.channel()
