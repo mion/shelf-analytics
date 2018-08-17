@@ -11,12 +11,14 @@ import pika
 from tnt import add_suffix_to_basename, current_local_time_isostring
 from worker import Worker
 from detector import Detector
+from tracker import Tracker
 from recorder import Recorder
 from transcoder import Transcoder
 from uploader import Uploader
 from db_saver import DBSaver
 from downloader import Downloader
 from frame_splitter import FrameSplitter
+from event_extractor import EventExtractor
 
 RECORDER_OUTPUT_DIR = '/Users/gvieira/shan-calib-videos'
 SHAN_WS_PATH = '/Users/gvieira/shan-develop'
@@ -130,9 +132,40 @@ class CalibManager(Worker):
                 w = Detector()
                 w.add_job({
                     'flow': 'experiment',
+                    'main_path': main_path,
+                    'video_path': msg['job']['input_video_path'],
                     'raw_frames_dir_path': raw_frames_dir_path,
                     'output_file_path': output_file_path,
                     'output_frames_dir_path': output_frames_dir_path
+                })
+            elif msg['worker'] == 'detector':
+                print('[*] Detector -> Tracker')
+                main_path = msg['job']['main_path']
+                video_path = msg['job']['video_path']
+                calib_path = '/Users/gvieira/code/toneto/shan/test/calib-configs/venue-11-shelf-1-fps-10.json'
+                tags_path = os.path.join(main_path, 'data/tags.json')
+                output_file_path = os.path.join(main_path, 'data/tracks.json')
+                w = Tracker()
+                w.add_job({
+                    'flow': 'experiment',
+                    'main_path': main_path,
+                    'video_path': video_path,
+                    'calib_path': calib_path,
+                    'tags_path': tags_path,
+                    'output_file_path': output_file_path
+                })
+            elif msg['worker'] == 'tracker':
+                print('[*] Tracker -> EventExtractor')
+                main_path = msg['job']['main_path']
+                w = EventExtractor()
+                tracks_path = msg['job']['output_file_path']
+                rois_path = '/Users/gvieira/code/toneto/shan/test/rois/v11s1.json'
+                output_path = os.path.join(main_path, 'data/events.json')
+                w.add_job({
+                    'flow': 'experiment',
+                    'tracks_path': tracks_path,
+                    'rois_path': rois_path,
+                    'output_path': output_path
                 })
         else:
             print("[!] FAILURE: unknown flow '{}'".format(msg['flow']))
