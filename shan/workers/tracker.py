@@ -2,13 +2,14 @@ import os
 import sys
 sys.path.append('/Users/gvieira/code/toneto/shan')
 sys.path.append('/Users/gvieira/code/toneto/shan/shan')
+sys.path.append('/Users/gvieira/code/toneto/shan/shan/workers')
 import argparse
 import json
 
-from shan.workers.worker import Worker
-from shan.tracking2 import track_humans
-from shan.frame_bundle import load_frame_bundles
-from shan.tnt import load_json
+from worker import Worker
+from tracking2 import track_humans
+from frame_bundle import load_frame_bundles
+from tnt import load_json
 
 MAX_TRACKS = 40
 
