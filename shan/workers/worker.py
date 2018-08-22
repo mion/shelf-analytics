@@ -66,8 +66,8 @@ class Worker:
 
     def start(self):
         params = pika.ConnectionParameters(host=self.conf['QUEUE_HOST'])
-        connection = pika.BlockingConnection(params)
-        channel = connection.channel()
+        self.connection = pika.BlockingConnection(params)
+        channel = self.connection.channel()
         channel.queue_declare(queue=self.conf['QUEUE_NAME'], durable=self.conf['QUEUE_DURABLE'])
         channel.basic_qos(prefetch_count=self.conf['QUEUE_PREFETCH_COUNT']) 
         channel.basic_consume(self.process_job, queue=self.conf['QUEUE_NAME'])
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     EXAMPLE_CONF = {
         'QUEUE_HOST': 'localhost',
-        'QUEUE_NAME': 'example_queue_1',
+        'QUEUE_NAME': 'example_queue_2',
         'QUEUE_DURABLE': True,
         'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
         'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     class SampleWorker(Worker):
         def __init__(self):
-            super().__init__(conf=EXAMPLE_CONF)
+            super().__init__('sample', conf=EXAMPLE_CONF)
         
         def process(self, job):
             secs = job['seconds']
@@ -101,6 +101,7 @@ if __name__ == '__main__':
                 else:
                     print("\tSlept 1 second.")
                     time.sleep(1)
+                    self.connection.process_data_events()
 
     parser = argparse.ArgumentParser(description='Sample worker.')
     parser.add_argument("command", help="the worker command: 'add', 'start'")
