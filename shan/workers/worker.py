@@ -7,7 +7,7 @@ import pika
 class Worker:
     DEFAULT_OUTPUT_CONF = {
         'QUEUE_HOST': 'localhost',
-        'QUEUE_NAME': 'output_dev_3',
+        'QUEUE_NAME': 'output_dev_4',
         'QUEUE_DURABLE': True,
         'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
         'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
@@ -27,28 +27,13 @@ class Worker:
     def process(self, job):
         raise NotImplementedError()
     
-    def reconnect_to_channel(self):
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.conf['QUEUE_HOST']))
-        channel = connection.channel()
-        channel.queue_declare(queue=self.conf['QUEUE_NAME'], durable=self.conf['QUEUE_DURABLE'])
-        channel.basic_qos(prefetch_count=self.conf['QUEUE_PREFETCH_COUNT'])
-        return channel
-    
     def process_job(self, channel, method, properties, message):
         job = json.loads(message)
         print("[*] Received job:", job)
         print("[*] Processing...")
         success = self.process(job)
         print("[*] Processing done, acknowledging...")
-        try:
-            channel.basic_ack(delivery_tag = method.delivery_tag)
-            print("[*] Ack sent!")
-        except pika.exceptions.ConnectionClosed:
-            # recover the connection
-            print("[!] WARNING: connection was closed. Trying to reconnect...")
-            channel = self.reconnect_to_channel()
-            channel.basic_ack(delivery_tag = method.delivery_tag)
-            print("[*] Ack sent!")
+        channel.basic_ack(delivery_tag = method.delivery_tag)
 
         if self.output_conf is not None:
             print("[*] Adding to output queue...")
@@ -76,22 +61,12 @@ class Worker:
         connection.close()
 
     def add_job(self, job):
-        # connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.conf['QUEUE_HOST']))
-        # channel = connection.channel()
-        # channel.queue_declare(queue=self.conf['QUEUE_NAME'], durable=self.conf['QUEUE_DURABLE'])
-        # message = json.dumps(job)
-        # channel.basic_publish(exchange='',
-        #                     routing_key=self.conf['QUEUE_NAME'],
-        #                     body=message,
-        #                     properties=pika.BasicProperties(
-        #                         delivery_mode = self.conf['DELIVERY_MODE'], 
-        #                     ))
-        # connection.close()
         self._add_message(job, self.conf['QUEUE_NAME'], self.conf['QUEUE_HOST'], self.conf['QUEUE_DURABLE'], self.conf['DELIVERY_MODE'])
         print('[*] Job added to queue:', job)
 
     def start(self):
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.conf['QUEUE_HOST']))
+        params = pika.ConnectionParameters(host=self.conf['QUEUE_HOST'])
+        connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.queue_declare(queue=self.conf['QUEUE_NAME'], durable=self.conf['QUEUE_DURABLE'])
         channel.basic_qos(prefetch_count=self.conf['QUEUE_PREFETCH_COUNT']) 
