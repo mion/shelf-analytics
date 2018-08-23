@@ -152,7 +152,10 @@ def detect_humans(model, image, debug_output_path):
 # the right order, which may not be the case. We should add a
 # 'last_processed_frame_filename' value to the output object 
 # and handle it accordingly.
-def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_path):
+def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_path, pika_connection=None):
+    """
+    This is ugly but we need the `pika_connection` to call `.process_data_events()` so it won't be closed by RabbitMQ.
+    """
     ### Load images and last json
     images = load_images(input_dir_path, DEFAULT_FRAME_IMAGE_EXTENSION)
     output = None
@@ -179,6 +182,8 @@ def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_pa
     return_error = None
     for index in range(output['last_detected_frame_index'], len(images)):
         print('Detecting objects in frame {} of {}'.format(str(index), str(len(images))))
+        if pika_connection is not None:
+            pika_connection.process_data_events()
         try:
             img = images[index]
             n_digits = len(str(len(images)))
