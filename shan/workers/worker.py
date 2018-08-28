@@ -7,7 +7,7 @@ import pika
 class Worker:
     DEFAULT_OUTPUT_CONF = {
         'QUEUE_HOST': 'localhost',
-        'QUEUE_NAME': 'output_dev_4',
+        'QUEUE_NAME': 'output_dev_5',
         'QUEUE_DURABLE': True,
         'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
         'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html

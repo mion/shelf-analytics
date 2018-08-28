@@ -12,7 +12,7 @@ class Uploader(Worker):
     def __init__(self):
         conf = {
             'QUEUE_HOST': 'localhost',
-            'QUEUE_NAME': 'uploader_dev_1',
+            'QUEUE_NAME': 'uploader_dev_2',
             'QUEUE_DURABLE': True,
             'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
             'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
