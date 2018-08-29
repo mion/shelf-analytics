@@ -24,7 +24,7 @@ class Tracker(Worker):
         #     'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
         # }
         name = 'tracker'
-        super().__init__(name, configuration['workers'][name])
+        super().__init__(name, configuration['dev']['workers'][name])
     
     def process(self, job):
         missing_keys = self.missing_keys(job, ['calib_path', 'tags_path', 'video_path', 'output_file_path'])

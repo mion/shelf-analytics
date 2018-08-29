@@ -183,10 +183,10 @@ class CalibManager(Worker):
                     'shelf_id': msg['job']['shelf_id'],
                     'video_path': msg['job']['video_path'],
                     'rois_path': msg['job']['rois_path'],
-                    'tr_path': os.path.join(main_path, 'data/tracking-result.json'),
+                    'tr_path': os.path.join(msg['job']['main_path'], 'data/tracking-result.json'),
                     'events_path': msg['job']['output_path'],
-                    'output_frames_path': os.path.join(main_path, 'frames/events'),
-                    'output_videos_path': os.path.join(main_path, 'videos')
+                    'output_frames_path': os.path.join(msg['job']['main_path'], 'frames/events'),
+                    'output_videos_path': os.path.join(msg['job']['main_path'], 'videos')
                 })
             elif msg['worker'] == 'evented_video_maker':
                 print('[*] EventedVideoMaker -> Uploader')
@@ -201,15 +201,15 @@ class CalibManager(Worker):
                     's3_bucket': 'shan-develop',
                     's3_key': evented_video_filename
                 })
-            elif msg['worker'] == 'db_saver':
-                print('[*] EventedVideoMaker -> DBSaver')
+            elif msg['worker'] == 'uploader':
+                print('[*] Uploader -> DBSaver')
                 d = DBSaver()
                 d.add_job({
                     'type': 'experiment',
                     'flow': 'experiment',
                     'data': {
                         'shelf_id': msg['job']['shelf_id'],
-                        's3_key': s3_key
+                        's3_key': msg['job']['s3_key']
                     }
                 }) 
         else:

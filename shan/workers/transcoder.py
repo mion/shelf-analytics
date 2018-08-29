@@ -29,7 +29,7 @@ class Transcoder(Worker):
         #     'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
         # }
         name = 'transcoder'
-        super().__init__(name, configuration['workers'][name])
+        super().__init__(name, configuration['dev']['workers'][name])
     
     def process(self, job):
         missing_keys = self.missing_keys(job, ['input_video_path', 'output_video_path', 'fps'])

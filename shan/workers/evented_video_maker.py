@@ -8,6 +8,8 @@ import argparse
 import json
 import shutil
 
+from configuration import configuration
+
 from worker import Worker
 from scripts.print_events import print_frames
 from tnt import load_json

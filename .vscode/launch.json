@@ -11,6 +11,15 @@
       "program": "${file}"
     },
     {
+      "name": "Shan Worker",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "args": [
+        "start"
+      ]
+    },
+    {
       "name": "Python: Attach",
       "type": "python",
       "request": "attach",

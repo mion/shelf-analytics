@@ -6,6 +6,8 @@ sys.path.append('/Users/gvieira/code/toneto/shan/shan/workers')
 import argparse
 import json
 
+from configuration import configuration
+
 from worker import Worker
 from event_extraction import extract_all_events
 from iaot import extract_intersection_area_over_time

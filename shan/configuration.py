@@ -3,7 +3,7 @@ configuration = {
         'workers': {
             'default': {
                 'QUEUE_HOST': 'localhost',
-                'QUEUE_NAME': 'default1',
+                'QUEUE_NAME': 'default2',
                 'QUEUE_DURABLE': True,
                 'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
                 'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
@@ -17,7 +17,7 @@ configuration = {
             },
             'detector': {
                 'QUEUE_HOST': 'localhost',
-                'QUEUE_NAME': 'detector1',
+                'QUEUE_NAME': 'detector2',
                 'QUEUE_DURABLE': True,
                 'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
                 'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
