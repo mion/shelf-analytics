@@ -8,6 +8,7 @@ import shutil
 
 import pika
 
+from configuration import configuration
 from tnt import add_suffix_to_basename, current_local_time_isostring
 from worker import Worker
 from detector import Detector
@@ -19,17 +20,17 @@ from db_saver import DBSaver
 from downloader import Downloader
 from frame_splitter import FrameSplitter
 from event_extractor import EventExtractor
+from evented_video_maker import EventedVideoMaker
 
 RECORDER_OUTPUT_DIR = '/Users/gvieira/shan-calib-videos'
 SHAN_WS_PATH = '/Users/gvieira/shan-develop'
 
 class CalibManager(Worker):
     def __init__(self):
-        super().__init__('calib_manager', Worker.DEFAULT_OUTPUT_CONF)
+        super().__init__('calib_manager', configuration['dev']['workers']['default'])
         self.output_conf = None
 
     def process(self, msg):
-        print("[*] Received message:\n{}".format(msg))
         # TODO check for 'success' status
         if 'job' not in msg:
             print("[!] FAILURE: missing 'job' key in msg dict")
@@ -118,6 +119,7 @@ class CalibManager(Worker):
                 w = FrameSplitter()
                 w.add_job({
                     'flow': 'experiment',
+                    'shelf_id': msg['job']['shelf_id'],
                     'main_path': main_path,
                     'input_video_path': input_video_path,
                     'output_dir_path': os.path.join(main_path, 'frames/raw'),
@@ -132,6 +134,7 @@ class CalibManager(Worker):
                 w = Detector()
                 w.add_job({
                     'flow': 'experiment',
+                    'shelf_id': msg['job']['shelf_id'],
                     'main_path': main_path,
                     'video_path': msg['job']['input_video_path'],
                     'raw_frames_dir_path': raw_frames_dir_path,
@@ -148,6 +151,7 @@ class CalibManager(Worker):
                 w = Tracker()
                 w.add_job({
                     'flow': 'experiment',
+                    'shelf_id': msg['job']['shelf_id'],
                     'main_path': main_path,
                     'video_path': video_path,
                     'calib_path': calib_path,
@@ -157,16 +161,57 @@ class CalibManager(Worker):
             elif msg['worker'] == 'tracker':
                 print('[*] Tracker -> EventExtractor')
                 main_path = msg['job']['main_path']
+                video_path = msg['job']['video_path']
                 w = EventExtractor()
                 tracks_path = msg['job']['output_file_path']
                 rois_path = '/Users/gvieira/code/toneto/shan/test/rois/v11s1.json'
                 output_path = os.path.join(main_path, 'data/events.json')
                 w.add_job({
                     'flow': 'experiment',
+                    'shelf_id': msg['job']['shelf_id'],
+                    'main_path': main_path,
+                    'video_path': video_path,
                     'tracks_path': tracks_path,
                     'rois_path': rois_path,
                     'output_path': output_path
                 })
+            elif msg['worker'] == 'event_extractor':
+                print('[*] EventExtractor -> EventedVideoMaker')
+                w = EventedVideoMaker()
+                w.add_job({
+                    'flow': 'experiment',
+                    'shelf_id': msg['job']['shelf_id'],
+                    'video_path': msg['job']['video_path'],
+                    'rois_path': msg['job']['rois_path'],
+                    'tr_path': os.path.join(main_path, 'data/tracking-result.json'),
+                    'events_path': msg['job']['output_path'],
+                    'output_frames_path': os.path.join(main_path, 'frames/events'),
+                    'output_videos_path': os.path.join(main_path, 'videos')
+                })
+            elif msg['worker'] == 'evented_video_maker':
+                print('[*] EventedVideoMaker -> Uploader')
+                w = Uploader()
+                _, orig_video_filename = os.path.split(msg['job']['video_path'])
+                evented_video_filename = 'evented-' + orig_video_filename
+                evented_video_path = os.path.join(msg['job']['output_videos_path'], evented_video_filename)
+                w.add_job({
+                    'flow': 'experiment',
+                    'shelf_id': msg['job']['shelf_id'],
+                    'input_file_path': evented_video_path,
+                    's3_bucket': 'shan-develop',
+                    's3_key': evented_video_filename
+                })
+            elif msg['worker'] == 'db_saver':
+                print('[*] EventedVideoMaker -> DBSaver')
+                d = DBSaver()
+                d.add_job({
+                    'type': 'experiment',
+                    'flow': 'experiment',
+                    'data': {
+                        'shelf_id': msg['job']['shelf_id'],
+                        's3_key': s3_key
+                    }
+                }) 
         else:
             print("[!] FAILURE: unknown flow '{}'".format(msg['flow']))
         return True
@@ -180,7 +225,7 @@ def add_calibration_job(shelf_id):
         'flow': 'calibration',
         'shelf_id': shelf_id,
         'filename': os.path.join(RECORDER_OUTPUT_DIR, 'calib-{}'.format(time_str) + ext),
-        'duration': 3,
+        'duration': 1,
         'fps': 'source',
         'size': 'source',
         'codec': 'mp4v',
