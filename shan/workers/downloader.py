@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.path.join(os.getcwd(), 'shan'))
+
 import argparse
 import boto3
 
