@@ -9,15 +9,18 @@ from tnt import load_json
 from frame_bundle import FrameBundle
 
 def track_humans(calib, frame_bundles, max_tracks):
-    """Does NOT export tracking-result.json file."""
+    #
+    # FIXME implicit exporting of tracking-result is bad
+    #
+    """This exports a tracking-result.json file at the same path of the tracks.json file"""
     print('Filtering bounding boxes inside frame bundles...')
     bbox_filter = BBoxFilter(calib)
     for frame_bundle in frame_bundles:
         bbox_filter.filter_frame_bundle(frame_bundle)
     print('Analyzing tracks...')
-    _, analyzer = compute_tracking_result(calib, frame_bundles, max_tracks)
+    tracking_result, analyzer = compute_tracking_result(calib, frame_bundles, max_tracks)
     print('Exporting tracks...')
-    return [track.to_dict() for track in analyzer.tracks]
+    return ([track.to_dict() for track in analyzer.tracks], tracking_result)
 
 def compute_tracking_result(calib, frame_bundles, max_track_count):
     analyzer = HumanTrackAnalyzer(calib, frame_bundles)
