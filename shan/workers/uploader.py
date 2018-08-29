@@ -7,17 +7,19 @@ import boto3
 from worker import Worker
 from transcoding import generate_thumbnail
 from tnt import replace_ext
+from configuration import configuration
 
 class Uploader(Worker):
     def __init__(self):
-        conf = {
-            'QUEUE_HOST': 'localhost',
-            'QUEUE_NAME': 'uploader_dev_2',
-            'QUEUE_DURABLE': True,
-            'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
-            'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
-        }
-        super().__init__('uploader', conf)
+        # conf = {
+        #     'QUEUE_HOST': 'localhost',
+        #     'QUEUE_NAME': 'uploader_dev_2',
+        #     'QUEUE_DURABLE': True,
+        #     'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
+        #     'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
+        # }
+        name = 'uploader'
+        super().__init__(name, configuration['workers'][name])
     
     def process(self, job):
         missing_keys = self.missing_keys(job, ['input_file_path', 's3_bucket', 's3_key'])

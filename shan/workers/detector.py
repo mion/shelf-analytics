@@ -6,22 +6,43 @@ import subprocess
 import time
 import cv2
 
+from configuration import configuration
 from worker import Worker
 
 SHAN_WORKSPACE_PATH = '/Users/gvieira/shan'
 
 class Detector(Worker):
     def __init__(self):
-        conf = {
-            'QUEUE_HOST': 'localhost',
-            'QUEUE_NAME': 'detector_dev_5',
-            'QUEUE_DURABLE': True,
-            'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
-            'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
-        }
-        super().__init__('detector', conf)
+        # conf = {
+        #     'QUEUE_HOST': 'localhost',
+        #     'QUEUE_NAME': 'detector_dev_6',
+        #     'QUEUE_DURABLE': True,
+        #     'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
+        #     'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
+        # }
+        name = 'detector'
+        super().__init__(name, configuration['dev']['workers'][name])
     
-    def process(self, job):
+    def process(self, job): # FIXME temp to test
+        missing_keys = self.missing_keys(job, ['raw_frames_dir_path', 'output_file_path', 'output_frames_dir_path'])
+        if len(missing_keys) > 0:
+            print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))
+            return False
+        import shutil
+        import subprocess
+        import time
+        print("[!] Faking detection...")
+        time.sleep(2)
+        base_path = os.path.split(job['raw_frames_dir_path'])[0]
+        video_id = os.path.split(base_path)[1]
+        video_path = os.path.join(base_path, 'videos/{}-fps-10.mp4'.format(video_id))
+        subprocess.run('rm {}'.format(video_path), shell=True, check=True)
+        subprocess.run('cp /Users/gvieira/shan/video-31-p_09/videos/video-31-p_09-fps-10.mp4 {}'.format(video_path))
+        shutil.copy('/Users/gvieira/shan/video-31-p_09/data/tags.json', job['output_file_path'])
+        subprocess.run('cp /Users/gvieira/shan/video-31-p_09/frames/events/*.png {}'.format(job['output_frames_dir_path']), shell=True, check=True)
+        print("[!] Fake detection completed.")
+
+    def _real_process(self, job):
         missing_keys = self.missing_keys(job, ['raw_frames_dir_path', 'output_file_path', 'output_frames_dir_path'])
         if len(missing_keys) > 0:
             print("FAILURE: missing required keys '{}' in job JSON".format(missing_keys))

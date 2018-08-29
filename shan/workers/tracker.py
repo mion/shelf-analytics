@@ -6,6 +6,7 @@ sys.path.append('/Users/gvieira/code/toneto/shan/shan/workers')
 import argparse
 import json
 
+from configuration import configuration
 from worker import Worker
 from tracking2 import track_humans
 from frame_bundle import load_frame_bundles
@@ -15,14 +16,15 @@ MAX_TRACKS = 40
 
 class Tracker(Worker):
     def __init__(self):
-        conf = {
-            'QUEUE_HOST': 'localhost',
-            'QUEUE_NAME': 'tracker_dev_3',
-            'QUEUE_DURABLE': True,
-            'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
-            'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
-        }
-        super().__init__('tracker', conf)
+        # conf = {
+        #     'QUEUE_HOST': 'localhost',
+        #     'QUEUE_NAME': 'tracker_dev_4',
+        #     'QUEUE_DURABLE': True,
+        #     'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
+        #     'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
+        # }
+        name = 'tracker'
+        super().__init__(name, configuration['workers'][name])
     
     def process(self, job):
         missing_keys = self.missing_keys(job, ['calib_path', 'tags_path', 'video_path', 'output_file_path'])
@@ -32,9 +34,12 @@ class Tracker(Worker):
         calib = load_json(job['calib_path'])
         tags = load_json(job['tags_path'])
         frame_bundles = load_frame_bundles(job['video_path'], tags)
-        tracks = track_humans(calib, frame_bundles, MAX_TRACKS)
+        tracks, tracking_result = track_humans(calib, frame_bundles, MAX_TRACKS)
         with open(job['output_file_path'], 'w') as output_file:
             json.dump(tracks, output_file)
+        base_path, _ = os.path.split(job['output_file_path'])
+        tr_file_path = os.path.join(base_path, 'tracking-result.json')
+        tracking_result.save_as_json(tr_file_path)
         return True
 
 if __name__ == '__main__':

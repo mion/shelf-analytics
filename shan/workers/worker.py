@@ -7,7 +7,7 @@ import pika
 class Worker:
     DEFAULT_OUTPUT_CONF = {
         'QUEUE_HOST': 'localhost',
-        'QUEUE_NAME': 'output_dev_5',
+        'QUEUE_NAME': 'output_dev_11',
         'QUEUE_DURABLE': True,
         'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
         'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
@@ -16,6 +16,9 @@ class Worker:
         self.name = name
         self.conf = conf
         self.output_conf = Worker.DEFAULT_OUTPUT_CONF
+    
+    def print_json(self, obj):
+        print(json.dumps(obj, indent=3, sort_keys=True))
     
     def missing_keys(self, job, required_keys):
         missing = []
@@ -29,7 +32,8 @@ class Worker:
     
     def process_job(self, channel, method, properties, message):
         job = json.loads(message)
-        print("[*] Received job:", job)
+        print("[*] Received job:")
+        self.print_json(job)
         print("[*] Processing...")
         success = self.process(job)
         print("[*] Processing done, acknowledging...")
