@@ -1,5 +1,0 @@
-#!/bin/bash
-TARGET_DIR=/Users/gvieira/shan/test
-rm $TARGET_DIR/tracks.json
-python scripts/track_objects.py ~/shan/video-33-p_06/video-33-p_06-fps-10.mp4 ~/shan/video-33-p_06/frames_retagged/tags.json $TARGET_DIR
-cmp --silent $TARGET_DIR/tracks.json $TARGET_DIR/fixture-tracks.json || echo "ERROR: output does not match fixture."
