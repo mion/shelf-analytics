@@ -1,0 +1,17 @@
+[
+  {
+    "name": "front_aisle",
+    "bbox": [304, 185, 445, 590],
+    "type": "aisle"
+  },
+  {
+    "name": "side_aisle",
+    "bbox": [68, 96, 287, 259],
+    "type": "aisle"
+  },
+  {
+    "name": "main_shelf",
+    "bbox": [165, 270, 298, 572],
+    "type": "shelf"
+  }
+]
