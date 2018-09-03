@@ -1,12 +1,11 @@
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
 import argparse
 import boto3
 
 from worker import Worker
-from transcoding import generate_thumbnail
-from tnt import replace_ext
+from shan.core.transcoding import generate_thumbnail
+from shan.common.util import replace_ext
 from configuration import configuration
 
 class Uploader(Worker):

@@ -1,17 +1,14 @@
 import os
 import sys
-sys.path.append('/Users/gvieira/code/toneto/shan')
-sys.path.append('/Users/gvieira/code/toneto/shan/shan')
-sys.path.append('/Users/gvieira/code/toneto/shan/shan/workers')
 import argparse
 import json
 
 from configuration import configuration
 
 from worker import Worker
-from event_extraction import extract_all_events
-from iaot import extract_intersection_area_over_time
-from tnt import load_json
+from shan.core.event_extraction import extract_all_events
+from shan.core.iaot import extract_intersection_area_over_time
+from shan.common.util import load_json
 
 class EventExtractor(Worker):
     def __init__(self):

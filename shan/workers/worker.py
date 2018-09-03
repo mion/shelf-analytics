@@ -1,12 +1,10 @@
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-from configuration import configuration
-
 import json
 import argparse
-
 import pika
+
+from configuration import configuration
 
 
 class Worker:

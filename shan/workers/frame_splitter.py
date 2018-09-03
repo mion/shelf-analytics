@@ -7,14 +7,11 @@ Author: Gabriel Luis Vieira (gluisvieira@gmail.com)
 """
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import json
 import pika
 import time
 import argparse
-from frame_splitting import split_frames
+from shan.core.frame_splitting import split_frames
 from worker import Worker
 from configuration import configuration
 

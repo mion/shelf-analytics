@@ -1,8 +1,5 @@
 import os
 import sys
-sys.path.append('/Users/gvieira/code/toneto/shan')
-sys.path.append('/Users/gvieira/code/toneto/shan/shan')
-sys.path.append('/Users/gvieira/code/toneto/shan/shan/workers')
 import subprocess
 import argparse
 import json
@@ -11,8 +8,8 @@ import shutil
 from configuration import configuration
 
 from worker import Worker
-from scripts.print_events import print_frames
-from tnt import load_json
+from shan.scripts.print_events import print_frames
+from shan.common.util import load_json
 
 def make_video(video_filename, evented_frames_dir_path, videos_path):
     fps = 10

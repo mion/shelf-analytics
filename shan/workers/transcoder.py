@@ -7,14 +7,11 @@ Author: Gabriel Luis Vieira (gluisvieira@gmail.com)
 """
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import json
 import pika
 import time
 import argparse
-from transcoding import transcode
+from shan.core.transcoding import transcode
 from worker import Worker
 from configuration import configuration
 

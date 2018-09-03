@@ -1,6 +1,5 @@
 import sys
 import os
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
 import argparse
 import subprocess
 import time
@@ -30,7 +29,7 @@ class Detector(Worker):
             return False
         # NOTE: Something I have not figure out yet in the MaskRCNN code currently starts TensorFlow upon import. 
         # Keeping TF running for too long seems clog the CPU/RAM so for now we want it to get restarted everytime.
-        from detection import detect_humans_in_every_image
+        from shan.core.detection import detect_humans_in_every_image
         raw_frames_dir_path = job['raw_frames_dir_path']
         output_file_path = job['output_file_path']
         output_frames_dir_path = job['output_frames_dir_path']

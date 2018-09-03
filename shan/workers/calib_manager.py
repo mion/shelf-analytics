@@ -1,6 +1,5 @@
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
 import json
 import argparse
 import time
@@ -9,7 +8,7 @@ import shutil
 import pika
 
 from configuration import configuration
-from tnt import add_suffix_to_basename, current_local_time_isostring
+from shan.common.util import add_suffix_to_basename, current_local_time_isostring
 from worker import Worker
 from detector import Detector
 from tracker import Tracker
