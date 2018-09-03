@@ -3,10 +3,7 @@ This module handles detection of human beings in images.
 """
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
-from tnt import load_images, load_json
+from shan.common.util import load_images, load_json
 import json
 
 # Mask RCNN stuff
@@ -16,10 +13,10 @@ from skimage.measure import find_contours
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.patches import Polygon
-import coco
-import utils
-import model as modellib
-import visualize
+import shan.core.mask_rcnn.coco
+import shan.core.mask_rcnn.utils
+import shan.core.mask_rcnn.model as modellib
+import shan.core.mask_rcnn.visualize
 
 DEFAULT_FRAME_IMAGE_EXTENSION = 'png'
 COCO_CLASS_NAMES = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
