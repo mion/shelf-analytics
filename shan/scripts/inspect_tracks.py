@@ -1,18 +1,14 @@
-import pdb
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import argparse
 import numpy as np
 import cv2
 
-from tnt import load_json, load_frames
-from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
-from tracking2 import Track, Transition, TrackingResult
-from drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords, draw_bbox_header, draw_calibration_config, draw_footer, draw_text, get_text_size, draw_line, draw_line_right_of
-from frame_bundle import FrameBundle
+from shan.common.util import load_json, load_frames
+from shan.core.bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+from shan.core.tracking import Track, Transition, TrackingResult
+from shan.common.drawing import draw_bbox_outline, draw_bbox_line_between_centers, draw_bbox_coords, draw_bbox_header, draw_calibration_config, draw_footer, draw_text, get_text_size, draw_line, draw_line_right_of
+from shan.core.frame_bundle import FrameBundle
 
 AVAILABLE_BBOX_OUTLINE_COLOR = (192, 192, 192)
 AVAILABLE_BBOX_OUTLINE_THICKNESS = 1

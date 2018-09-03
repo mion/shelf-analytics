@@ -1,16 +1,11 @@
-import pdb
-
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import json
 import argparse
-from tnt import load_json, load_frames, load_bboxes_per_frame
-from frame_bundle import load_frame_bundles
-from bounding_box_filter import BoundingBoxFilter as BBoxFilter
-from tracking2 import compute_tracking_result
+from shan.common.util import load_json, load_frames, load_bboxes_per_frame
+from shan.core.frame_bundle import load_frame_bundles
+from shan.core.bounding_box_filter import BoundingBoxFilter as BBoxFilter
+from shan.core.tracking import compute_tracking_result
 
 MAX_TRACKS = 40
 

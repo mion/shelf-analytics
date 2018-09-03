@@ -1,12 +1,9 @@
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import argparse
 
 try:
-    from detection import detect_humans_in_every_image
+    from shan.core.detection import detect_humans_in_every_image
 
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir_path", help="input directory with many images inside")

@@ -4,12 +4,9 @@
 
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import argparse
 import subprocess
-from frame_splitting import split_frames
+from shan.core.frame_splitting import split_frames
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

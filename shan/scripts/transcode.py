@@ -7,15 +7,12 @@ Author: Gabriel Luis Vieira (gluisvieira@gmail.com)
 """
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import argparse
 import subprocess
 import shutil
 
-from tnt import extract_video_name
-from transcoding import transcode
+from shan.common.util import extract_video_name
+from shan.core.transcoding import transcode
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

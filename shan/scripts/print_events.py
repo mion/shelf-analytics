@@ -1,14 +1,11 @@
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import argparse
-from tnt import load_json, load_frames, make_events_per_frame
-from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
-from tracking2 import TrackingResult
-from cvutil import save_image
-from drawing import draw_bbox_with_title, draw_sidebar_right, draw_text, get_text_size, draw_bbox_outline
+from shan.common.util import load_json, load_frames, make_events_per_frame
+from shan.core.bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+from shan.core.tracking import TrackingResult
+from shan.common.cvutil import save_image
+from shan.common.drawing import draw_bbox_with_title, draw_sidebar_right, draw_text, get_text_size, draw_bbox_outline
 
 def render_frame_with_events(frame, index, rois, bboxes_in_frame, events_in_frame, past_events):
     for roi in rois:

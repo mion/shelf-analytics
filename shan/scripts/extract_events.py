@@ -1,16 +1,12 @@
-import pdb
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
-
 import argparse
 import matplotlib.pyplot as plt
 import json
 import numpy
 from scipy.signal import find_peaks, peak_widths, lfilter, lfilter_zi, filtfilt, butter
-from tnt import load_json
-from event_extraction import extract_all_events
+from shan.common.util import load_json
+from shan.core.event_extraction import extract_all_events
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
