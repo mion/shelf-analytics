@@ -1,6 +1,6 @@
 from cv2 import VideoCapture
-from cvutil import read_frames_from_video
-from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+from shan.common.cvutil import read_frames_from_video
+from shan.core.bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 
 def load_frames(video_path):
     video = VideoCapture(video_path)
