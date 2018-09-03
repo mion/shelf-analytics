@@ -6,11 +6,9 @@ Author: Gabriel Luis Vieira (gluisvieira@gmail.com)
 """
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'shan'))
-sys.path.append(os.path.join(os.getcwd(), 'shan/mask_rcnn'))
 import subprocess
 
-from tnt import has_ffmpeg_installed, count_frames
+from shan.common.util import has_ffmpeg_installed, count_frames
 
 def split_frames(input_video_path, output_dir_path, extension):
     if not has_ffmpeg_installed():

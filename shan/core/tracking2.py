@@ -2,11 +2,11 @@ import os
 import json
 import math
 
-from cvutil import create_object_tracker
-from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
-from bounding_box_filter import BoundingBoxFilter as BBoxFilter
-from tnt import load_json
-from frame_bundle import FrameBundle
+from shan.common.cvutil import create_object_tracker
+from shan.core.bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+from shan.core.bounding_box_filter import BoundingBoxFilter as BBoxFilter
+from shan.common.util import load_json
+from shan.core.frame_bundle import FrameBundle
 
 def track_humans(calib, frame_bundles, max_tracks):
     #
