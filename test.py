@@ -1,5 +1,6 @@
 import os, sys, inspect, argparse, json
 from shan.common.colorize import header, yellow, red, green
+from shan.common.util import load_json
 
 def get_currendir():
     return os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -51,11 +52,21 @@ def test_frame_splitting(ws_path):
         print(red('[!] TEST FAILED'))
 
 def test_iaot(ws_path):
-    pass
+    from shan.core.iaot import extract_intersection_area_over_time
+    tracks_path = os.path.join(get_currendir(), 'test/fixture/iaot/tracks.json')
+    rois_path = os.path.join(get_currendir(), 'test/fixture/iaot/venue-11-shelf-1.json')
+    tracks = load_json(tracks_path)
+    rois = load_json(rois_path)
+    print(yellow('[*] Tracks path: ') + tracks_path)
+    print(yellow('[*] Rois path: ') + rois_path)
+    iaot = extract_intersection_area_over_time(tracks, rois)
+    if len(iaot) > 0:
+        print(green('[*] TEST SUCCESSFUL'))
+    else:
+        print(red('[!] TEST FAILED'))
 
 def test_tracking(ws_path):
     import uuid
-    from shan.common.util import load_json
     from shan.core.frame_bundle import load_frame_bundles
     from shan.core.tracking import track_humans
 
