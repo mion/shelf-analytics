@@ -1,5 +1,4 @@
-import os, sys, inspect, argparse
-
+import os, sys, inspect, argparse, json
 from shan.common.colorize import header, yellow, red, green
 
 def get_currendir():
@@ -55,7 +54,39 @@ def test_iaot(ws_path):
     pass
 
 def test_tracking(ws_path):
-    pass
+    import uuid
+    from shan.common.util import load_json
+    from shan.core.frame_bundle import load_frame_bundles
+    from shan.core.tracking import track_humans
+
+    test_id = uuid.uuid4().hex
+    MAX_TRACKS = 40
+
+    calib_config_path = os.path.join(get_currendir(), 'test/calib-configs/venue-11-shelf-1-fps-10.json')
+    tags_path = os.path.join(get_currendir(), 'test/fixture/tracking/tags.json')
+    video_path = os.path.join(get_currendir(), 'test/fixture/tracking/video-33-p_06-fps-10.mp4')
+    output_dir_path = os.path.join(ws_path, 'tracking_test_{}'.format(test_id))
+    os.mkdir(output_dir_path)
+    output_file_path = os.path.join(output_dir_path, 'tracks.json')
+    tr_file_path = os.path.join(output_dir_path, 'tracking-result.json')
+
+    print(yellow('[*] Calib config path: ') + calib_config_path)
+    print(yellow('[*] Tags path: ') + tags_path)
+    print(yellow('[*] Video path: ') + video_path)
+    print(yellow('[*] Output dir path: ') + output_dir_path)
+
+    calib_config = load_json(calib_config_path)
+    tags = load_json(tags_path)
+    frame_bundles = load_frame_bundles(video_path, tags)
+    tracks, tracking_result = track_humans(calib_config, frame_bundles, MAX_TRACKS)
+    with open(output_file_path, 'w') as output_file:
+        json.dump(tracks, output_file)
+    tracking_result.save_as_json(tr_file_path)
+
+    if os.path.exists(output_file_path) and os.path.exists(tr_file_path):
+        print(green('[*] TEST SUCCESSFUL'))
+    else:
+        print(red('[!] TEST FAILED'))
 
 def test_transcoding(ws_path):
     from shan.core.transcoding import transcode
