@@ -31,9 +31,7 @@ def test_detection(ws_path):
         print(red('[!] TEST FAILED'))
 
 def test_event_extraction(ws_path):
-    import uuid
     from shan.core.event_extraction import extract_all_events
-    test_id = uuid.uuid4().hex
     iaot_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/iaot.json')
     tracks_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/tracks.json')
     rois_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/venue-11-shelf-1.json')
