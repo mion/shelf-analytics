@@ -31,7 +31,26 @@ def test_detection(ws_path):
         print(red('[!] TEST FAILED'))
 
 def test_event_extraction(ws_path):
-    pass
+    import uuid
+    from shan.core.event_extraction import extract_all_events
+    test_id = uuid.uuid4().hex
+    iaot_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/iaot.json')
+    tracks_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/tracks.json')
+    rois_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/venue-11-shelf-1.json')
+    iaot = load_json(iaot_path)
+    tracks = load_json(tracks_path)
+    rois = load_json(rois_path)
+
+    print(yellow('[*] Tracks path: ') + tracks_path)
+    print(yellow('[*] IAOT path: ') + iaot_path)
+    print(yellow('[*] ROIs path: ') + rois_path)
+
+    events = extract_all_events(iaot, tracks, rois)
+
+    if len(events) > 0:
+        print(green('[*] TEST SUCCESSFUL'))
+    else:
+        print(red('[!] TEST FAILED'))
 
 def test_frame_splitting(ws_path):
     import uuid
@@ -66,13 +85,11 @@ def test_iaot(ws_path):
         print(red('[!] TEST FAILED'))
 
 def test_tracking(ws_path):
-    import uuid
     from shan.core.frame_bundle import load_frame_bundles
     from shan.core.tracking import track_humans
-
+    import uuid
     test_id = uuid.uuid4().hex
     MAX_TRACKS = 40
-
     calib_config_path = os.path.join(get_currendir(), 'test/calib-configs/venue-11-shelf-1-fps-10.json')
     tags_path = os.path.join(get_currendir(), 'test/fixture/tracking/tags.json')
     video_path = os.path.join(get_currendir(), 'test/fixture/tracking/video-33-p_06-fps-10.mp4')
