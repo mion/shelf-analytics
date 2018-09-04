@@ -13,10 +13,8 @@ from skimage.measure import find_contours
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.patches import Polygon
-import shan.core.mask_rcnn.coco
-import shan.core.mask_rcnn.utils
+import shan.core.mask_rcnn.coco as coco
 import shan.core.mask_rcnn.model as modellib
-import shan.core.mask_rcnn.visualize
 
 DEFAULT_FRAME_IMAGE_EXTENSION = 'png'
 COCO_CLASS_NAMES = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
@@ -170,7 +168,7 @@ def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_pa
     config.display()
     ROOT_DIR = os.getcwd()
     MODEL_DIR = os.path.join(ROOT_DIR, "logs")
-    COCO_MODEL_PATH = os.path.join(ROOT_DIR, "shan/mask_rcnn/mask_rcnn_coco.h5")
+    COCO_MODEL_PATH = os.path.join(ROOT_DIR, "data/mask_rcnn_coco.h5")
     # Create model object in inference mode.
     model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
     # Load weights trained on MS-COCO

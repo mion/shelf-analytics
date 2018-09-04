@@ -6,8 +6,6 @@ Copyright (c) 2017 Matterport, Inc.
 Licensed under the MIT License (see LICENSE for details)
 Written by Waleed Abdulla
 """
-import pdb
-
 import random
 import itertools
 import colorsys
@@ -19,7 +17,7 @@ import matplotlib.lines as lines
 from matplotlib.patches import Polygon
 import IPython.display
 
-import utils
+import shan.core.mask_rcnn.utils as utils
 
 
 ############################################################

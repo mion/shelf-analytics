@@ -45,9 +45,9 @@ import zipfile
 import urllib.request
 import shutil
 
-import utils
-from config import Config
-import model as modellib
+import shan.core.mask_rcnn.utils as utils
+from shan.core.mask_rcnn.config import Config
+import shan.core.mask_rcnn.model as modellib
 
 # Root directory of the project
 ROOT_DIR = os.getcwd()
