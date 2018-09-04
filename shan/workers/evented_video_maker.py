@@ -8,19 +8,8 @@ import shutil
 from configuration import configuration
 
 from worker import Worker
-from shan.scripts.print_events import print_frames
-from shan.common.util import load_json
-
-def make_video(video_filename, evented_frames_dir_path, videos_path):
-    fps = 10
-    output_video_name = 'evented-' + video_filename
-    cmd_tmpl = 'cd {}; ffmpeg -framerate {} -pattern_type glob -i "*.png" -c:v libx264 -r {} -pix_fmt yuv420p {}'
-    cmd = cmd_tmpl.format(evented_frames_dir_path, fps, fps, output_video_name)
-    # WARNING shell=True is dangerous
-    result = subprocess.call(cmd, shell=True)
-    if result != 0:
-        raise RuntimeError('Command "{}" returned non-zero'.format(cmd))
-    shutil.move(os.path.join(evented_frames_dir_path, output_video_name), videos_path)
+from shan.common.print_events import print_frames
+from shan.common.util import load_json, make_video
 
 class EventedVideoMaker(Worker):
     def __init__(self):
