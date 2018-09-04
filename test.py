@@ -5,11 +5,30 @@ from shan.common.colorize import header, yellow, red, green
 def get_currendir():
     return os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
+def is_dir_empty(path):
+    return next(os.scandir(path), None) is None
+
 def test_all(ws_path):
     pass
 
 def test_detection(ws_path):
-    pass
+    import uuid
+    from shan.core.detection import detect_humans_in_every_image
+    test_id = uuid.uuid4().hex
+    input_dir_path = os.path.join(get_currendir(), 'test/fixture/detection')
+    output_file_path = os.path.join(ws_path, 'detection_test_tags_{}.json'.format(test_id))
+    frames_dir_path = os.path.join(ws_path, 'detection_test_tagged_frames_{}'.format(test_id))
+    os.mkdir(frames_dir_path)
+    print(yellow('[*] Input dir path: ') + input_dir_path)
+    print(yellow('[*] Output file path: ') + output_file_path)
+    print(yellow('[*] Frames dir path: ') + frames_dir_path)
+
+    error = detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_path)
+
+    if error is None and os.path.exists(output_file_path) and not is_dir_empty(frames_dir_path):
+        print(green('[*] TEST SUCCESSFUL'))
+    else:
+        print(red('[!] TEST FAILED'))
 
 def test_event_extraction(ws_path):
     pass
