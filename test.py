@@ -18,8 +18,8 @@ def test_frame_splitting(ws_path):
     import uuid
     from shan.core.frame_splitting import split_frames
     EXT = 'png'
-    input_video_path = os.path.join(get_currendir(), 'test/fixture/frame_splitter/walked-single-fps-10.mp4')
-    output_dir_path = os.path.join(ws_path, 'frame_splitter_test_{}'.format(uuid.uuid4().hex))
+    input_video_path = os.path.join(get_currendir(), 'test/fixture/frame_splitting/walked-single-fps-10.mp4')
+    output_dir_path = os.path.join(ws_path, 'frame_splitting_test_{}'.format(uuid.uuid4().hex))
     os.mkdir(output_dir_path)
     print(yellow('[*] Input video path: ') + input_video_path)
     print(yellow('[*] Output dir path: ') + output_dir_path)
