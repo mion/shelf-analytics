@@ -9,7 +9,18 @@ def is_dir_empty(path):
     return next(os.scandir(path), None) is None
 
 def test_all(ws_path):
-    pass
+    tests = {
+        'detection': test_detection,
+        'event_extraction': test_event_extraction,
+        'frame_splitting': test_frame_splitting,
+        'iaot': test_iaot,
+        'tracking': test_tracking,
+        'transcoding': test_transcoding
+    }
+    results = [(name, test_func(ws_path)) for name, test_func in tests.items()]
+    for name, result in results:
+        r = green('OK') if result else red('FAIL')
+        print(yellow('[*] {}: '.format(name) + r))
 
 def test_detection(ws_path):
     import uuid
@@ -27,8 +38,10 @@ def test_detection(ws_path):
 
     if error is None and os.path.exists(output_file_path) and not is_dir_empty(frames_dir_path):
         print(green('[*] TEST SUCCESSFUL'))
+        return True
     else:
         print(red('[!] TEST FAILED'))
+        return False
 
 def test_event_extraction(ws_path):
     from shan.core.event_extraction import extract_all_events
@@ -47,8 +60,10 @@ def test_event_extraction(ws_path):
 
     if len(events) > 0:
         print(green('[*] TEST SUCCESSFUL'))
+        return True
     else:
         print(red('[!] TEST FAILED'))
+        return False
 
 def test_frame_splitting(ws_path):
     import uuid
@@ -65,8 +80,10 @@ def test_frame_splitting(ws_path):
 
     if success and os.path.exists(os.path.join(output_dir_path, 'frame-56.png')):
         print(green('[*] TEST SUCCESSFUL'))
+        return True
     else:
         print(red('[!] TEST FAILED'))
+        return False
 
 def test_iaot(ws_path):
     from shan.core.iaot import extract_intersection_area_over_time
@@ -79,8 +96,10 @@ def test_iaot(ws_path):
     iaot = extract_intersection_area_over_time(tracks, rois)
     if len(iaot) > 0:
         print(green('[*] TEST SUCCESSFUL'))
+        return True
     else:
         print(red('[!] TEST FAILED'))
+        return False
 
 def test_tracking(ws_path):
     from shan.core.frame_bundle import load_frame_bundles
@@ -111,8 +130,10 @@ def test_tracking(ws_path):
 
     if os.path.exists(output_file_path) and os.path.exists(tr_file_path):
         print(green('[*] TEST SUCCESSFUL'))
+        return True
     else:
         print(red('[!] TEST FAILED'))
+        return False
 
 def test_transcoding(ws_path):
     from shan.core.transcoding import transcode
@@ -129,8 +150,10 @@ def test_transcoding(ws_path):
 
     if success and os.path.exists(output_video_path):
         print(green('[*] TEST SUCCESSFUL'))
+        return True
     else:
         print(red('[!] TEST FAILED'))
+        return False
 
 if __name__ == '__main__':
     argparse = argparse.ArgumentParser(description='A very simple and rudimentary integration test for all the code.')
