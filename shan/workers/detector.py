@@ -8,8 +8,6 @@ import cv2
 from configuration import configuration
 from worker import Worker
 
-SHAN_WORKSPACE_PATH = '/Users/gvieira/shan'
-
 class Detector(Worker):
     def __init__(self):
         # conf = {

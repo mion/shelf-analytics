@@ -9,17 +9,10 @@ from shan.core.tracking import track_humans
 from shan.core.frame_bundle import load_frame_bundles
 from shan.common.util import load_json
 
-MAX_TRACKS = 40
+MAX_TRACKS = 40 # FIXME
 
 class Tracker(Worker):
     def __init__(self):
-        # conf = {
-        #     'QUEUE_HOST': 'localhost',
-        #     'QUEUE_NAME': 'tracker_dev_4',
-        #     'QUEUE_DURABLE': True,
-        #     'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
-        #     'DELIVERY_MODE': 2 # make message persistent, for stronger guarantee of persistance see: https://www.rabbitmq.com/confirms.html
-        # }
         name = 'tracker'
         super().__init__(name, configuration['dev']['workers'][name])
     
