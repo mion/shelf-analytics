@@ -1,11 +1,15 @@
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import argparse
 import matplotlib.pyplot as plt
 import json
 import numpy
 from scipy.signal import find_peaks, peak_widths, lfilter, lfilter_zi, filtfilt, butter
-from shan.common.util import load_json
+from util import load_json
 
 VIDEO_FPS = 10
 DEFAULT_CONFIG = {

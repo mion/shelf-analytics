@@ -27,7 +27,12 @@ Usage: import the module (see Jupyter notebooks for examples), or run from
     python3 coco.py evaluate --dataset=/path/to/coco/ --model=last
 """
 
-import os
+import os, sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core/mask_rcnn'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import time
 import numpy as np
 
@@ -44,10 +49,9 @@ from pycocotools import mask as maskUtils
 import zipfile
 import urllib.request
 import shutil
-
-import shan.core.mask_rcnn.utils as utils
-from shan.core.mask_rcnn.config import Config
-import shan.core.mask_rcnn.model as modellib
+import utils
+from config import Config
+import model as modellib
 
 # Root directory of the project
 ROOT_DIR = os.getcwd()

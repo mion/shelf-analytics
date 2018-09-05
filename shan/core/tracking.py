@@ -1,12 +1,16 @@
-import os
+import os, sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import json
 import math
 
-from shan.common.cvutil import create_object_tracker
-from shan.core.bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
-from shan.core.bounding_box_filter import BoundingBoxFilter as BBoxFilter
-from shan.common.util import load_json
-from shan.core.frame_bundle import FrameBundle
+from cvutil import create_object_tracker
+from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+from bounding_box_filter import BoundingBoxFilter as BBoxFilter
+from util import load_json
+from frame_bundle import FrameBundle
 
 def track_humans(calib, frame_bundles, max_tracks):
     #

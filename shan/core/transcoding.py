@@ -7,9 +7,13 @@ Author: Gabriel Luis Vieira (gluisvieira@gmail.com)
 """
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import subprocess
 
-from shan.common.util import has_ffmpeg_installed
+from util import has_ffmpeg_installed
 
 def transcode(input_video_path, output_video_path, fps):
   if not has_ffmpeg_installed():

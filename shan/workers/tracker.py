@@ -1,13 +1,17 @@
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import argparse
 import json
 
 from configuration import configuration
 from worker import Worker
-from shan.core.tracking import track_humans
-from shan.core.frame_bundle import load_frame_bundles
-from shan.common.util import load_json
+from tracking import track_humans
+from frame_bundle import load_frame_bundles
+from util import load_json
 
 MAX_TRACKS = 40 # FIXME
 

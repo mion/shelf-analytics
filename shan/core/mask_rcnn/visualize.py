@@ -17,7 +17,7 @@ import matplotlib.lines as lines
 from matplotlib.patches import Polygon
 import IPython.display
 
-import shan.core.mask_rcnn.utils as utils
+import utils
 
 
 ############################################################

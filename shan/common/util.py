@@ -2,7 +2,11 @@
 #
 """Toneto helper module."""
 
-import os
+import os, sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import shutil
 import json
 import cv2
@@ -11,7 +15,7 @@ import datetime
 import time
 import subprocess
 
-from shan.core.bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
+from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 
 def make_video(video_filename, evented_frames_dir_path, videos_path):
     fps = 10

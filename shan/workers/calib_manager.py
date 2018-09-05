@@ -1,5 +1,9 @@
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import json
 import argparse
 import time
@@ -8,7 +12,7 @@ import shutil
 import pika
 
 from configuration import configuration
-from shan.common.util import add_suffix_to_basename, current_local_time_isostring
+from util import add_suffix_to_basename, current_local_time_isostring
 from worker import Worker
 from detector import Detector
 from tracker import Tracker

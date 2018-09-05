@@ -7,11 +7,15 @@ Author: Gabriel Luis Vieira (gluisvieira@gmail.com)
 """
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import json
 import pika
 import time
 import argparse
-from shan.core.frame_splitting import split_frames
+from frame_splitting import split_frames
 from worker import Worker
 from configuration import configuration
 

@@ -1,11 +1,15 @@
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import argparse
 import boto3
 
 from worker import Worker
-from shan.core.transcoding import generate_thumbnail
-from shan.common.util import replace_ext
+from transcoding import generate_thumbnail
+from util import replace_ext
 from configuration import configuration
 
 class Uploader(Worker):

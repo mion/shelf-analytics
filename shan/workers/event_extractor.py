@@ -1,14 +1,18 @@
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import argparse
 import json
 
 from configuration import configuration
 
 from worker import Worker
-from shan.core.event_extraction import extract_all_events
-from shan.core.iaot import extract_intersection_area_over_time
-from shan.common.util import load_json
+from event_extraction import extract_all_events
+from iaot import extract_intersection_area_over_time
+from util import load_json
 
 class EventExtractor(Worker):
     def __init__(self):

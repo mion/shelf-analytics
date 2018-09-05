@@ -1,5 +1,9 @@
 import os
 import sys
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import subprocess
 import argparse
 import json
@@ -8,8 +12,8 @@ import shutil
 from configuration import configuration
 
 from worker import Worker
-from shan.common.print_events import print_frames
-from shan.common.util import load_json, make_video
+from print_events import print_frames
+from util import load_json, make_video
 
 class EventedVideoMaker(Worker):
     def __init__(self):

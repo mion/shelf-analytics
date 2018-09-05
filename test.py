@@ -1,6 +1,10 @@
 import os, sys, inspect, argparse, json
-from shan.common.colorize import header, yellow, red, green
-from shan.common.util import load_json
+sys.path.append(os.environ['SHANPATH'])
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
+sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
+from colorize import header, yellow, red, green
+from util import load_json
 
 def get_currendir():
     return os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -24,7 +28,7 @@ def test_all(ws_path):
 
 def test_detection(ws_path):
     import uuid
-    from shan.core.detection import detect_humans_in_every_image
+    from detection import detect_humans_in_every_image
     test_id = uuid.uuid4().hex
     input_dir_path = os.path.join(get_currendir(), 'test/fixture/detection')
     output_file_path = os.path.join(ws_path, 'detection_test_tags_{}.json'.format(test_id))
@@ -44,7 +48,7 @@ def test_detection(ws_path):
         return False
 
 def test_event_extraction(ws_path):
-    from shan.core.event_extraction import extract_all_events
+    from event_extraction import extract_all_events
     iaot_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/iaot.json')
     tracks_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/tracks.json')
     rois_path = os.path.join(get_currendir(), 'test/fixture/event_extraction/venue-11-shelf-1.json')
@@ -67,7 +71,7 @@ def test_event_extraction(ws_path):
 
 def test_frame_splitting(ws_path):
     import uuid
-    from shan.core.frame_splitting import split_frames
+    from frame_splitting import split_frames
     EXT = 'png'
     input_video_path = os.path.join(get_currendir(), 'test/fixture/frame_splitting/walked-single-fps-10.mp4')
     output_dir_path = os.path.join(ws_path, 'frame_splitting_test_{}'.format(uuid.uuid4().hex))
@@ -86,7 +90,7 @@ def test_frame_splitting(ws_path):
         return False
 
 def test_iaot(ws_path):
-    from shan.core.iaot import extract_intersection_area_over_time
+    from iaot import extract_intersection_area_over_time
     tracks_path = os.path.join(get_currendir(), 'test/fixture/iaot/tracks.json')
     rois_path = os.path.join(get_currendir(), 'test/fixture/iaot/venue-11-shelf-1.json')
     tracks = load_json(tracks_path)
@@ -102,8 +106,8 @@ def test_iaot(ws_path):
         return False
 
 def test_tracking(ws_path):
-    from shan.core.frame_bundle import load_frame_bundles
-    from shan.core.tracking import track_humans
+    from frame_bundle import load_frame_bundles
+    from tracking import track_humans
     import uuid
     test_id = uuid.uuid4().hex
     MAX_TRACKS = 40
@@ -136,7 +140,7 @@ def test_tracking(ws_path):
         return False
 
 def test_transcoding(ws_path):
-    from shan.core.transcoding import transcode
+    from transcoding import transcode
     FPS = 10
     test_videos_path = os.path.join(get_currendir(), 'test/videos')
     test_video_name = 'walked-single.mp4'
