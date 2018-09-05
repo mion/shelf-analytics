@@ -143,10 +143,6 @@ def detect_humans(model, image, debug_output_path):
     
     return {'boxes': simple_boxes, 'scores': simple_scores}
 
-# NOTE: This code assumes that the frames will be read in
-# the right order, which may not be the case. We should add a
-# 'last_processed_frame_filename' value to the output object 
-# and handle it accordingly.
 def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_path, pika_connection=None):
     """
     This is ugly but we need the `pika_connection` to call `.process_data_events()` so it won't be closed by RabbitMQ.

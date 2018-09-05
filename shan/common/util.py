@@ -97,7 +97,8 @@ def load_images(path, extension):
     for fname in file_names:
         if fname.endswith(extension):
             image_file_paths.append(os.path.join(path, fname))
-    return [skimage.io.imread(img_path) for img_path in image_file_paths]
+    sorted_image_file_paths = sorted(image_file_paths)
+    return [skimage.io.imread(img_path) for img_path in sorted_image_file_paths]
 
 def get_filenames_at(path):
     return next(os.walk(path))[2]
