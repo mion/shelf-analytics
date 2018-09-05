@@ -72,7 +72,7 @@ class CalibManager(Worker):
                     'shelf_id': shelf_id,
                     'flow': flow,
                     'input_file_path': transcoded_video_path,
-                    's3_bucket': 'shan-develop',
+                    's3_bucket': configuration['dev']['s3_bucket'],
                     's3_key': basename,
                     'recording_date': recording_date
                 })
@@ -194,7 +194,7 @@ class CalibManager(Worker):
                     'flow': 'experiment',
                     'shelf_id': msg['job']['shelf_id'],
                     'input_file_path': evented_video_path,
-                    's3_bucket': 'shan-develop',
+                    's3_bucket': configuration['dev']['s3_bucket'],
                     's3_key': evented_video_filename
                 })
             elif msg['worker'] == 'uploader':
@@ -230,7 +230,7 @@ def add_calibration_job(shelf_id):
 
 def add_experiment_job(s3_key, shelf_id, calibration_video_id, rois_conf, tracking_conf, events_conf):
     d = Downloader()
-    s3_bucket = 'shan-develop'
+    s3_bucket = configuration['dev']['s3_bucket']
     d.add_job({
         'flow': 'experiment',
         'output_file_path': os.path.join(configuration['dev']['workspace_path'], s3_key),

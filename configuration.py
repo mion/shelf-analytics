@@ -2,6 +2,7 @@ configuration = {
     'dev': {
         'API_base_url': 'http://localhost:8000/shancms',
         'workspace_path': '/Users/gvieira/shan-develop',
+        's3_bucket': 'shan-develop',
         'workers': {
             'default': {
                 'QUEUE_HOST': 'localhost',
