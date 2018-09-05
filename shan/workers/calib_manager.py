@@ -21,8 +21,6 @@ from frame_splitter import FrameSplitter
 from event_extractor import EventExtractor
 from evented_video_maker import EventedVideoMaker
 
-RECORDER_OUTPUT_DIR = '/Users/gvieira/shan-calib-videos'
-
 class CalibManager(Worker):
     def __init__(self):
         super().__init__('calib_manager', configuration['dev']['workers']['default'])
@@ -222,7 +220,7 @@ def add_calibration_job(shelf_id):
     r.add_job({
         'flow': 'calibration',
         'shelf_id': shelf_id,
-        'filename': os.path.join(RECORDER_OUTPUT_DIR, 'calib-{}'.format(time_str) + ext),
+        'filename': os.path.join(configuration['dev']['workspace_path'], 'calib-{}'.format(time_str) + ext),
         'duration': 1,
         'fps': 'source',
         'size': 'source',
