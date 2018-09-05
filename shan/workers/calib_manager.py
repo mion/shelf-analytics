@@ -22,7 +22,6 @@ from event_extractor import EventExtractor
 from evented_video_maker import EventedVideoMaker
 
 RECORDER_OUTPUT_DIR = '/Users/gvieira/shan-calib-videos'
-SHAN_WS_PATH = '/Users/gvieira/shan-develop'
 
 class CalibManager(Worker):
     def __init__(self):
@@ -102,7 +101,7 @@ class CalibManager(Worker):
                 print('[*] Downloader -> Frame Splitter')
                 _, fname = os.path.split(msg['job']['output_file_path'])
                 name, _ = os.path.splitext(fname)
-                main_path = os.path.join(SHAN_WS_PATH, name)
+                main_path = os.path.join(configuration['dev']['workspace_path'], name)
                 videos_path = os.path.join(main_path, 'videos')
                 os.mkdir(main_path)
                 os.mkdir(videos_path)
@@ -236,7 +235,7 @@ def add_experiment_job(s3_key, shelf_id, calibration_video_id, rois_conf, tracki
     s3_bucket = 'shan-develop'
     d.add_job({
         'flow': 'experiment',
-        'output_file_path': os.path.join(SHAN_WS_PATH, s3_key),
+        'output_file_path': os.path.join(configuration['dev']['workspace_path'], s3_key),
         's3_key': s3_key,
         's3_bucket': s3_bucket,
         'shelf_id': shelf_id,
