@@ -141,7 +141,7 @@ class CalibManager(Worker):
                 print('[*] Detector -> Tracker')
                 main_path = msg['job']['main_path']
                 video_path = msg['job']['video_path']
-                calib_path = '/Users/gvieira/code/toneto/shan/test/calib-configs/venue-11-shelf-1-fps-10.json'
+                calib_path = configuration['dev']['default_calib_config_path'] #'/Users/gvieira/code/toneto/shan/test/calib-configs/venue-11-shelf-1-fps-10.json'
                 tags_path = os.path.join(main_path, 'data/tags.json')
                 output_file_path = os.path.join(main_path, 'data/tracks.json')
                 w = Tracker()
@@ -160,7 +160,7 @@ class CalibManager(Worker):
                 video_path = msg['job']['video_path']
                 w = EventExtractor()
                 tracks_path = msg['job']['output_file_path']
-                rois_path = '/Users/gvieira/code/toneto/shan/test/rois/v11s1.json'
+                rois_path = configuration['dev']['default_rois_path'] #'/Users/gvieira/code/toneto/shan/test/rois/v11s1.json'
                 output_path = os.path.join(main_path, 'data/events.json')
                 w.add_job({
                     'flow': 'experiment',
