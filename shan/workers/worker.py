@@ -12,6 +12,7 @@ class Worker:
         self.name = name
         self.conf = conf
         self.output_conf = configuration['dev']['workers']['default']
+        self.API_base_url = configuration['dev']['API_base_url']
     
     def print_json(self, obj):
         print(json.dumps(obj, indent=3, sort_keys=True))

@@ -1,5 +1,6 @@
 configuration = {
     'dev': {
+        'API_base_url': 'http://localhost:8000/shancms',
         'workers': {
             'default': {
                 'QUEUE_HOST': 'localhost',
