@@ -51,9 +51,15 @@ class Worker:
             print("[*] Done!")
         else:
             print("[*] Output queue is NULL, all done.")
+    
+    def _connect(self):
+        credentials = pika.PlainCredentials(self.conf['USER'], self.conf['PASSWORD'])
+        return pika.BlockingConnection(pika.ConnectionParameters(host=self.conf['QUEUE_HOST'], credentials=credentials))
 
-    def _add_message(self, msg, queue_name, queue_host, durable, delivery_mode):
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_host))
+    def _add_message(self, msg, queue_name, queue_host, durable, delivery_mode): # TODO remove queue_host from args
+        # credentials = pika.PlainCredentials('admin', 'shan')
+        # connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_host, credentials=credentials))
+        connection = self._connect()
         channel = connection.channel()
         channel.queue_declare(queue=queue_name, durable=durable)
         message = json.dumps(msg)
@@ -70,8 +76,9 @@ class Worker:
         print('[*] Job added to queue:', job)
 
     def start(self):
-        params = pika.ConnectionParameters(host=self.conf['QUEUE_HOST'])
-        self.connection = pika.BlockingConnection(params)
+        # params = pika.ConnectionParameters(host=self.conf['QUEUE_HOST'])
+        # self.connection = pika.BlockingConnection(params)
+        self.connection = self._connect()
         channel = self.connection.channel()
         channel.queue_declare(queue=self.conf['QUEUE_NAME'], durable=self.conf['QUEUE_DURABLE'])
         channel.basic_qos(prefetch_count=self.conf['QUEUE_PREFETCH_COUNT']) 
@@ -84,7 +91,9 @@ if __name__ == '__main__':
     import random
 
     EXAMPLE_CONF = {
-        'QUEUE_HOST': 'localhost',
+        'USER': 'admin',
+        'PASSWORD': 'shan',
+        'QUEUE_HOST': 'ec2-54-152-156-20.compute-1.amazonaws.com',
         'QUEUE_NAME': 'example_queue_2',
         'QUEUE_DURABLE': True,
         'QUEUE_PREFETCH_COUNT': 1, # do not give more than one message to a worker at a time
