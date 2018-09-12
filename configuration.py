@@ -1,4 +1,4 @@
-DEV_QUEUE_HOST = 'localhost'
+DEV_QUEUE_HOST = 'ec2-54-152-156-20.compute-1.amazonaws.com'
 
 configuration = {
     'dev': {
