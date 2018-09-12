@@ -181,6 +181,10 @@ if __name__ == '__main__':
     if args.name not in func_for_name:
         print(red('[!] ERROR: invalid name:')+ args.name)
         sys.exit(1)
+    
+    if args.path is None:
+        print(red('[!] ERROR: you must provide a path a dir where temp files will be created during the test') + ' (use "-p" or "--path")')
+        sys.exit(1)
 
     print(yellow('[*] Module: ') + header(args.name))
     print(yellow('[*] Workspace: ') + args.path)
