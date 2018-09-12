@@ -159,6 +159,9 @@ def test_transcoding(ws_path):
         print(red('[!] TEST FAILED'))
         return False
 
+def test_event_printing(ws_path):
+    pass
+
 if __name__ == '__main__':
     argparse = argparse.ArgumentParser(description='A very simple and rudimentary integration test for all the code.')
     argparse.add_argument('name', type=str, help="Name of the module to test: 'all', 'detection', 'event_extraction', 'frame_splitting', 'iaot', 'tracking' or 'transcoding'")
