@@ -4,7 +4,8 @@ sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 from colorize import header, yellow, red, green
-from util import load_json
+from util import load_json, make_video
+from print_events import print_frames
 
 def get_currendir():
     return os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -160,7 +161,33 @@ def test_transcoding(ws_path):
         return False
 
 def test_event_printing(ws_path):
-    pass
+    import uuid
+    test_id = uuid.uuid4().hex
+
+    fixture_path = os.path.join(get_currendir(), 'test/fixture/event_printing')
+    video_path = os.path.join(fixture_path, 'video-33-p_04-fps-10.mp4')
+    rois_path = os.path.join(fixture_path, 'rois.json')
+    events_path = os.path.join(fixture_path, 'events.json')
+    tr_path = os.path.join(fixture_path, 'tracking-result.json')
+
+    output_dir_path = os.path.join(ws_path, 'test_event_printing_{}'.format(test_id))
+    output_frames_path = os.path.join(output_dir_path, 'frames')
+    output_videos_path = os.path.join(output_dir_path, 'video')
+
+    os.mkdir(output_dir_path)
+    os.mkdir(output_frames_path)
+    os.mkdir(output_videos_path)
+
+    print_frames(video_path, rois_path, tr_path, events_path, output_frames_path)
+    _, video_filename = os.path.split(video_path)
+    make_video(video_filename, output_frames_path, output_videos_path)
+
+    if len(os.listdir(output_frames_path)) == 0 or len(os.listdir(output_videos_path)) == 0:
+        print(red('[!] TEST FAILED'))
+        return False
+    else:
+        print(green('[*] TEST SUCCESSFUL'))
+        return True
 
 if __name__ == '__main__':
     argparse = argparse.ArgumentParser(description='A very simple and rudimentary integration test for all the code.')
@@ -175,7 +202,8 @@ if __name__ == '__main__':
         'frame_splitting': test_frame_splitting,
         'iaot': test_iaot,
         'tracking': test_tracking,
-        'transcoding': test_transcoding
+        'transcoding': test_transcoding,
+        'event_printing': test_event_printing
     }
 
     if args.name not in func_for_name:

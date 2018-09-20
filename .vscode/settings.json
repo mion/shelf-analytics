@@ -1,3 +1,10 @@
 {
-  "editor.fontFamily": "Inconsolata-g, Menlo, Monaco, 'Courier New', monospace"
+  "editor.fontFamily": "Inconsolata-g, Menlo, Monaco, 'Courier New', monospace",
+  "python.pythonPath": "/Users/gvieira/code/ai/bin/python3",
+  "python.autoComplete.extraPaths": [
+    "/Users/gvieira/code/toneto/shan/shan",
+    "/Users/gvieira/code/toneto/shan/shan/core",
+    "/Users/gvieira/code/toneto/shan/shan/common",
+    "/Users/gvieira/code/toneto/shan/shan/workers"
+  ]
 }

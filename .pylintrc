@@ -1,0 +1,2 @@
+[MASTER]
+init-hook='import sys; sys.path.append("/Users/gvieira/code/toneto/shan/shan"); sys.path.append("/Users/gvieira/code/toneto/shan/shan/core"); sys.path.append("/Users/gvieira/code/toneto/shan/shan/common"); sys.path.append("/Users/gvieira/code/toneto/shan/shan/workers");'
