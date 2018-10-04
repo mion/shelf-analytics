@@ -3,7 +3,7 @@ sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
 from cv2 import VideoCapture
-from cvutil import read_frames_from_video
+from util import read_frames_from_video
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 
 def load_frames(video_path):

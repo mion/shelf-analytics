@@ -5,10 +5,9 @@ sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
 
 import argparse
-from util import load_json, load_frames, make_events_per_frame
+from util import load_json, load_frames, make_events_per_frame, save_image
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from tracking import TrackingResult
-from cvutil import save_image
 from drawing import draw_bbox_with_title, draw_sidebar_right, draw_text, get_text_size, draw_bbox_outline
 
 def render_frame_with_events(frame, index, rois, bboxes_in_frame, events_in_frame, past_events):

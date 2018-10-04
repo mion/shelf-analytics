@@ -5,10 +5,9 @@ sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
 import json
 import math
 
-from cvutil import create_object_tracker
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from bounding_box_filter import BoundingBoxFilter as BBoxFilter
-from util import load_json
+from util import load_json, create_object_tracker
 from frame_bundle import FrameBundle
 
 def track_humans(calib, frame_bundles, max_tracks):

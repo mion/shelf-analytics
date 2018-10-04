@@ -16,6 +16,26 @@ import subprocess
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 
+def create_object_tracker(obj_tracker_type):
+    major_ver, minor_ver, subminor_ver = cv2.__version__.split(".")
+    if int(minor_ver) < 3:
+        return cv2.Tracker_create(obj_tracker_type)
+    else:
+        if obj_tracker_type == 'BOOSTING':
+            return cv2.TrackerBoosting_create()
+        elif obj_tracker_type == 'MIL':
+            return cv2.TrackerMIL_create()
+        elif obj_tracker_type == 'KCF':
+            return cv2.TrackerKCF_create()
+        elif obj_tracker_type == 'TLD':
+            return cv2.TrackerTLD_create()
+        elif obj_tracker_type == 'MEDIANFLOW':
+            return cv2.TrackerMedianFlow_create()
+        elif obj_tracker_type == 'GOTURN':
+            return cv2.TrackerGOTURN_create()
+        else:
+            raise RuntimeError("invalid object tracker type")
+
 def make_video(video_filename, evented_frames_dir_path, videos_path):
     fps = 10
     output_video_name = 'evented-' + video_filename
@@ -63,6 +83,9 @@ def load_json(path):
 def save_json(obj, path):
     with open(path, "w") as jsonfile:
         json.dump(obj, jsonfile)
+
+def save_image(img, name, path):
+  cv2.imwrite(os.path.join(path, name), img)
 
 def read_frames_from_video(video):
     is_first_frame = True
