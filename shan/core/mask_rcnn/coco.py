@@ -32,7 +32,6 @@ sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core/mask_rcnn'))
-sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import time
 import numpy as np
 

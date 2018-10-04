@@ -2,7 +2,6 @@ import os, sys, inspect, argparse, json
 sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
-sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 from colorize import header, yellow, red, green
 from util import load_json, make_video
 from print_events import print_frames

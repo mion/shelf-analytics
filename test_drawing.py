@@ -5,7 +5,6 @@ import cv2
 sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
-sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat
 from util import load_json

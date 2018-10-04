@@ -2,7 +2,6 @@ import os, sys
 sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
-sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import cv2
 import numpy as np
 from bounding_box import BoundingBox as BBox, BoundingBoxFormat as BBoxFormat

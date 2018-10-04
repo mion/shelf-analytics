@@ -6,7 +6,6 @@ import sys
 sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
-sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core/mask_rcnn'))
 from util import load_images, load_json, add_suffix_to_basename
 import json

@@ -6,7 +6,6 @@ import os, sys
 sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
-sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 import shutil
 import json
 import cv2

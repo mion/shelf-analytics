@@ -10,7 +10,6 @@ import subprocess
 sys.path.append(os.environ['SHANPATH'])
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/common'))
 sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/core'))
-sys.path.append(os.path.join(os.environ['SHANPATH'], 'shan/workers'))
 from util import has_ffmpeg_installed, count_frames
 
 def split_frames(input_video_path, output_dir_path, extension):
