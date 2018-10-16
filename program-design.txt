@@ -1,0 +1,55 @@
+--------------------------------------------------------------------------------
+FUNCTIONS
+
+main(video, ROIs, params) -> list of events
+
+  split(video) -> list of frames
+  detect(list of frames, config, params) -> list of post detection frames
+  filter_frames(list of post detection frames, list of filters) -> list of post detection frames
+  track_humans(list of post detection frames, params) -> list of tracks
+  extract_events(list of tracks, ROIs, params) -> list of events
+
+--------------------------------------------------------------------------------
+DATA DEFINITIONS
+
+Transition is an enum: 'first', 'snapped', 'tracked', 'retaken', 'interpolated'
+
+Track is a list of (pdframe_index, drect_index, trans)
+
+PostDetectionFrame is a structure:
+- frame
+- list of detected rectangles
+
+DetectedRectangle is a Rectangle with:
+- class
+- score
+
+Video is a list of Frames
+
+A Frame is an image loaded through OpenCV 3
+
+Rectangle is a structure:
+- x : int
+- y : int
+- width : int
+- height : int
+
+ROIs (Region of Interest) is a dictionary:
+- name : string -> (rectangle, list of event types)
+
+Calibration parameters is a dictionary
+
+An Event is a structure:
+- type : string
+- frame_index : int
+- roi_name : string
+
+A WalkEvent is an Event:
+- type = "walk"
+
+An InteractEvent is an Event:
+- type = "interact"
+
+A PonderEvent is an Event:
+- type = "ponder"
+- duration: int
