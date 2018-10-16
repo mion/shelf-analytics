@@ -14,6 +14,11 @@ class Video:
     def __init__(self, frames=None):
         self.frames = [] if frames is None else frames
 
+class PostDetectionVideo(Video):
+    def __init__(self, frames=None, drects_by_frame=None):
+        super().__init__(frames)
+        self.detected_retangles_by_frame = [] if drects_by_frame is None else drects_by_frame
+
 class Frame:
     """
     A frame loaded from a video. This class is a wrapper on top of an image
@@ -57,14 +62,6 @@ class DetectedRectangle(Rectangle):
     def __init__(self, score, obj_class):
         self.score = score
         self.obj_class = obj_class
-
-class PostDetectionFrame(Frame):
-    """
-    A frame that was outputted from object detection, containing a list of
-    detected rectangles.
-    """
-    def __init__(self, drects):
-        self.detected_rectangles = drects
 
 class Track:
     """
