@@ -63,6 +63,13 @@ class DetectedRectangle(Rectangle):
         self.score = score
         self.obj_class = obj_class
 
+class TrackingResult:
+    """A structure holding the result of running a `PostDetectionVideo` object
+    through the tracking function.
+    """
+    def __init__(self, tracks):
+        self.tracks = tracks
+
 class Track:
     """
     A track identifies the same detected rectangle (representing a person)
