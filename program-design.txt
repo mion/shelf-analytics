@@ -1,6 +1,14 @@
+FUTURE
+- We will want ROIs to be polygons instead of rectangles to increase accuracy.
+- We will want detected rectangles to be polygons or even masks (if using MaskRCNN) to increase accuracy.
+
+--------------------------------------------------------------------------------
 QUESTIONS
 - Why rename 'bounding box' to 'detected rectangle'?
-- Why return a PostDetectionVideo instead of just the frames? Can't we simplify?
+- Why return a PostDetectionVideo instead of just the frames?
+- Why return a TrackingResult instead of just the Tracks?
+- Why not restructure PostDetectionVideo as DetectionResult and use composition?
+- Change event 'type' to 'kind' to avoid the keyword name clash?
 
 --------------------------------------------------------------------------------
 FUNCTIONS
@@ -10,8 +18,8 @@ main(video, ROIs, params) -> list of events
   load_video(path) -> Video
   detect(Video, config, params) -> post detection video
   filter_detected_rectangles(post detection video, list of filters) -> post detection video
-  track_humans(post detection video, params) -> list of tracks
-  extract_events(list of tracks, ROIs, params) -> list of events
+  track_humans(post detection video, params) -> tracking result
+  extract_events(tracking result, ROIs, params) -> list of events
 
 --------------------------------------------------------------------------------
 DATA DEFINITIONS
