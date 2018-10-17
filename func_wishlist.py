@@ -55,6 +55,35 @@ def filter_detected_rectangles(pdvideo, filters, params):
     """
     return None
 
+def track_humans(pdvideo, config, params):
+    """Attempt to link one person to the most likely detected rectangles
+    across various frames.
+
+    Uses an `OpenCV` object tracker under the hood for basic object tracking,
+    then applies ad-hoc heuristics to handle cases such as missing detected
+    rectangles, two drects merging into one, using the drect velocity to guess
+    its next position, etc.
+
+    Parameters
+    ----------
+    pdvideo : PostDetectionVideo
+        The `PostDetectionVideo` object containing the frames and the detected
+        rectangles that will be used for tracking.
+    config : dict
+        A dictionary specifying options such as the object tracker algorithm to
+        be used (e.g. `KCF`, `MIL`, etc).
+    params : dict
+        A dictionary specifying values that should be calibrated according to
+        the placement of the camera.
+
+    Returns
+    -------
+    tresult : TrackingResult
+        A `TrackingResult` object that embodies the result of the application
+        of this human tracking algorithm.
+    """
+    return []
+
 def load_video(file_path):
     """Loads a video file in memory using ``OpenCV``.
 
