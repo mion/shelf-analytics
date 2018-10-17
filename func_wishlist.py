@@ -78,9 +78,44 @@ def track_humans(pdvideo, config, params):
 
     Returns
     -------
-    tresult : TrackingResult
+    tracking_result : TrackingResult
         A `TrackingResult` object that embodies the result of the application
         of this human tracking algorithm.
+    """
+    return []
+
+def extract_events(tracking_result, rois, config, params):
+    """Extracts events according to some regions of interest (ROIs).
+
+    A ROI is simply a rectangle accompanied by a list of events to be
+    extracted from the intersection of a human rectangle and this one.
+
+    Parameters
+    ----------
+    tracking_result : TrackingResult
+        A `TrackingResult` object that embodies the result of the application
+        of this human tracking algorithm.
+    rois : dict
+        A dictionary specifying the desired ROIs (regions of interest). The
+        dict must have this format:
+            `name -> (rect, ev_types)`
+        Where `name` is a string representing the name of the ROI (e.g.
+        "front_aisle"), `rect` is the `Rectangle` delimiting the actual region
+        and `ev_types` is a list of strings defining the type of `Event` to be
+        captured (e.g. "walk", "ponder" or "touch").
+    config : dict
+        A dictionary specifying options such as the object tracker algorithm to
+        be used (e.g. `KCF`, `MIL`, etc).
+    params : dict
+        A dictionary specifying values that should be calibrated according to
+        the placement of the camera.
+
+    Returns
+    -------
+    events : list
+        A list of `Event` objects that were extracted upon the interaction of
+        a human with a region of interest. The `Event` object contains the
+        name of ROI and also its type.
     """
     return []
 
