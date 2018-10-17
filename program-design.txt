@@ -1,3 +1,7 @@
+QUESTIONS
+- Why rename 'bounding box' to 'detected rectangle'?
+- Why return a PostDetectionVideo instead of just the frames? Can't we simplify?
+
 --------------------------------------------------------------------------------
 FUNCTIONS
 
