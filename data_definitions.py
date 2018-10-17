@@ -108,8 +108,9 @@ class Event:
     person) interacts with a ROI (region of interest) that was previously
     defined.
     """
-    def __init__(self, event_type):
+    def __init__(self, event_type, roi_name):
         self.type = event_type
+        self.roi_name = roi_name
 
 class WalkEvent(Event):
     """
