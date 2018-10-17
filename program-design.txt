@@ -9,6 +9,9 @@ QUESTIONS
 - Why return a TrackingResult instead of just the Tracks?
 - Why not restructure PostDetectionVideo as DetectionResult and use composition?
 - Change event 'type' to 'kind' to avoid the keyword name clash?
+- Why not return a EventExtractionResult instead of just the list of events?
+- What is the best data representation to use for the ROIs?
+- When to use abbreviations of classes for the argument names in function headers?
 
 --------------------------------------------------------------------------------
 FUNCTIONS
