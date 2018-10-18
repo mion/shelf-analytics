@@ -45,7 +45,7 @@ class Point:
         self.x = x
         self.y = y
 
-class Rectangle:
+class BoundingBox:
     """
     A rectangle in 2D with an origin (a Point representing the upper left
     corner), width and height.
@@ -55,9 +55,9 @@ class Rectangle:
         self.width = width
         self.height = height
 
-class DetectedRectangle(Rectangle):
+class DetectedBoundingBox(BoundingBox):
     """
-    A rectangle that was outputted from object detection.
+    A bbox that was outputted from object detection.
     """
     def __init__(self, score, obj_class):
         self.score = score
@@ -72,7 +72,7 @@ class TrackingResult:
 
 class Track:
     """
-    A track identifies the same detected rectangle (representing a person)
+    A track identifies the same detected bbox (representing a person)
     across many different frames. (By 'frame' we mean a PostDetectionFrame.)
     """
     def __init__(self):
@@ -81,7 +81,7 @@ class Track:
 class Step:
     """
     A step is a simple structure containing the index of the frame and the
-    rectangle (identifying the same person across all frames) and the
+    bbox (identifying the same person across all frames) and the
     transition from last step. (By 'frame' we mean a PostDetectionFrame.)
     """
     def __init__(self, pdframe_index, drect_index, trans):
@@ -92,8 +92,8 @@ class Step:
 from enum import Enum
 class Transition(Enum):
     """
-    An Enum representing how a detected rectangle inside a certain frame
-    is connnected to (transitions to) to another detected rectangle in the
+    An Enum representing how a detected bbox inside a certain frame
+    is connnected to (transitions to) to another detected bbox in the
     following frame. (By 'frame' we mean a PostDetectionFrame.)
     """
     first = 1
@@ -104,7 +104,7 @@ class Transition(Enum):
 
 class Event:
     """
-    An event that is captured whenever a detected rectangle (representing a
+    An event that is captured whenever a detected bbox (representing a
     person) interacts with a ROI (region of interest) that was previously
     defined.
     """
@@ -114,7 +114,7 @@ class Event:
 
 class WalkEvent(Event):
     """
-    A walk event is captured whenever a detected rectangle (representing a
+    A walk event is captured whenever a detected bbox (representing a
     person) goes through a ROI (region of interest) without stopping for a
     certain amount of time.
     """
@@ -123,7 +123,7 @@ class WalkEvent(Event):
 
 class PonderEvent(Event):
     """
-    A ponder event is captured whenever a detected rectangle (representing a
+    A ponder event is captured whenever a detected bbox (representing a
     person) arrives at a ROI (region of interest) and stays there for a certain
     amount of time.
     """
@@ -132,7 +132,7 @@ class PonderEvent(Event):
 
 class TouchEvent(Event):
     """
-    A touch event is captured whenever a detected rectangle (representing a
+    A touch event is captured whenever a detected bbox (representing a
     person) enters and then exits a ROI (region of interest) in a short span of
     time.
     """
