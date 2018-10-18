@@ -10,7 +10,7 @@ class BBox:
         self.origin = origin
         self.width = width
         self.height = height
-        self.center = (origin.x + int(width / 2), origin.y + int(height / 2))
+        self.center = Point(origin.x + int(width / 2), origin.y + int(height / 2))
         self.area = width * height
 
     def __str__(self):
