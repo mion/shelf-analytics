@@ -3,8 +3,11 @@ from data_definitions import *
 def detect_humans(video, config, params):
     """Detect human beings that appear in the frames of a `Video` object.
 
-    Applies object detection, filtering out objects that are not human
-    beings.
+    Applies object detection using a deep learning framework such as MaskRCNN
+    and then filters out objects that are not human beings or have unwanted
+    properties. For example, some detected bboxes have a high score
+    (confidence) but are actually too small or too large to be a person.
+    In this example the area has to be calibrated according to the placement of the camera.
 
     Parameters
     ----------
@@ -28,19 +31,19 @@ def detect_humans(video, config, params):
     return None
 
 def track_humans(pdvideo, config, params):
-    """Attempt to link one person to the most likely detected rectangles
+    """Attempt to link one person to the most likely detected bboxes
     across various frames.
 
     Uses an `OpenCV` object tracker under the hood for basic object tracking,
     then applies ad-hoc heuristics to handle cases such as missing detected
-    rectangles, two drects merging into one, using the drect velocity to guess
+    bboxes, two drects merging into one, using the drect velocity to guess
     its next position, etc.
 
     Parameters
     ----------
     pdvideo : PostDetectionVideo
         The `PostDetectionVideo` object containing the frames and the detected
-        rectangles that will be used for tracking.
+        bboxes that will be used for tracking.
     config : dict
         A dictionary specifying options such as the object tracker algorithm to
         be used (e.g. `KCF`, `MIL`, etc).
@@ -59,8 +62,8 @@ def track_humans(pdvideo, config, params):
 def extract_events(tracking_result, rois, config, params):
     """Extracts events according to some regions of interest (ROIs).
 
-    A ROI is simply a rectangle accompanied by a list of events to be
-    extracted from the intersection of a human rectangle and this one.
+    A ROI is simply a bbox accompanied by a list of events to be
+    extracted from the intersection of a human bbox and this one.
 
     Parameters
     ----------
@@ -70,9 +73,9 @@ def extract_events(tracking_result, rois, config, params):
     rois : dict
         A dictionary specifying the desired ROIs (regions of interest). The
         dict must have this format:
-            `name -> (rect, ev_types)`
+            `name -> (bbox, ev_types)`
         Where `name` is a string representing the name of the ROI (e.g.
-        "front_aisle"), `rect` is the `Rectangle` delimiting the actual region
+        "front_aisle"), `bbox` is the `BoundingBox` delimiting the actual region
         and `ev_types` is a list of strings defining the type of `Event` to be
         captured (e.g. "walk", "ponder" or "touch").
     config : dict
