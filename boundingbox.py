@@ -12,6 +12,7 @@ class BBox:
         self.height = height
         self.center = Point(origin.x + int(width / 2), origin.y + int(height / 2))
         self.area = width * height
+        # for backward comp
         self.x1 = origin.x
         self.y1 = origin.y
         self.x2 = origin.x + width
@@ -33,11 +34,18 @@ class BBox:
         y2 = min(self.y2, bbox.y2)
         return (x2 - x1) * (y2 - y1) if ((x1 < x2) and (y1 < y2)) else None
 
+    def to_tuple(self, fmt):
+        if fmt == Format.x1_y1_w_h:
+            return (self.x1, self.y1, self.width, self.height)
+        else: # fmt == Format.y1_x1_y2_x2:
+            return (self.y1, self.x1, self.y2, self.x2)
+
     @staticmethod
     def parse(raw_bbox, fmt):
         # IMPORTANT: OpenCV expects tuples, not lists.
         #            Also, tuples will be used as indexes so
         #            ints are necessary.
+        # TODO: rewrite the above comment?
         args = tuple([int(n) for n in raw_bbox])
         if fmt == Format.x1_y1_w_h:
             x1 = args[0]

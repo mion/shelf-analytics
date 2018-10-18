@@ -22,6 +22,11 @@ class BBoxTest(unittest.TestCase):
         bbox2 = BBox(Point(50, 50), 100, 100)
         area = bbox1.intersection_area(bbox2)
         self.assertEqual(area, 2500)
+    
+    def test_to_tuple(self):
+        bbox1 = BBox(Point(1, 2), 321, 123)
+        self.assertEqual(bbox1.to_tuple(Format.x1_y1_w_h), (1, 2, 321, 123))
+        self.assertEqual(bbox1.to_tuple(Format.y1_x1_y2_x2), (2, 1, 125, 322))
 
 if __name__ == '__main__':
     unittest.main()
