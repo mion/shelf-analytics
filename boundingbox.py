@@ -12,12 +12,26 @@ class BBox:
         self.height = height
         self.center = Point(origin.x + int(width / 2), origin.y + int(height / 2))
         self.area = width * height
+        self.x1 = origin.x
+        self.y1 = origin.y
+        self.x2 = origin.x + width
+        self.y2 = origin.y + height
 
     def __str__(self):
         return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
 
     def __repr__(self):
         return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
+    
+    def has_intersection_with(self, bbox):
+        return self.intersection_area(bbox) is not None
+    
+    def intersection_area(self, bbox):
+        x1 = max(self.x1, bbox.x1)
+        y1 = max(self.y1, bbox.y1)
+        x2 = min(self.x2, bbox.x2)
+        y2 = min(self.y2, bbox.y2)
+        return (x2 - x1) * (y2 - y1) if ((x1 < x2) and (y1 < y2)) else None
 
     @staticmethod
     def parse(raw_bbox, fmt):
