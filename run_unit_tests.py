@@ -1,4 +1,5 @@
 import unittest
+from point import Point
 from boundingbox import BBox, Format
 
 class BBoxTest(unittest.TestCase):
@@ -15,6 +16,12 @@ class BBoxTest(unittest.TestCase):
         self.assertEqual(bbox.origin.y, 50)
         self.assertEqual(bbox.width, 200)
         self.assertEqual(bbox.height, 100)
+    
+    def test_intersection(self):
+        bbox1 = BBox(Point(0, 0), 100, 100)
+        bbox2 = BBox(Point(50, 50), 100, 100)
+        area = bbox1.intersection_area(bbox2)
+        self.assertEqual(area, 2500)
 
 if __name__ == '__main__':
     unittest.main()
