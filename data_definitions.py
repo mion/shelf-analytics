@@ -5,20 +5,6 @@ This module is a blueprint for the design of the full program.
 ###############################################################################
 # Data definitions
 ###############################################################################
-class Video:
-    """
-    A video is a list of Frames, each representing an image, that was loaded
-    with OpenCV. It also contain properties such as the framerate (FPS), the
-    format (e.g.: mp4), the name of the file, etc.
-    """
-    def __init__(self, frames=None):
-        self.frames = [] if frames is None else frames
-
-class PostDetectionVideo(Video):
-    def __init__(self, frames=None, drects_by_frame=None):
-        super().__init__(frames)
-        self.detected_retangles_by_frame = [] if drects_by_frame is None else drects_by_frame
-
 class Frame:
     """
     A frame loaded from a video. This class is a wrapper on top of an image
@@ -28,14 +14,14 @@ class Frame:
     def __init__(self, image):
         self.image = image
 
-class CalibrationParameters(dict):
+class Video:
     """
-    The tracking algorithm needs some arbitrary values to function (eg.: how
-    small can the bounding box of a detected object be so it is still
-    considered a human being). This class is simply a dictionary containing
-    such values.
+    A video is a list of Frames, each representing an image, that was loaded
+    with OpenCV. It also contain properties such as the framerate (FPS), the
+    format (e.g.: mp4), the name of the file, etc.
     """
-    pass
+    def __init__(self, frames=None):
+        self.frames = [] if frames is None else frames
 
 class Point:
     """
@@ -45,7 +31,7 @@ class Point:
         self.x = x
         self.y = y
 
-class BoundingBox:
+class BBox:
     """
     A rectangle in 2D with an origin (a Point representing the upper left
     corner), width and height.
@@ -55,20 +41,28 @@ class BoundingBox:
         self.width = width
         self.height = height
 
-class DetectedBoundingBox(BoundingBox):
+class DetectedBBox(BBox):
     """
     A bbox that was outputted from object detection.
     """
-    def __init__(self, score, obj_class):
+    def __init__(self, origin, width, height, identifier, score, obj_class):
+        super().__init__(origin, width, height)
+        self.identifier = identifier
         self.score = score
         self.obj_class = obj_class
+        self.filtering_results = []
 
-class TrackingResult:
-    """A structure holding the result of running a `PostDetectionVideo` object
-    through the tracking function.
+class DetectionResult:
     """
-    def __init__(self, tracks):
-        self.tracks = tracks
+    The result of object detection.
+    """
+    def __init__(self, frames, dbboxes_by_frame_idx):
+        self.frames = frames
+        self.dbboxes_by_frame_idx = dbboxes_by_frame_idx
+
+class TrackedBBox(DetectedBBox):
+    def __init__(self, parent_track_id):
+        self.parent_track_ids = [parent_track_id]
 
 class Track:
     """
@@ -84,9 +78,9 @@ class Step:
     bbox (identifying the same person across all frames) and the
     transition from last step. (By 'frame' we mean a PostDetectionFrame.)
     """
-    def __init__(self, pdframe_index, drect_index, trans):
+    def __init__(self, pdframe_index, bbox_index, trans):
         self.post_detection_frame_index = pdframe_index
-        self.detected_rectangle_index = drect_index
+        self.bbox_index = bbox_index
         self.transition = trans
 
 from enum import Enum
@@ -101,6 +95,17 @@ class Transition(Enum):
     tracked = 3
     retaken = 4
     interpolated = 5
+
+class TrackingResult:
+    """A structure holding the result of running a `PostDetectionVideo` object
+    through the tracking function.
+    """
+    def __init__(self, tracks):
+        self.tracks = tracks
+
+class EventExtractionResult:
+    def __init__(self):
+        pass
 
 class Event:
     """
