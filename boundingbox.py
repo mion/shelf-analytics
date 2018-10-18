@@ -23,5 +23,8 @@ class BBox:
             width = args[2]
             height = args[3]
             return BBox(Point(x1, y1), width, height)
-        else:
-            return None
+        else: # fmt == Format.y1_x1_y2_x2
+            y1, x1, y2, x2 = args
+            width = x2 - x1
+            height = y2 - y1
+            return BBox(Point(x1, y1), width, height)

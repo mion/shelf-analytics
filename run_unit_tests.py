@@ -9,5 +9,12 @@ class BBoxTest(unittest.TestCase):
         self.assertEqual(bbox.width, 200)
         self.assertEqual(bbox.height, 300)
 
+    def test_parse_y1_x1_y2_x2(self):
+        bbox = BBox.parse([50, 20, 150, 220], Format.y1_x1_y2_x2)
+        self.assertEqual(bbox.origin.x, 20)
+        self.assertEqual(bbox.origin.y, 50)
+        self.assertEqual(bbox.width, 200)
+        self.assertEqual(bbox.height, 100)
+
 if __name__ == '__main__':
     unittest.main()
