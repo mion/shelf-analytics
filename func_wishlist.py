@@ -27,34 +27,6 @@ def detect_humans(video, config, params):
     """
     return None
 
-def filter_detected_rectangles(pdvideo, filters, params):
-    """Removes detected rectangles with unwanted properties (e.g. too small).
-
-    For example, some detected rectangles have a high score (confidence) but are actually
-    too small or too large to be a person. In this example the area has to be
-    calibrated according to the placement of the camera.
-
-    Parameters
-    ----------
-    pdvideo : PostDetectionVideo
-        The `PostDetectionVideo` object containing the frames and the detected
-        rectangles that will be filtered.
-    filters : list
-        A list of filters to be applied. A filter is a function with the
-        following signature:
-        `f(drect:DetectedRectangle, params:dict) -> should_be_removed:bool`
-    params : dict
-        A dictionary specifying values that should be calibrated according to
-        the placement of the camera.
-
-    Returns
-    -------
-    filtered_pdvideo : PostDetectionVideo
-        A `PostDetectionVideo` object that had some of its detected rectangles
-        filtered out.
-    """
-    return None
-
 def track_humans(pdvideo, config, params):
     """Attempt to link one person to the most likely detected rectangles
     across various frames.
