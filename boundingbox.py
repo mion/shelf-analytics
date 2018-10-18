@@ -13,6 +13,12 @@ class BBox:
         self.center = (origin.x + int(width / 2), origin.y + int(height / 2))
         self.area = width * height
 
+    def __str__(self):
+        return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
+
+    def __repr__(self):
+        return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
+
     @staticmethod
     def parse(raw_bbox, fmt):
         # IMPORTANT: OpenCV expects tuples, not lists.
