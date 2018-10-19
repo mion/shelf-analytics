@@ -4,7 +4,7 @@ class DetectedBBox(BBox):
     """
     A bbox that was outputted from object detection.
     """
-    def __init__(self, origin, width, height, identifier, score, obj_class, filtering_results=None):
+    def __init__(self, origin, width, height, identifier, score, obj_class, filtering_results):
         super().__init__(origin, width, height)
         self.identifier = identifier
         self.score = score
