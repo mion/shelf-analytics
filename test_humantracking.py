@@ -16,6 +16,18 @@ class TestFindBBoxToSnap(unittest.TestCase):
         self.assertEqual(closest_bbox_idx, 1)
         self.assertEqual(closest_dist, 75)
 
+    def test_should_find_earlier_in_the_list(self):
+        bboxes = [
+            BBox(Point(25, 25), 200, 150),
+            BBox(Point(25, 100), 200, 150),
+            BBox(Point(25, 500), 200, 150)
+        ]
+
+        idx, dist = find_bbox_to_snap(bboxes, 1, 1000)
+
+        self.assertEqual(idx, 0)
+        self.assertEqual(dist, 75)
+
     def test_should_not_find_beyond_max(self):
         bboxes = [
             BBox(Point(25, 25), 200, 150),
