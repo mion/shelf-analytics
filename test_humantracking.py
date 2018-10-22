@@ -11,10 +11,10 @@ class TestFindBBoxToSnap(unittest.TestCase):
             BBox(Point(25, 175), 200, 150)
         ]
 
-        closest_bbox_idx, closest_dist = find_bbox_to_snap(bboxes, 0, 1000)
+        idx, dist = find_bbox_to_snap(bboxes, 0, 1000)
 
-        self.assertEqual(closest_bbox_idx, 1)
-        self.assertEqual(closest_dist, 75)
+        self.assertEqual(idx, 1)
+        self.assertEqual(dist, 75)
 
     def test_should_find_earlier_in_the_list(self):
         bboxes = [
@@ -35,10 +35,10 @@ class TestFindBBoxToSnap(unittest.TestCase):
             BBox(Point(25, 325), 200, 150)
         ]
 
-        closest_bbox_idx, closest_dist = find_bbox_to_snap(bboxes, 1, 149)
+        idx, dist = find_bbox_to_snap(bboxes, 1, 149)
 
-        self.assertEqual(closest_bbox_idx, None)
-        self.assertEqual(closest_dist, None)
+        self.assertEqual(idx, None)
+        self.assertEqual(dist, None)
 
 if __name__ == '__main__':
     unittest.main()
