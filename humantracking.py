@@ -4,8 +4,22 @@ from boundingbox import BBox
 def track_humans(det_result, config, params):
     return []
 
-def is_intersecting_any(bboxes, base_bbox_idx, min_intersec_area_perc_thresh):
-    return None
+def is_intersecting_any(bboxes, base_bbox_idx, min_intersec_area_perc):
+    if not bboxes:
+        raise RuntimeError("bboxes must not be empty")
+    base_bbox = bboxes[base_bbox_idx]
+    for bbox in bboxes:
+        if bbox is base_bbox:
+            continue
+        intersec_area = bbox.intersection_area(base_bbox)
+        if intersec_area is None:
+            continue
+        else:
+            area_perc = intersec_area / base_bbox.area
+            area_perc_vice_versa = intersec_area / bbox.area
+            if area_perc > min_intersec_area_perc or area_perc_vice_versa > min_intersec_area_perc:
+                return True
+    return False
 
 def find_bbox_to_snap(bboxes, base_bbox_index, max_snap_distance):
     if not bboxes:
