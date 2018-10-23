@@ -4,6 +4,9 @@ from boundingbox import BBox
 def track_humans(det_result, config, params):
     return []
 
+def is_intersecting_any(bboxes, base_bbox_idx, min_intersec_area_perc_thresh):
+    return None
+
 def find_bbox_to_snap(bboxes, base_bbox_index, max_snap_distance):
     closest_dist = math.inf
     closest_bbox_idx = None
@@ -16,6 +19,5 @@ def find_bbox_to_snap(bboxes, base_bbox_index, max_snap_distance):
             closest_bbox_idx = idx
             closest_dist = dist
     if closest_bbox_idx is not None:
-        return (closest_bbox_idx, closest_dist) 
-    else:
-        return (None, None)
+        return (closest_bbox_idx, closest_dist)
+    return (None, None)
