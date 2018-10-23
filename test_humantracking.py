@@ -5,10 +5,9 @@ from humantracking import find_bbox_to_snap, is_intersecting_any
 
 class TestIsIntersectingAny(unittest.TestCase):
     def test_should_raise_an_exception_when_empty(self):
-        bboxes = []
         with self.assertRaises(RuntimeError):
-            is_intersecting_any(bboxes, 2, 0.35)
-    
+            is_intersecting_any([], 2, 0.35)
+
     def test_should_return_false_below_thresh(self):
         bboxes = [
             BBox(Point(10, 10), 200, 150),
@@ -36,8 +35,8 @@ class TestIsIntersectingAny(unittest.TestCase):
 class TestFindBBoxToSnap(unittest.TestCase):
     def test_should_raise_an_exception_when_empty(self):
         with self.assertRaises(RuntimeError):
-            idx, dist = find_bbox_to_snap([], 1, 250)
-    
+            find_bbox_to_snap([], 1, 250)
+
     def test_should_find_first_in_line(self):
         bboxes = [
             BBox(Point(25, 25), 200, 150),
