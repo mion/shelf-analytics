@@ -39,10 +39,12 @@ def find_some_track(bboxes_per_frame, is_filtered, parent_of):
     start_frame, start_bboxes = bboxes_per_frame[fr_idx]
     start_bbox = start_bboxes[bbox_idx]
     tracker = create_tracker(start_frame, start_bbox)
+    # WIP
     return None
 
 def create_tracker(frame, bbox):
     # FIXME I removed the call to tracker.clear(), this probably brakes something.
+    pass
 
 def find_start(bboxes_per_frame, is_filtered, parent_of, params):
     for fr_idx, (frame, bboxes) in enumerate(bboxes_per_frame):
