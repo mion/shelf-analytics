@@ -61,3 +61,13 @@ class BBox:
             width = x2 - x1
             height = y2 - y1
             return BBox(Point(x1, y1), width, height)
+
+class DetectedBBox(BBox):
+    """
+    A bbox that was outputted from object detection.
+    """
+    def __init__(self, origin, width, height, score, obj_class, filtering_results):
+        super().__init__(origin, width, height)
+        self.score = score
+        self.obj_class = obj_class
+        self.filtering_results = [] if filtering_results is None else filtering_results
