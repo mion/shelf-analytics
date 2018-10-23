@@ -24,6 +24,9 @@ class BBox:
     def __repr__(self):
         return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
     
+    def distance_to(self, bbox):
+        return self.origin.distance_to(bbox.origin)
+
     def has_intersection_with(self, bbox):
         return self.intersection_area(bbox) is not None
     
