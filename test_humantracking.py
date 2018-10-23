@@ -1,7 +1,32 @@
 import unittest
 from point import Point
 from boundingbox import BBox
-from humantracking import find_bbox_to_snap
+from humantracking import find_bbox_to_snap, is_intersecting_any
+
+class TestIsIntersectingAny(unittest.TestCase):
+    def test_should_return_false_below_thresh(self):
+        bboxes = [
+            BBox(Point(10, 10), 200, 150),
+            BBox(Point(110, 85), 350, 250)
+        ]
+
+        self.assertEqual(is_intersecting_any(bboxes, 0, 0.40), False)
+
+    def test_should_return_true_above_thresh(self):
+        bboxes = [
+            BBox(Point(10, 10), 200, 150),
+            BBox(Point(20, 20), 350, 250)
+        ]
+
+        self.assertTrue(is_intersecting_any(bboxes, 0, 0.40), True)
+
+    def test_should_return_false_without_a_single_intersec(self):
+        bboxes = [
+            BBox(Point(10, 10), 200, 150),
+            BBox(Point(200, 170), 350, 250)
+        ]
+
+        self.assertEqual(is_intersecting_any(bboxes, 0, 0.75), False)
 
 class TestFindBBoxToSnap(unittest.TestCase):
     def test_should_find_first_in_line(self):
