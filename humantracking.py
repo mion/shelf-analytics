@@ -10,8 +10,8 @@ def track_humans(bboxes_per_frame, config, params):
     tracks = find_all_tracks(bboxes_per_frame, is_filtered, params['MAX_TRACK_COUNT'])
     return tracks
 
-def filter_bboxes(bboxes_per_frame):
-    return bboxes_per_frame
+def filter_bboxes(bboxes_per_frame): # TODO
+    return {}
 
 def find_all_tracks(bboxes_per_frame, is_filtered, max_track_count):
     count = 0
