@@ -7,18 +7,18 @@ def track_humans(bboxes_per_frame, config, params):
         (frame, bboxes)
     """
     is_filtered = filter_bboxes(bboxes_per_frame)
-    tracks = find_all_tracks(bboxes_per_frame, is_filtered, params['MAX_TRACK_COUNT'])
+    tracks = find_all_tracks(bboxes_per_frame, is_filtered, params)
     return tracks
 
 def filter_bboxes(bboxes_per_frame): # TODO
     return {}
 
-def find_all_tracks(bboxes_per_frame, is_filtered, max_track_count):
+def find_all_tracks(bboxes_per_frame, is_filtered, params):
     count = 0
     tracks = []
     parent_of = {}
-    while count < max_track_count:
-        track = find_some_track(bboxes_per_frame, is_filtered, parent_of)
+    while count < params['MAX_TRACK_COUNT']:
+        track = find_some_track(bboxes_per_frame, is_filtered, parent_of, params)
         count += 1
         if track is not None:
             tracks.append(track)
@@ -26,7 +26,7 @@ def find_all_tracks(bboxes_per_frame, is_filtered, max_track_count):
             break
     return tracks
 
-def find_some_track(bboxes_per_frame, is_filtered, parent_of):
+def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
     """
     Returns None if no track found.
     """
