@@ -101,15 +101,12 @@ def is_intersecting_any(bboxes, base_bbox_idx, intersec_area_perc_thresh):
                 return True
     return False
 
-def find_bbox_to_snap(bboxes, base_bbox_index, max_snap_distance):
+def find_bbox_to_snap(bboxes, base_bbox, max_snap_distance):
     if not bboxes:
         raise RuntimeError("bboxes must not be empty")
     closest_dist = math.inf
     closest_bbox_idx = None
-    base_bbox = bboxes[base_bbox_index]
     for idx, bbox in enumerate(bboxes):
-        if bbox is base_bbox:
-            continue
         dist = base_bbox.distance_to(bbox)
         if dist < max_snap_distance and dist < closest_dist:
             closest_bbox_idx = idx

@@ -35,28 +35,28 @@ class TestIsIntersectingAny(unittest.TestCase):
 class TestFindBBoxToSnap(unittest.TestCase):
     def test_should_raise_an_exception_when_empty(self):
         with self.assertRaises(RuntimeError):
-            find_bbox_to_snap([], 1, 250)
+            find_bbox_to_snap([], BBox(Point(0, 0), 50, 50), 250)
 
     def test_should_find_first_in_line(self):
         bboxes = [
-            BBox(Point(25, 25), 200, 150),
             BBox(Point(25, 100), 200, 150),
             BBox(Point(25, 175), 200, 150)
         ]
 
-        idx, dist = find_bbox_to_snap(bboxes, 0, 1000)
+        base_bbox = BBox(Point(25, 25), 200, 150)
+        idx, dist = find_bbox_to_snap(bboxes, base_bbox, 1000)
 
-        self.assertEqual(idx, 1)
+        self.assertEqual(idx, 0)
         self.assertEqual(dist, 75)
 
     def test_should_find_earlier_in_the_list(self):
         bboxes = [
             BBox(Point(25, 25), 200, 150),
-            BBox(Point(25, 100), 200, 150),
             BBox(Point(25, 500), 200, 150)
         ]
 
-        idx, dist = find_bbox_to_snap(bboxes, 1, 1000)
+        base_bbox = BBox(Point(25, 100), 200, 150)
+        idx, dist = find_bbox_to_snap(bboxes, base_bbox, 1000)
 
         self.assertEqual(idx, 0)
         self.assertEqual(dist, 75)
@@ -64,11 +64,11 @@ class TestFindBBoxToSnap(unittest.TestCase):
     def test_should_not_find_beyond_max(self):
         bboxes = [
             BBox(Point(25, 25), 200, 150),
-            BBox(Point(25, 175), 200, 150),
             BBox(Point(25, 325), 200, 150)
         ]
 
-        idx, dist = find_bbox_to_snap(bboxes, 1, 149)
+        base_bbox = BBox(Point(25, 175), 200, 150)
+        idx, dist = find_bbox_to_snap(bboxes, base_bbox, 149)
 
         self.assertEqual(idx, None)
         self.assertEqual(dist, None)
