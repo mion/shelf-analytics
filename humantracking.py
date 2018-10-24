@@ -1,9 +1,24 @@
 import math
-from boundingbox import BBox, DetectedBBox
+from boundingbox import BBox, Format, DetectedBBox
+
+class Track:
+    def __init__(self):
+        self.steps = []
+
+    def add(self, frame_index, bbox_index, transition):
+        self.steps.append((frame_index, bbox_index, transition))
+
+from enum import Enum
+class Transition(Enum):
+    first = 1
+    snapped = 2
+    tracked = 3
+    retaken = 4
+    interpolated = 5
 
 def track_humans(bboxes_per_frame, config, params):
     """
-    dbboxes_per_frame is a list of pairs:
+    bboxes_per_frame is a list of pairs:
         (frame, bboxes)
     """
     is_filtered = filter_bboxes(bboxes_per_frame)
@@ -22,6 +37,7 @@ def find_all_tracks(bboxes_per_frame, is_filtered, params):
         count += 1
         if track is not None:
             tracks.append(track)
+            # TODO add all bboxes from this track to parent_of
         else:
             break
     return tracks
@@ -39,7 +55,19 @@ def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
     start_frame, start_bboxes = bboxes_per_frame[fr_idx]
     start_bbox = start_bboxes[bbox_idx]
     tracker = create_tracker(start_frame, start_bbox)
-    # WIP
+    track = Track()
+    track.add(fr_idx, bbox_idx, Transition.first)
+    print("Tracking started:")
+    curr_idx = fr_idx + 1
+    while curr_idx < len(bboxes_per_frame):
+        curr_frame, curr_bboxes = bboxes_per_frame[curr_idx]
+        ok, xywh_tuple = tracker.update(curr_frame)
+        if ok:
+            tracker_bbox = BBox.parse(xywh_tuple, Format.x1_y1_w_h)
+            # snap_bbox, snap_dist = find_bbox_to_snap(curr_bboxes, )
+            # find_bbox_to_snap is wrong, it should use a BBox that is not in the array
+        curr_idx += 1
+
     return None
 
 def create_tracker(frame, bbox):
