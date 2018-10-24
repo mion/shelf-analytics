@@ -39,7 +39,8 @@ class ObjectTracker:
             return None
 
     def restart(self, frame, bbox):
-        self.opencv_tracker.clear()
+        self.opencv_tracker.clear() # Dig into OpenCV docs/code to figure out
+        # why this is needed and what's going on under the hood.
         self.opencv_tracker = self._create_opencv_tracker(self._opencv_obj_tracker_type)
         ok = self.opencv_tracker.init(frame, bbox.to_tuple(Format.x1_y1_w_h))
         if not ok:
@@ -65,17 +66,27 @@ class ObjectTracker:
             else:
                 raise RuntimeError("invalid object tracker type")
 
-def track_humans(bboxes_per_frame, config, params):
+def track_humans(det_bboxes_per_frame, config, params):
     """
     bboxes_per_frame is a list of pairs:
         (frame, bboxes)
+    At first they are in fact DetectedBBox, but that doesn't matter
+    being filtering.
     """
-    is_filtered = filter_bboxes(bboxes_per_frame)
-    tracks = find_all_tracks(bboxes_per_frame, is_filtered, params)
+    is_filtered = filter_bboxes(det_bboxes_per_frame)
+    tracks = find_all_tracks(det_bboxes_per_frame, is_filtered, params)
     return tracks
 
-def filter_bboxes(bboxes_per_frame): # TODO
-    return {}
+def filter_bboxes(det_bboxes_per_frame, params):
+    is_filtered = {}
+    for fr_idx, (frame, det_bboxes) in enumerate(det_bboxes_per_frame):
+        for bbox_idx, det_bbox in enumerate(det_bboxes):
+            too_uncertain = det_bbox.score < params['MIN_OBJ_DET_SCORE']
+            too_small = det_bbox.area < params['MIN_BBOX_AREA']
+            too_large = det_bbox.area > params['MAX_BBOX_AREA']
+            if too_uncertain or too_small or too_large:
+                is_filtered[(fr_idx, bbox_idx)] = True
+    return is_filtered
 
 def find_all_tracks(bboxes_per_frame, is_filtered, params):
     count = 0
@@ -90,6 +101,15 @@ def find_all_tracks(bboxes_per_frame, is_filtered, params):
         else:
             break
     return tracks
+
+def unfiltered_and_untracked(fr_idx, bboxes, is_filtered, parent_of):
+    clean_bboxes = []
+    for bbox_idx, bbox in enumerate(bboxes):
+        unfiltered = (fr_idx, bbox_idx) not in is_filtered
+        untracked = (fr_idx, bbox_idx) not in parent_of
+        if unfiltered and untracked:
+            clean_bboxes.append(bbox)
+    return clean_bboxes
 
 def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
     """
@@ -110,19 +130,18 @@ def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
     curr_idx = fr_idx + 1
     while curr_idx < len(bboxes_per_frame):
         curr_frame, curr_bboxes = bboxes_per_frame[curr_idx]
+        clean_bboxes = unfiltered_and_untracked(curr_idx, curr_bboxes, is_filtered, parent_of)
         tracker_bbox = tracker.update(curr_frame)
         if tracker_bbox: 
             # If the OpenCV obj tracker managed to keep track of the bbox,
             # let's see if we can also snap it onto a detected bbox to
             # increase accuracy.
-            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, tracker_bbox, params['MAX_SNAP_DISTANCE_SHORT'])
+            closest_bbox_idx, _ = find_bbox_to_snap(clean_bboxes, tracker_bbox, params['MAX_SNAP_DISTANCE_SHORT'])
             if closest_bbox_idx is not None:
-                closest_bbox = curr_bboxes[closest_bbox_idx]
+                closest_bbox = clean_bboxes[closest_bbox_idx]
                 print("\tAt frame {:d} SNAPPED tracker bbox {} to closest detected bbox {}".format(curr_idx, tracker_bbox, closest_bbox))
                 track.add(curr_idx, closest_bbox, Transition.snapped)
-                # Let's reset the tracker to start tracking from here
-                tracker.clear() # TODO Without this line this doesn't work,
-                # we should understand what is going under the hoods.
+                # Let's reset the tracker to make its algorithm "forget" what happened previously.
                 tracker = tracker.restart(curr_frame, closest_bbox)
             else:
                 print("\tAt frame {:d} TRACKED previous bbox to {} in current frame, but could not snap it to any detected bbox".format(curr_idx, tracker_bbox))
@@ -138,9 +157,9 @@ def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
             # it was tracking. We don't want it to be too large since when 
             # tracking fails it could also be failing correctly (ie, that the
             # human left the scene, went underneath something, etc).
-            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, track.get_last_bbox(), params['MAX_SNAP_DISTANCE_LARGE'])
+            closest_bbox_idx, _ = find_bbox_to_snap(clean_bboxes, track.get_last_bbox(), params['MAX_SNAP_DISTANCE_LARGE'])
             if closest_bbox_idx is not None:
-                closest_bbox = curr_bboxes[closest_bbox_idx]
+                closest_bbox = clean_bboxes[closest_bbox_idx]
                 print("\tAt frame {:d} PATCHED the track by snapping from the previous bbox to {} in current frame".format(curr_idx, closest_bbox))
                 track.add(curr_idx, closest_bbox, Transition.patched)
                 tracker.restart(curr_frame, closest_bbox)
@@ -178,6 +197,7 @@ def is_intersecting_any(bboxes, base_bbox_idx, intersec_area_perc_thresh):
     return False
 
 def find_bbox_to_snap(bboxes, base_bbox, max_snap_distance):
+    # FIXME refactor to return a bbox instead of idx, and no distance
     if not bboxes:
         raise RuntimeError("bboxes must not be empty")
     closest_dist = math.inf
