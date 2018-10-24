@@ -5,8 +5,15 @@ class Track:
     def __init__(self):
         self.steps = []
 
-    def add(self, frame_index, bbox_index, transition):
-        self.steps.append((frame_index, bbox_index, transition))
+    def add(self, frame_index, bbox, transition):
+        # We can't use the bbox index here because we may want to add a bbox
+        # that wasn't detected (it may be have come from object tracking or
+        # the look ahead/interpolation algorithm).
+        self.steps.append((frame_index, bbox, transition))
+    
+    def get_last_bbox(self):
+        # TODO implement this
+        return None
 
 from enum import Enum
 class Transition(Enum):
