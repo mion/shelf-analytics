@@ -70,4 +70,3 @@ class DetectedBBox(BBox):
         super().__init__(origin, width, height)
         self.score = score
         self.obj_class = obj_class
-        self.filtering_results = [] if filtering_results is None else filtering_results
