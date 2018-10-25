@@ -2,13 +2,17 @@ import math
 from boundingbox import BBox, Format, DetectedBBox
 
 class Track:
+    next_id = 1
     def __init__(self):
+        self.id = Track.next_id
+        Track.next_id += 1
         self.steps = []
 
     def add(self, frame_index, bbox, transition):
         # We can't use the bbox index here because we may want to add a bbox
         # that wasn't detected (it may be have come from object tracking or
         # the look ahead/interpolation algorithm).
+        bbox.parent_track_id = self.id
         self.steps.append((frame_index, bbox, transition))
 
     def get_last_bbox(self):
@@ -90,32 +94,30 @@ def filter_bboxes(det_bboxes_per_frame, params):
 def find_all_tracks(bboxes_per_frame, is_filtered, params):
     count = 0
     tracks = []
-    parent_of = {}
     while count < params['MAX_TRACK_COUNT']:
-        track = find_some_track(bboxes_per_frame, is_filtered, parent_of, params)
+        track = find_some_track(bboxes_per_frame, is_filtered, params)
         count += 1
         if track is not None:
             tracks.append(track)
-            # TODO add all bboxes from this track to parent_of
         else:
             break
     return tracks
 
-def unfiltered_and_untracked(fr_idx, bboxes, is_filtered, parent_of):
+def unfiltered_and_untracked(fr_idx, bboxes, is_filtered):
     clean_bboxes = []
     for bbox_idx, bbox in enumerate(bboxes):
         unfiltered = (fr_idx, bbox_idx) not in is_filtered
-        untracked = (fr_idx, bbox_idx) not in parent_of
+        untracked = bbox.parent_track_id is not None
         if unfiltered and untracked:
             clean_bboxes.append(bbox)
     return clean_bboxes
 
-def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
+def find_some_track(bboxes_per_frame, is_filtered, params):
     """
     Returns None if no track found.
     """
     print("Searching for a bbox that is a good starting point...")
-    fr_idx, bbox_idx = find_start(bboxes_per_frame, is_filtered, parent_of, params)
+    fr_idx, bbox_idx = find_start(bboxes_per_frame, is_filtered, params)
     if fr_idx is None:
         print("None found. All humans have been tracked.")
         return None
@@ -129,7 +131,7 @@ def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
     curr_idx = fr_idx + 1
     while curr_idx < len(bboxes_per_frame):
         curr_frame, curr_bboxes = bboxes_per_frame[curr_idx]
-        clean_bboxes = unfiltered_and_untracked(curr_idx, curr_bboxes, is_filtered, parent_of)
+        clean_bboxes = unfiltered_and_untracked(curr_idx, curr_bboxes, is_filtered)
         tracker_bbox = tracker.update(curr_frame)
         if tracker_bbox: 
             # If the OpenCV obj tracker managed to keep track of the bbox,
@@ -168,11 +170,11 @@ def find_some_track(bboxes_per_frame, is_filtered, parent_of, params):
         curr_idx += 1
     return track
 
-def find_start(bboxes_per_frame, is_filtered, parent_of, params):
+def find_start(bboxes_per_frame, is_filtered, params):
     for fr_idx, (frame, bboxes) in enumerate(bboxes_per_frame):
         for bbox_idx, bbox in enumerate(bboxes):
             unfiltered = (fr_idx, bbox_idx) not in is_filtered
-            untracked = (fr_idx, bbox_idx) not in parent_of
+            untracked = bbox.parent_track_id is not None
             without_large_intersections = not is_intersecting_any(bboxes, bbox_idx, params['MIN_INTERSEC_AREA_PERC'])
             if unfiltered and untracked and without_large_intersections:
                 return (fr_idx, bbox_idx)

@@ -6,7 +6,11 @@ class Format(Enum):
     x1_y1_w_h = "(x1, y1, w, h)"
 
 class BBox:
+    next_id = 1
     def __init__(self, origin, width, height):
+        self.id = BBox.next_id
+        BBox.next_id += 1
+        self.parent_track_id = None
         self.origin = origin
         self.width = width
         self.height = height
@@ -66,7 +70,7 @@ class DetectedBBox(BBox):
     """
     A bbox that was outputted from object detection.
     """
-    def __init__(self, origin, width, height, score, obj_class, filtering_results):
+    def __init__(self, origin, width, height, score, obj_class):
         super().__init__(origin, width, height)
         self.score = score
         self.obj_class = obj_class
