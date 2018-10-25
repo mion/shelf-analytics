@@ -35,10 +35,7 @@ class ObjectTracker:
 
     def update(self, frame):
         ok, xywh_tuple = self.opencv_tracker.update(frame)
-        if ok:
-            return BBox.parse(xywh_tuple, Format.x1_y1_w_h)
-        else:
-            return None
+        return BBox.parse(xywh_tuple, Format.x1_y1_w_h) if ok else None
 
     def restart(self, frame, bbox):
         self.opencv_tracker.clear() # Dig into OpenCV docs/code to figure out
