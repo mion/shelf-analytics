@@ -189,6 +189,8 @@ def is_intersecting_any(bboxes, base_bbox_idx, intersec_area_perc_thresh):
         if intersec_area is None:
             continue
         else:
+            # Since we don't know if base bbox is "the large one" or not
+            # let's calculate the intersection area percentage both ways.
             area_perc = intersec_area / base_bbox.area
             area_perc_vice_versa = intersec_area / bbox.area
             if area_perc > intersec_area_perc_thresh or area_perc_vice_versa > intersec_area_perc_thresh:
