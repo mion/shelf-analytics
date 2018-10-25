@@ -10,10 +10,12 @@ class Track:
         # that wasn't detected (it may be have come from object tracking or
         # the look ahead/interpolation algorithm).
         self.steps.append((frame_index, bbox, transition))
-    
+
     def get_last_bbox(self):
-        # TODO implement this
-        return None
+        if not self.steps:
+            raise RuntimeError('cannot get last bbox from an empty track')
+        _, bbox, _ = self.steps[len(self.steps) - 1]
+        return bbox
 
 from enum import Enum
 class Transition(Enum):
