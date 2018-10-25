@@ -73,7 +73,7 @@ def track_humans(det_bboxes_per_frame, config, params):
     At first they are in fact DetectedBBox, but that doesn't matter
     being filtering.
     """
-    is_filtered = filter_bboxes(det_bboxes_per_frame)
+    is_filtered = filter_bboxes(det_bboxes_per_frame, params)
     tracks = find_all_tracks(det_bboxes_per_frame, is_filtered, params)
     return tracks
 
