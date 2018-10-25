@@ -28,7 +28,7 @@ class ObjectTracker:
         self._opencv_obj_tracker_type = opencv_obj_tracker_type
         self.opencv_tracker = self._create_opencv_tracker(opencv_obj_tracker_type)
         ok = self.opencv_tracker.init(frame, bbox.to_tuple(Format.x1_y1_w_h))
-        if not ok:
+        if not ok: # TODO Is this a good use of exceptions?
             raise RuntimeError('failed to init OpenCV tracker')
 
     def update(self, frame):
@@ -43,7 +43,7 @@ class ObjectTracker:
         # why this is needed and what's going on under the hood.
         self.opencv_tracker = self._create_opencv_tracker(self._opencv_obj_tracker_type)
         ok = self.opencv_tracker.init(frame, bbox.to_tuple(Format.x1_y1_w_h))
-        if not ok:
+        if not ok: # TODO Is this a good use of exceptions?
             raise RuntimeError('failed to restart OpenCV tracker')
 
     def _create_opencv_tracker(self, obj_tracker_type):
