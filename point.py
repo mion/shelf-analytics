@@ -9,3 +9,6 @@ class Point:
         dx = p.x - self.x
         dy = p.y - self.y
         return sqrt((dx * dx) + (dy * dy))
+    
+    def copy(self):
+        return Point(self.x, self.y)
