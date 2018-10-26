@@ -12,3 +12,7 @@ class Point:
     
     def copy(self):
         return Point(self.x, self.y)
+    
+    def add(self, p):
+        self.x += p.x 
+        self.y += p.y
