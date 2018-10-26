@@ -1,5 +1,6 @@
 import math
 from boundingbox import BBox, Format, DetectedBBox
+from point import Point
 
 class Track:
     next_id = 1
@@ -7,6 +8,9 @@ class Track:
         self.id = Track.next_id
         Track.next_id += 1
         self.steps = []
+    
+    def __len__(self):
+        return len(self.steps)
 
     def add(self, frame_index, bbox, transition):
         # We can't use the bbox index here because we may want to add a bbox
@@ -14,6 +18,12 @@ class Track:
         # the look ahead/interpolation algorithm).
         bbox.parent_track_id = self.id
         self.steps.append((frame_index, bbox, transition))
+    
+    def get_bbox(self, idx):
+        if idx >= len(self.steps):
+            raise IndexError('bbox index out of bounds')
+        _, bbox, _ = self.steps[idx]
+        return bbox
 
     def get_last_bbox(self):
         if not self.steps:
@@ -169,6 +179,25 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
 
         curr_idx += 1
     return track
+
+# TODO Refactor this function after testing.
+def average_bbox_velocity(track, max_back_hops):
+    start_i = max(len(track) - max_back_hops, 0)
+    avg_vel_x = 0
+    avg_vel_y = 0
+    back_hops = 0
+    for i in range(start_i, len(track) - 1):
+        bbox = track.get_bbox(i)
+        next_bbox = track.get_bbox(i + 1)
+        avg_vel_x += (next_bbox.center.x - bbox.center.x)
+        avg_vel_y += (next_bbox.center.y - bbox.center.y)
+        back_hops += 1
+    if back_hops > 0: # FIXME This is weird, compute it beforehand and refactor to use exceptions.
+        avg_vel_x = int(avg_vel_x / back_hops)
+        avg_vel_y = int(avg_vel_y / back_hops)
+        return Point(avg_vel_x, avg_vel_y)
+    else:
+        return Point(0, 0)
 
 def find_start(bboxes_per_frame, is_filtered, params):
     for fr_idx, (frame, bboxes) in enumerate(bboxes_per_frame):
