@@ -189,17 +189,11 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
         curr_idx += 1
     return track
 
-def normalized_direction(p1, p2):
-    dx = p2.x - p1.x
-    dy = p2.y - p1.y
-    norm = math.sqrt((dx * dx) + (dy * dy))
-    return (dx / norm, dy / norm)
-
 def interpolate(track, curr_idx, target_idx, target_bbox):
     last_bbox = track.get_last_bbox()
     n_hops = target_idx - curr_idx + 1
     delta_per_hop = last_bbox.distance_to(target_bbox) / n_hops
-    dir_vec = normalized_direction(last_bbox.center, target_bbox.center)
+    dir_vec = last_bbox.center.normalized_direction(target_bbox.center)
     curr_x = last_bbox.x1
     curr_y = last_bbox.y1
     for idx in range(curr_idx, target_idx):
