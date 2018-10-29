@@ -233,7 +233,7 @@ def look_ahead(track, bboxes_per_frame, fr_idx, avg_bbox_vel, max_front_hops, ma
     target_bbox = None
     target_idx = None
     for idx in range(fr_idx, min(fr_idx + max_front_hops + 1, len(bboxes_per_frame))):
-        moving_center.add(avg_bbox_vel)
+        moving_center = moving_center.add(avg_bbox_vel)
         closest_dist = math.inf
         closest_bbox = None
         _, bboxes = bboxes_per_frame[idx]
