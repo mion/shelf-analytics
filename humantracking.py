@@ -194,13 +194,11 @@ def interpolate(track, curr_idx, target_idx, target_bbox):
     n_hops = target_idx - curr_idx + 1
     delta_per_hop = last_bbox.distance_to(target_bbox) / n_hops
     dir_vec = last_bbox.center.normalized_direction(target_bbox.center)
-    curr_x = last_bbox.x1
-    curr_y = last_bbox.y1
+    interpol_orig = last_bbox.copy()
     for idx in range(curr_idx, target_idx):
-        curr_x += int(dir_vec[0] * delta_per_hop)
-        curr_y += int(dir_vec[1] * delta_per_hop)
-        interpolated_bbox = BBox(Point(curr_x, curr_y), last_bbox.width, last_bbox.height)
-        track.add(idx, interpolated_bbox, Transition.interpolated)
+        interpol_orig = interpol_orig.add(dir_vec.multiply(delta_per_hop))
+        interpol_bbox = BBox(interpol_orig, last_bbox.width, last_bbox.height)
+        track.add(idx, interpol_bbox, Transition.interpolated)
 
 # TODO Refactor this function after testing.
 def average_bbox_velocity(track, max_back_hops):
