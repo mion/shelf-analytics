@@ -176,9 +176,37 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
                 tracker.restart(curr_frame, closest_bbox)
             else:
                 print("\tTrack lost at frame {:d}!".format(curr_idx))
-
+                avg_bbox_vel = average_bbox_velocity(track, params['AVG_BBOX_VEL_MAX_BACK_HOPS'])
+                target_idx, target_bbox = look_ahead(track, bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'], is_filtered)
+                if target_idx is not None:
+                    print("\tLooked ahead and found a good target for intepolation: {} at index {:d}".format(target_bbox, target_idx))
+                    interpolate(track, curr_idx, target_idx, target_bbox)
+                    curr_idx = target_idx - 1
+                    frame, _ = bboxes_per_frame[curr_idx]
+                    tracker.restart(frame, track.get_last_bbox())
+                else:
+                    print("\tLook ahead failed, track lost.")
         curr_idx += 1
     return track
+
+def normalized_direction(p1, p2):
+    dx = p2.x - p1.x
+    dy = p2.y - p1.y
+    norm = math.sqrt((dx * dx) + (dy * dy))
+    return (dx / norm, dy / norm)
+
+def interpolate(track, curr_idx, target_idx, target_bbox):
+    last_bbox = track.get_last_bbox()
+    n_hops = target_idx - curr_idx + 1
+    delta_per_hop = last_bbox.distance_to(target_bbox) / n_hops
+    dir_vec = normalized_direction(last_bbox.center, target_bbox.center)
+    curr_x = last_bbox.x1
+    curr_y = last_bbox.y1
+    for idx in range(curr_idx, target_idx):
+        curr_x += int(dir_vec[0] * delta_per_hop)
+        curr_y += int(dir_vec[1] * delta_per_hop)
+        interpolated_bbox = BBox(Point(curr_x, curr_y), last_bbox.width, last_bbox.height)
+        track.add(idx, interpolated_bbox, Transition.interpolated)
 
 # TODO Refactor this function after testing.
 def average_bbox_velocity(track, max_back_hops):
