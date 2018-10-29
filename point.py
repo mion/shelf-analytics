@@ -23,6 +23,9 @@ class Point:
     def subtract(self, p):
         return Point(p.x - self.x, p.y - self.y)
 
+    def multiply(self, k):
+        return Point(self.x * k, self.y * k)
+
     def normalized_direction(self, p):
         direction = self.subtract(p)
         return direction.normalize()
