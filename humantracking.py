@@ -254,12 +254,12 @@ def look_ahead(track, bboxes_per_frame, fr_idx, avg_bbox_vel, max_front_hops, ma
     else:
         return (None, None)
 
-def find_start(bboxes_per_frame, is_filtered, params):
+def find_start(bboxes_per_frame, is_filtered, intersec_area_perc_thresh):
     for fr_idx, (frame, bboxes) in enumerate(bboxes_per_frame):
         for bbox_idx, bbox in enumerate(bboxes):
             unfiltered = (fr_idx, bbox_idx) not in is_filtered
-            untracked = bbox.parent_track_id is not None
-            without_large_intersections = not is_intersecting_any(bboxes, bbox_idx, params['MIN_INTERSEC_AREA_PERC'])
+            untracked = bbox.parent_track_id is None
+            without_large_intersections = not is_intersecting_any(bboxes, bbox_idx, intersec_area_perc_thresh)
             if unfiltered and untracked and without_large_intersections:
                 return (fr_idx, bbox_idx)
     return (None, None)
