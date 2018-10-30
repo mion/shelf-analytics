@@ -1,12 +1,57 @@
 import unittest
 from point import Point
 from boundingbox import BBox
-from humantracking import find_bbox_to_snap, is_intersecting_any, find_start
+from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
     bbox.parent_track_id = ptid
     return bbox
+
+class TestAverageBboxVelocity(unittest.TestCase):
+    def test_should_be_zero_for_empty_track(self):
+        track_bboxes = []
+        max_back_hops = 10
+
+        avg_vel = average_bbox_velocity(track_bboxes, max_back_hops)
+
+        self.assertEqual(avg_vel.x, 0)
+        self.assertEqual(avg_vel.y, 0)
+
+    def test_should_be_zero_for_single_item(self):
+        track_bboxes = [mkbox()]
+        max_back_hops = 3
+
+        avg_vel = average_bbox_velocity(track_bboxes, max_back_hops)
+
+        self.assertEqual(avg_vel.x, 0)
+        self.assertEqual(avg_vel.y, 0)
+
+    def test_should_work_when_hops_is_within_length(self):
+        track_bboxes = [
+            mkbox(2, 0),
+            mkbox(3, 0),
+            mkbox(6, 0)
+        ]
+        max_back_hops = 2
+
+        avg_vel = average_bbox_velocity(track_bboxes, max_back_hops)
+
+        self.assertEqual(avg_vel.x, 3)
+        self.assertEqual(avg_vel.y, 0)
+
+    def test_should_work_when_hops_is_larger_than_length(self):
+        track_bboxes = [
+            mkbox(4, 3),
+            mkbox(8, 6),
+            mkbox(12, 9)
+        ]
+        max_back_hops = 5
+
+        avg_vel = average_bbox_velocity(track_bboxes, max_back_hops)
+
+        self.assertEqual(avg_vel.x, 4)
+        self.assertEqual(avg_vel.y, 3)
 
 class TestFindStart(unittest.TestCase):
     def test_should_not_find_tracked_nor_filtered_bbox(self):
@@ -24,7 +69,7 @@ class TestFindStart(unittest.TestCase):
 
         self.assertEqual(fr_idx, 2)
         self.assertEqual(bbox_id, 1)
-    
+
     def test_should_not_find_intersecting_bbox(self):
         bboxes_per_frame = [
             (None, [mkbox(0, 0), mkbox(1, 1)]),
