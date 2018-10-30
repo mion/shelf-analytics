@@ -30,6 +30,9 @@ class Track:
             raise RuntimeError('cannot get last bbox from an empty track')
         _, bbox, _ = self.steps[len(self.steps) - 1]
         return bbox
+    
+    def get_bboxes(self):
+        return [bbox for _, bbox, _ in self.steps]
 
 from enum import Enum
 class Transition(Enum):
@@ -176,7 +179,7 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
                 tracker.restart(curr_frame, closest_bbox)
             else:
                 print("\tTrack lost at frame {:d}!".format(curr_idx))
-                avg_bbox_vel = average_bbox_velocity(track, params['AVG_BBOX_VEL_MAX_BACK_HOPS'])
+                avg_bbox_vel = average_bbox_velocity(track.get_bboxes(), params['AVG_BBOX_VEL_MAX_BACK_HOPS'])
                 target_idx, target_bbox = look_ahead(track, bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'], is_filtered)
                 if target_idx is not None:
                     print("\tLooked ahead and found a good target for intepolation: {} at index {:d}".format(target_bbox, target_idx))
@@ -205,14 +208,14 @@ def interpolate(last_bbox, curr_idx, target_idx, target_bbox):
     return steps
 
 # TODO Refactor this function after testing.
-def average_bbox_velocity(track, max_back_hops):
-    start_i = max(len(track) - max_back_hops, 0)
+def average_bbox_velocity(track_bboxes, max_back_hops):
+    start_i = max(len(track_bboxes) - max_back_hops, 0)
     avg_vel_x = 0
     avg_vel_y = 0
     back_hops = 0
-    for i in range(start_i, len(track) - 1):
-        bbox = track.get_bbox(i)
-        next_bbox = track.get_bbox(i + 1)
+    for i in range(start_i, len(track_bboxes) - 1):
+        bbox = track_bboxes[i]
+        next_bbox = track_bboxes[i + 1]
         avg_vel_x += (next_bbox.center.x - bbox.center.x)
         avg_vel_y += (next_bbox.center.y - bbox.center.y)
         back_hops += 1
