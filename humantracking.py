@@ -16,6 +16,8 @@ class Track:
         # We can't use the bbox index here because we may want to add a bbox
         # that wasn't detected (it may be have come from object tracking or
         # the look ahead/interpolation algorithm).
+        # For this reason we added an `id` field to the BBox class though
+        # we also use indexes throughout the code when possible as it's simpler.
         bbox.parent_track_id = self.id
         self.steps.append((frame_index, bbox, transition))
     
