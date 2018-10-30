@@ -3,13 +3,13 @@ from point import Point
 from boundingbox import BBox
 from humantracking import find_bbox_to_snap, is_intersecting_any, find_start
 
-def mkbox(x=0, y=0, w=200, h=100, ptid=None):
+def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
     bbox.parent_track_id = ptid
     return bbox
 
 class TestFindStart(unittest.TestCase):
-    def test_should_not_find_tracked_nor_filtered(self):
+    def test_should_not_find_tracked_nor_filtered_bbox(self):
         bboxes_per_frame = [
             (None, [mkbox(ptid=0), mkbox(ptid=1)]),
             (None, [mkbox(ptid=2), mkbox()]),
@@ -24,6 +24,20 @@ class TestFindStart(unittest.TestCase):
 
         self.assertEqual(fr_idx, 2)
         self.assertEqual(bbox_id, 1)
+    
+    def test_should_not_find_intersecting_bbox(self):
+        bboxes_per_frame = [
+            (None, [mkbox(0, 0), mkbox(1, 1)]),
+            (None, [mkbox(2, 2), mkbox(3, 3), mkbox(4, 4)]),
+            (None, [mkbox(5, 5)])
+        ]
+        is_filtered = {}
+        intersec_area_perc_thresh = 0.0
+
+        fr_idx, bbox_id = find_start(bboxes_per_frame, is_filtered, intersec_area_perc_thresh)
+
+        self.assertEqual(fr_idx, 2)
+        self.assertEqual(bbox_id, 0)
 
 class TestIsIntersectingAny(unittest.TestCase):
     def test_should_raise_an_exception_when_empty(self):
