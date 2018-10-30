@@ -180,7 +180,7 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
             else:
                 print("\tTrack lost at frame {:d}!".format(curr_idx))
                 avg_bbox_vel = average_bbox_velocity(track.get_bboxes(), params['AVG_BBOX_VEL_MAX_BACK_HOPS'])
-                target_idx, target_bbox = look_ahead(track, bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'], is_filtered)
+                target_idx, target_bbox = look_ahead(track.get_last_bbox(), bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'], is_filtered)
                 if target_idx is not None:
                     print("\tLooked ahead and found a good target for intepolation: {} at index {:d}".format(target_bbox, target_idx))
                     steps = interpolate(track.get_last_bbox(), curr_idx, target_idx, target_bbox)
@@ -227,8 +227,7 @@ def average_bbox_velocity(track_bboxes, max_back_hops):
         return Point(0, 0)
 
 # TODO Refactor this function after testing.
-def look_ahead(track, bboxes_per_frame, fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered):
-    tail_bbox = track.get_last_bbox()
+def look_ahead(tail_bbox, bboxes_per_frame, fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered):
     moving_center = tail_bbox.center.copy()
     target_bbox = None
     target_idx = None
