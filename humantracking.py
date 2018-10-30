@@ -226,6 +226,7 @@ def average_bbox_velocity(track_bboxes, max_back_hops):
     else:
         return Point(0, 0)
 
+# TODO Refactor this function after testing.
 def look_ahead(track, bboxes_per_frame, fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered):
     tail_bbox = track.get_last_bbox()
     moving_center = tail_bbox.center.copy()
