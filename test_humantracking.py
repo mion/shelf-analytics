@@ -10,22 +10,22 @@ def mkbox(x=0, y=0, w=10, h=10, ptid=None):
 
 class TestLookAhead(unittest.TestCase):
     def test_should_ignore_filtered_or_tracked_bboxes(self):
-        tail_bbox = mkbox(1, 0)
+        base_bbox = mkbox(1, 0)
         target_bbox = mkbox(5, 0)
         bboxes_per_frame = [
-            (None, [tail_bbox]), # fr_idx = 0
+            (None, [base_bbox]), # fr_idx = 0
             (None, []), # fr_idx = 1
             (None, [mkbox(3, 0, ptid=1)]), # fr_idx = 2
             (None, [mkbox(4, 0)]), # fr_idx = 3
             (None, [target_bbox]), # fr_idx = 4
         ]
         is_filtered = {(3, 0): True}
-        fr_idx = 1
+        base_fr_idx = 1
         avg_bbox_vel = Point(1, 0)
         max_front_hops = 3
         max_snap_distance = 100
 
-        idx, bbox = look_ahead(tail_bbox, bboxes_per_frame, fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+        idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
 
         self.assertEqual(idx, 4)
         self.assertIs(bbox, target_bbox)
