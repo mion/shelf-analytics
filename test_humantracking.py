@@ -1,12 +1,41 @@
 import unittest
 from point import Point
-from boundingbox import BBox
-from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition
+from boundingbox import BBox, DetectedBBox
+from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition, filter_bboxes
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
     bbox.parent_track_id = ptid
     return bbox
+
+class TestFilterBboxes(unittest.TestCase):
+    def test_filter_bboxes(self):
+        det_bboxes_per_frame = [
+            (None, [
+                DetectedBBox(Point(0, 0), 50, 50, 0.5, 'human'),
+                DetectedBBox(Point(5, 4), 50, 50, 0.93, 'human'),
+            ]),
+            (None, [
+                DetectedBBox(Point(90, 15), 50, 50, 0.85, 'bicycle'),
+                DetectedBBox(Point(20, 30), 50, 50, 0.96, 'human'),
+                DetectedBBox(Point(60, 10), 500, 500, 0.97, 'human'),
+            ]),
+            (None, [
+                DetectedBBox(Point(100, 33), 5, 5, 0.98, 'human'),
+            ])
+        ]
+        min_det_score = 0.95
+        min_bbox_area = 25 * 25
+        max_bbox_area = 100 * 100
+
+        is_filtered = filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_area)
+
+        self.assertTrue(is_filtered[(0, 0)])
+        self.assertTrue(is_filtered[(0, 1)])
+        self.assertTrue(is_filtered[(1, 0)])
+        self.assertTrue((1, 1) not in is_filtered)
+        self.assertTrue(is_filtered[(1, 2)])
+        self.assertTrue(is_filtered[(2, 0)])
 
 class TestInterpolate(unittest.TestCase):
     def test_interpolate(self):
