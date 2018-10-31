@@ -27,13 +27,16 @@ class BBox:
 
     def __repr__(self):
         return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
-    
+
+    def is_similar(self, bbox):
+        return self.origin == bbox.origin and self.width == bbox.width and self.height == bbox.height
+
     def distance_to(self, bbox):
         return self.center.distance_to(bbox.center)
 
     def has_intersection_with(self, bbox):
         return self.intersection_area(bbox) is not None
-    
+
     def intersection_area(self, bbox):
         x1 = max(self.x1, bbox.x1)
         y1 = max(self.y1, bbox.y1)
