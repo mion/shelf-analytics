@@ -196,15 +196,15 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
         curr_idx += 1
     return track
 
-def interpolate(start_bbox, start_idx, end_bbox, end_idx):
+def interpolate(base_bbox, start_idx, end_bbox, end_idx):
     n_hops = end_idx - start_idx + 1
-    delta_per_hop = start_bbox.distance_to(end_bbox) / n_hops
-    dir_vec = start_bbox.center.normalized_direction(end_bbox.center)
-    interpol_orig = start_bbox.copy()
+    delta_per_hop = base_bbox.distance_to(end_bbox) / n_hops
+    dir_vec = base_bbox.center.normalized_direction(end_bbox.center)
+    interpol_orig = base_bbox.copy()
     steps = []
     for idx in range(start_idx, end_idx):
         interpol_orig = interpol_orig.add(dir_vec.multiply(delta_per_hop))
-        interpol_bbox = BBox(interpol_orig, start_bbox.width, start_bbox.height)
+        interpol_bbox = BBox(interpol_orig, base_bbox.width, base_bbox.height)
         steps.append((idx, interpol_bbox, Transition.interpolated))
     return steps
 
