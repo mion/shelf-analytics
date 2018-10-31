@@ -4,6 +4,12 @@ class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+    
+    def __str__(self):
+        return "({:d},{:d})".format(self.x, self.y)
+
+    def __repr__(self):
+        return "<Point ({:d},{:d})>".format(self.x, self.y)
 
     def distance_to(self, p):
         dx = p.x - self.x
