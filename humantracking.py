@@ -197,7 +197,6 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
     return track
 
 def interpolate(last_bbox, curr_idx, target_idx, target_bbox):
-    # last_bbox = track.get_last_bbox()
     n_hops = target_idx - curr_idx + 1
     delta_per_hop = last_bbox.distance_to(target_bbox) / n_hops
     dir_vec = last_bbox.center.normalized_direction(target_bbox.center)
