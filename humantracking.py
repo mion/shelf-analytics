@@ -231,8 +231,6 @@ def average_bbox_velocity(track_bboxes, max_back_hops):
 # TODO Refactor this function after testing.
 def look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered):
     moving_center = base_bbox.center.copy()
-    target_bbox = None
-    target_idx = None
     for idx in range(base_fr_idx, min(base_fr_idx + max_front_hops + 1, len(bboxes_per_frame))):
         moving_center = moving_center.add(avg_bbox_vel)
         closest_dist = math.inf
@@ -248,13 +246,8 @@ def look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front
                 closest_bbox = bbox
                 closest_dist = dist
         if closest_bbox is not None:
-            target_bbox = closest_bbox
-            target_idx = idx
-            break
-    if target_bbox is not None and target_idx is not None:
-        return (target_idx, target_bbox)
-    else:
-        return (None, None)
+            return (idx, closest_bbox)
+    return (None, None)
 
 def find_start(bboxes_per_frame, is_filtered, intersec_area_perc_thresh):
     for fr_idx, (frame, bboxes) in enumerate(bboxes_per_frame):
