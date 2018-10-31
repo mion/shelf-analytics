@@ -91,17 +91,17 @@ def track_humans(det_bboxes_per_frame, config, params):
     At first they are in fact DetectedBBox, but that doesn't matter
     being filtering.
     """
-    is_filtered = filter_bboxes(det_bboxes_per_frame, params)
+    is_filtered = filter_bboxes(det_bboxes_per_frame, params['MIN_OBJ_DET_SCORE'], params['MIN_BBOX_AREA'], params['MAX_BBOX_AREA'])
     tracks = find_all_tracks(det_bboxes_per_frame, is_filtered, params)
     return tracks
 
-def filter_bboxes(det_bboxes_per_frame, params):
+def filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_area):
     is_filtered = {}
     for fr_idx, (frame, det_bboxes) in enumerate(det_bboxes_per_frame):
         for bbox_idx, det_bbox in enumerate(det_bboxes):
-            too_uncertain = det_bbox.score < params['MIN_OBJ_DET_SCORE']
-            too_small = det_bbox.area < params['MIN_BBOX_AREA']
-            too_large = det_bbox.area > params['MAX_BBOX_AREA']
+            too_uncertain = det_bbox.score < min_det_score
+            too_small = det_bbox.area < min_bbox_area
+            too_large = det_bbox.area > max_bbox_area
             if too_uncertain or too_small or too_large:
                 is_filtered[(fr_idx, bbox_idx)] = True
     return is_filtered
