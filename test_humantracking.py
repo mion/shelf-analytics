@@ -87,8 +87,6 @@ class TestLookAhead(unittest.TestCase):
         self.assertEqual(fr_idx, 2)
         self.assertIs(bbox, target_bbox)
 
-    # test_should_not_find_itself
-
 class TestAverageBboxVelocity(unittest.TestCase):
     def test_should_be_zero_for_empty_track(self):
         track_bboxes = []
