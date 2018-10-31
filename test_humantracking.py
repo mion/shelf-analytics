@@ -30,6 +30,26 @@ class TestLookAhead(unittest.TestCase):
         self.assertEqual(idx, 4)
         self.assertIs(bbox, target_bbox)
 
+    def test_should_ignore_far_away_bboxes(self):
+        base_bbox = mkbox(0, 0)
+        target_bbox = mkbox(3, 0)
+        bboxes_per_frame = [
+            (None, [base_bbox]),
+            (None, [mkbox(1, 100)]),
+            (None, [mkbox(2, 100)]),
+            (None, [mkbox(3, 100), target_bbox, mkbox(3, 200)]),
+        ]
+        is_filtered = {}
+        base_fr_idx = 1
+        avg_bbox_vel = Point(1, 0)
+        max_front_hops = 3
+        max_snap_distance = 25
+
+        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+
+        self.assertEqual(fr_idx, 3)
+        self.assertIs(bbox, target_bbox)
+
 class TestAverageBboxVelocity(unittest.TestCase):
     def test_should_be_zero_for_empty_track(self):
         track_bboxes = []
