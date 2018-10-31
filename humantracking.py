@@ -185,7 +185,7 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
                 target_idx, target_bbox = look_ahead(track.get_last_bbox(), bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'], is_filtered)
                 if target_idx is not None:
                     print("\tLooked ahead and found a good target for intepolation: {} at index {:d}".format(target_bbox, target_idx))
-                    steps = interpolate(track.get_last_bbox(), curr_idx, target_idx, target_bbox)
+                    steps = interpolate(track.get_last_bbox(), curr_idx, target_bbox, target_idx)
                     for step in steps:
                         track.add(*step)
                     curr_idx = target_idx - 1
@@ -196,7 +196,7 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
         curr_idx += 1
     return track
 
-def interpolate(start_bbox, start_idx, end_idx, end_bbox):
+def interpolate(start_bbox, start_idx, end_bbox, end_idx):
     n_hops = end_idx - start_idx + 1
     delta_per_hop = start_bbox.distance_to(end_bbox) / n_hops
     dir_vec = start_bbox.center.normalized_direction(end_bbox.center)
