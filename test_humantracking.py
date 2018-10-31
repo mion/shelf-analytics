@@ -1,12 +1,32 @@
 import unittest
 from point import Point
 from boundingbox import BBox
-from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead
+from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
     bbox.parent_track_id = ptid
     return bbox
+
+class TestInterpolate(unittest.TestCase):
+    def test_interpolate(self):
+        base_bbox = mkbox(0, 0, w=100, h=100)
+        start_idx = 0
+        end_bbox = mkbox(30, 30, w=100, h=100)
+        end_idx = 2
+
+        steps = interpolate(base_bbox, start_idx, end_bbox, end_idx)
+        # steps = [(idx, bbox, transition), ...]
+        self.assertEqual(2, len(steps))
+        # indexes
+        self.assertEqual(steps[0][0], 0)
+        self.assertEqual(steps[1][0], 1)
+        # bboxes
+        self.assertTrue(steps[0][1].is_similar(mkbox(10, 10, w=100, h=100)))
+        self.assertTrue(steps[1][1].is_similar(mkbox(20, 20, w=100, h=100)))
+        # trans
+        self.assertEqual(steps[0][2], Transition.interpolated)
+        self.assertEqual(steps[1][2], Transition.interpolated)
 
 class TestLookAhead(unittest.TestCase):
     def test_should_ignore_filtered_or_tracked_bboxes(self):
