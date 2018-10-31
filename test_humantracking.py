@@ -49,6 +49,26 @@ class TestLookAhead(unittest.TestCase):
 
         self.assertEqual(fr_idx, 3)
         self.assertIs(bbox, target_bbox)
+    
+    def test_should_not_find_bbox_in_other_direction(self):
+        base_bbox = mkbox(0, 0, w=5, h=5)
+        bboxes_per_frame = [
+            (None, [base_bbox]),
+            (None, [mkbox(10, 0, w=5, h=5)]),
+            (None, [mkbox(20, 0, w=5, h=5)])
+        ]
+        is_filtered = {}
+        base_fr_idx = 1
+        avg_bbox_vel = Point(-10, 0)
+        max_front_hops = 2
+        max_snap_distance = 15
+
+        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+
+        self.assertIsNone(fr_idx)
+        self.assertIsNone(bbox)
+
+    # test should work when bbox is not in bboxes_per_frame
 
 class TestAverageBboxVelocity(unittest.TestCase):
     def test_should_be_zero_for_empty_track(self):
