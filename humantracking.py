@@ -99,10 +99,11 @@ def filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_a
     is_filtered = {}
     for fr_idx, (frame, det_bboxes) in enumerate(det_bboxes_per_frame):
         for bbox_idx, det_bbox in enumerate(det_bboxes):
+            not_human = det_bbox.obj_class != 'human'
             too_uncertain = det_bbox.score < min_det_score
             too_small = det_bbox.area < min_bbox_area
             too_large = det_bbox.area > max_bbox_area
-            if too_uncertain or too_small or too_large:
+            if too_uncertain or too_small or too_large or not_human:
                 is_filtered[(fr_idx, bbox_idx)] = True
     return is_filtered
 
