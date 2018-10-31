@@ -68,7 +68,26 @@ class TestLookAhead(unittest.TestCase):
         self.assertIsNone(fr_idx)
         self.assertIsNone(bbox)
 
-    # test should work when bbox is not in bboxes_per_frame
+    def test_should_work_when_bbox_is_not_in_bboxes_per_frame(self):
+        base_bbox = mkbox(0, 0)
+        target_bbox = mkbox(3, 3)
+        bboxes_per_frame = [
+            (None, []),
+            (None, []),
+            (None, [target_bbox]),
+        ]
+        is_filtered = {}
+        base_fr_idx = 0
+        avg_bbox_vel = Point(1, 1)
+        max_front_hops = 3
+        max_snap_distance = 5
+
+        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+
+        self.assertEqual(fr_idx, 2)
+        self.assertIs(bbox, target_bbox)
+
+    # test_should_not_find_itself
 
 class TestAverageBboxVelocity(unittest.TestCase):
     def test_should_be_zero_for_empty_track(self):
