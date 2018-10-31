@@ -239,11 +239,11 @@ def look_ahead(tail_bbox, bboxes_per_frame, fr_idx, avg_bbox_vel, max_front_hops
         closest_bbox = None
         _, bboxes = bboxes_per_frame[idx]
         for bbox_idx, bbox in enumerate(bboxes):
-            filtered = (fr_idx, bbox_idx) not in is_filtered
+            filtered = (idx, bbox_idx) in is_filtered
             tracked = bbox.parent_track_id is not None
             if filtered or tracked:
                 continue
-            dist = bbox.origin.distance_to(moving_center)
+            dist = bbox.center.distance_to(moving_center)
             if dist < max_snap_distance and dist < closest_dist:
                 closest_bbox = bbox
                 closest_dist = dist
