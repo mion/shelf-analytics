@@ -11,6 +11,9 @@ class Point:
     def __repr__(self):
         return "<Point ({:d},{:d})>".format(self.x, self.y)
 
+    def __eq__(self, other):
+        return isinstance(other, Point) and self.x == other.x and self.y == other.y
+
     def distance_to(self, p):
         dx = p.x - self.x
         dy = p.y - self.y
