@@ -8,6 +8,21 @@ def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox.parent_track_id = ptid
     return bbox
 
+class FakeObjectTracker:
+    def __init__(self, frame, bbox, opencv_obj_tracker_type):
+        self.fake_orig = Point(0, 0)
+
+    def update(self, frame):
+        self.fake_orig = self.fake_orig.add(Point(1, 0))
+        return BBox(self.fake_orig, width=10, height=10)
+
+    def restart(self, frame, bbox):
+        pass # TODO
+
+class TestFindSomeTrack(unittest.TestCase):
+    def test_find_some_track(self):
+        pass
+
 class TestFilterBboxes(unittest.TestCase):
     def test_filter_bboxes(self):
         det_bboxes_per_frame = [
