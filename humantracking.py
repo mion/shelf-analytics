@@ -144,7 +144,7 @@ def find_some_track(bboxes_per_frame, obj_tracker_class, params):
             # If the OpenCV obj tracker managed to keep track of the bbox,
             # let's see if we can also snap it onto a detected bbox to
             # increase accuracy.
-            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, tracker_bbox, params['MAX_SNAP_DISTANCE_SHORT'])
+            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, tracker_bbox, params['TRACKER_SUCCESS_MAX_SNAP_DISTANCE'])
             if closest_bbox_idx is not None:
                 closest_bbox = curr_bboxes[closest_bbox_idx]
                 print("\tAt frame {:d} SNAPPED tracker bbox {} to closest detected bbox {}".format(curr_idx, tracker_bbox, closest_bbox))
@@ -165,7 +165,7 @@ def find_some_track(bboxes_per_frame, obj_tracker_class, params):
             # it was tracking. We don't want it to be too large since when 
             # tracking fails it could also be failing correctly (ie, that the
             # human left the scene, went underneath something, etc).
-            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, track.get_last_bbox(), params['MAX_SNAP_DISTANCE_LARGE'])
+            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, track.get_last_bbox(), params['TRACKER_FAIL_MAX_SNAP_DISTANCE'])
             if closest_bbox_idx is not None:
                 closest_bbox = curr_bboxes[closest_bbox_idx]
                 print("\tAt frame {:d} PATCHED the track by snapping from the previous bbox to {} in current frame".format(curr_idx, closest_bbox))
