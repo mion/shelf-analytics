@@ -198,18 +198,15 @@ class TestAverageBboxVelocity(unittest.TestCase):
         self.assertEqual(avg_vel.y, 3)
 
 class TestFindStart(unittest.TestCase):
-    def test_should_not_find_tracked_nor_filtered_bbox(self):
+    def test_should_not_find_tracked_bbox(self):
         bboxes_per_frame = [
             (None, [mkbox(ptid=0), mkbox(ptid=1)]),
-            (None, [mkbox(ptid=2), mkbox()]),
-            (None, [mkbox(ptid=3), mkbox()])
+            (None, [mkbox(ptid=2), mkbox(ptid=1)]),
+            (None, [mkbox(ptid=2), mkbox()])
         ]
-        is_filtered = {
-            (1, 1): True
-        }
         intersec_area_perc_thresh = 1.0
 
-        fr_idx, bbox_id = find_start(bboxes_per_frame, is_filtered, intersec_area_perc_thresh)
+        fr_idx, bbox_id = find_start(bboxes_per_frame, intersec_area_perc_thresh)
 
         self.assertEqual(fr_idx, 2)
         self.assertEqual(bbox_id, 1)
@@ -220,10 +217,9 @@ class TestFindStart(unittest.TestCase):
             (None, [mkbox(2, 2), mkbox(3, 3), mkbox(4, 4)]),
             (None, [mkbox(5, 5)])
         ]
-        is_filtered = {}
         intersec_area_perc_thresh = 0.0
 
-        fr_idx, bbox_id = find_start(bboxes_per_frame, is_filtered, intersec_area_perc_thresh)
+        fr_idx, bbox_id = find_start(bboxes_per_frame, intersec_area_perc_thresh)
 
         self.assertEqual(fr_idx, 2)
         self.assertEqual(bbox_id, 0)
