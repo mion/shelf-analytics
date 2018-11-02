@@ -45,7 +45,6 @@ class TestFindSomeTrack(unittest.TestCase):
         }
 
         track = find_some_track(bboxes_per_frame, FakeObjectTracker, params)
-        # import pdb; pdb.set_trace()
         self.assertEqual(len(track), 3)
         self.assertTrue(bbox1 in track)
         self.assertTrue(bbox2 in track)
