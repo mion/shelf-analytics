@@ -156,7 +156,7 @@ def find_some_track(bboxes_per_frame, obj_tracker_class, params):
                 print("\tAt frame {:d} SNAPPED tracker bbox {} to closest detected bbox {}".format(curr_idx, tracker_bbox, closest_bbox))
                 track.add(curr_idx, closest_bbox, Transition.snapped)
                 # Let's reset the tracker to make its algorithm "forget" what happened previously.
-                tracker = tracker.restart(curr_frame, closest_bbox)
+                tracker.restart(curr_frame, closest_bbox)
             else:
                 print("\tAt frame {:d} TRACKED previous bbox to {} in current frame, but could not snap it to any detected bbox".format(curr_idx, tracker_bbox))
                 track.add(curr_idx, tracker_bbox, Transition.tracked)
