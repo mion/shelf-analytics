@@ -112,7 +112,7 @@ def find_all_tracks(bboxes_per_frame, params):
     count = 0
     tracks = []
     while count < params['MAX_TRACK_COUNT']:
-        track = find_some_track(bboxes_per_frame, params)
+        track = find_some_track(bboxes_per_frame, ObjectTracker, params)
         count += 1
         if track is not None:
             tracks.append(track)
@@ -120,7 +120,7 @@ def find_all_tracks(bboxes_per_frame, params):
             break
     return tracks
 
-def find_some_track(bboxes_per_frame, params):
+def find_some_track(bboxes_per_frame, obj_tracker_class, params):
     """
     Returns None if no track found.
     """
@@ -132,7 +132,7 @@ def find_some_track(bboxes_per_frame, params):
     print("Found start bbox at frame index {:d} and bbox index {:d}".format(fr_idx, bbox_idx))
     start_frame, start_bboxes = bboxes_per_frame[fr_idx]
     start_bbox = start_bboxes[bbox_idx]
-    tracker = ObjectTracker(start_frame, start_bbox, params['OPENCV_OBJ_TRACKER_TYPE'])
+    tracker = obj_tracker_class(start_frame, start_bbox, params['OPENCV_OBJ_TRACKER_TYPE'])
     track = Track()
     track.add(fr_idx, start_bbox, Transition.first)
     print("Tracking started:")
