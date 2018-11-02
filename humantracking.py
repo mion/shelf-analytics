@@ -101,8 +101,8 @@ def filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_a
         bboxes = []
         for det_bbox in det_bboxes:
             is_human = det_bbox.obj_class == 'human'
-            above_conf_interv = det_bbox.score >= min_det_score
-            has_proper_size = min_bbox_area <= det_bbox.area <= max_bbox_area
+            above_conf_interv = (det_bbox.score >= min_det_score)
+            has_proper_size = (min_bbox_area <= det_bbox.area <= max_bbox_area)
             if is_human and above_conf_interv and has_proper_size:
                 bboxes.append(det_bbox)
         bboxes_per_frame.append((frame,bboxes))
