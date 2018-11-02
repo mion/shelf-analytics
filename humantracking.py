@@ -281,7 +281,7 @@ def find_bbox_to_snap(bboxes, base_bbox, max_snap_distance):
     closest_bbox_idx = None
     for idx, bbox in enumerate(bboxes):
         dist = base_bbox.distance_to(bbox)
-        if dist < max_snap_distance and dist < closest_dist:
+        if dist <= max_snap_distance and dist < closest_dist:
             closest_bbox_idx = idx
             closest_dist = dist
     if closest_bbox_idx is not None:
