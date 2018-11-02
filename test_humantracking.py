@@ -1,7 +1,7 @@
 import unittest
 from point import Point
 from boundingbox import BBox, DetectedBBox
-from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition, filter_bboxes
+from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition, filter_bboxes, find_some_track
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
@@ -10,18 +10,46 @@ def mkbox(x=0, y=0, w=10, h=10, ptid=None):
 
 class FakeObjectTracker:
     def __init__(self, frame, bbox, opencv_obj_tracker_type):
-        self.fake_orig = Point(0, 0)
+        self.fixed_w = bbox.width
+        self.fixed_h = bbox.height
+        self.orig = bbox.origin.copy()
 
     def update(self, frame):
-        self.fake_orig = self.fake_orig.add(Point(1, 0))
-        return BBox(self.fake_orig, width=10, height=10)
+        self.orig = self.orig.add(Point(10, 0))
+        return BBox(self.orig, width=self.fixed_w, height=self.fixed_h)
 
     def restart(self, frame, bbox):
-        pass # TODO
+        self.fixed_w = bbox.width
+        self.fixed_h = bbox.height
+        self.orig = bbox.origin.copy()
 
 class TestFindSomeTrack(unittest.TestCase):
-    def test_find_some_track(self):
-        pass
+    def test_should_find_simple_continuous_track(self):
+        bbox1 = mkbox(0, 0, 50, 50)
+        bbox2 = mkbox(20, 0, 50, 50)
+        bbox3 = mkbox(40, 0, 50, 50)
+        bboxes_per_frame = [
+            (None, []),
+            (None, [bbox1]),
+            (None, [bbox2]),
+            (None, [bbox3]),
+        ]
+        params = {
+            'MAX_INTERSEC_AREA_PERC': 0.0,
+            'OPENCV_OBJ_TRACKER_TYPE': '',
+            'TRACKER_SUCCESS_MAX_SNAP_DISTANCE': 10,
+            'TRACKER_FAIL_MAX_SNAP_DISTANCE': 0,
+            'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
+            'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
+            'LOOK_AHEAD_MAX_SNAP_DISTANCE': 0
+        }
+
+        track = find_some_track(bboxes_per_frame, FakeObjectTracker, params)
+        # import pdb; pdb.set_trace()
+        self.assertEqual(len(track), 3)
+        self.assertTrue(bbox1 in track)
+        self.assertTrue(bbox2 in track)
+        self.assertTrue(bbox3 in track)
 
 class TestFilterBboxes(unittest.TestCase):
     def test_filter_bboxes(self):
