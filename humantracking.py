@@ -91,27 +91,28 @@ def track_humans(det_bboxes_per_frame, config, params):
     At first they are in fact DetectedBBox, but that doesn't matter
     being filtering.
     """
-    is_filtered = filter_bboxes(det_bboxes_per_frame, params['MIN_OBJ_DET_SCORE'], params['MIN_BBOX_AREA'], params['MAX_BBOX_AREA'])
-    tracks = find_all_tracks(det_bboxes_per_frame, is_filtered, params)
+    bboxes_per_frame = filter_bboxes(det_bboxes_per_frame, params['MIN_OBJ_DET_SCORE'], params['MIN_BBOX_AREA'], params['MAX_BBOX_AREA'])
+    tracks = find_all_tracks(bboxes_per_frame, params)
     return tracks
 
 def filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_area):
-    is_filtered = {}
-    for fr_idx, (frame, det_bboxes) in enumerate(det_bboxes_per_frame):
-        for bbox_idx, det_bbox in enumerate(det_bboxes):
-            not_human = det_bbox.obj_class != 'human'
-            too_uncertain = det_bbox.score < min_det_score
-            too_small = det_bbox.area < min_bbox_area
-            too_large = det_bbox.area > max_bbox_area
-            if too_uncertain or too_small or too_large or not_human:
-                is_filtered[(fr_idx, bbox_idx)] = True
-    return is_filtered
+    bboxes_per_frame = []
+    for frame, det_bboxes in det_bboxes_per_frame:
+        bboxes = []
+        for det_bbox in det_bboxes:
+            is_human = det_bbox.obj_class == 'human'
+            above_conf_interv = det_bbox.score >= min_det_score
+            has_proper_size = min_bbox_area <= det_bbox.area <= max_bbox_area
+            if is_human and above_conf_interv and has_proper_size:
+                bboxes.append(det_bbox)
+        bboxes_per_frame.append((frame,bboxes))
+    return bboxes_per_frame
 
-def find_all_tracks(bboxes_per_frame, is_filtered, params):
+def find_all_tracks(bboxes_per_frame, params):
     count = 0
     tracks = []
     while count < params['MAX_TRACK_COUNT']:
-        track = find_some_track(bboxes_per_frame, is_filtered, params)
+        track = find_some_track(bboxes_per_frame, params)
         count += 1
         if track is not None:
             tracks.append(track)
@@ -119,21 +120,12 @@ def find_all_tracks(bboxes_per_frame, is_filtered, params):
             break
     return tracks
 
-def unfiltered_and_untracked(fr_idx, bboxes, is_filtered):
-    clean_bboxes = []
-    for bbox_idx, bbox in enumerate(bboxes):
-        unfiltered = (fr_idx, bbox_idx) not in is_filtered
-        untracked = bbox.parent_track_id is not None
-        if unfiltered and untracked:
-            clean_bboxes.append(bbox)
-    return clean_bboxes
-
-def find_some_track(bboxes_per_frame, is_filtered, params):
+def find_some_track(bboxes_per_frame, params):
     """
     Returns None if no track found.
     """
     print("Searching for a bbox that is a good starting point...")
-    fr_idx, bbox_idx = find_start(bboxes_per_frame, is_filtered, params['MIN_INTERSEC_AREA_PERC'])
+    fr_idx, bbox_idx = find_start(bboxes_per_frame, params['MIN_INTERSEC_AREA_PERC'])
     if fr_idx is None:
         print("None found. All humans have been tracked.")
         return None
@@ -147,15 +139,14 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
     curr_idx = fr_idx + 1
     while curr_idx < len(bboxes_per_frame):
         curr_frame, curr_bboxes = bboxes_per_frame[curr_idx]
-        clean_bboxes = unfiltered_and_untracked(curr_idx, curr_bboxes, is_filtered)
         tracker_bbox = tracker.update(curr_frame)
         if tracker_bbox: 
             # If the OpenCV obj tracker managed to keep track of the bbox,
             # let's see if we can also snap it onto a detected bbox to
             # increase accuracy.
-            closest_bbox_idx, _ = find_bbox_to_snap(clean_bboxes, tracker_bbox, params['MAX_SNAP_DISTANCE_SHORT'])
+            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, tracker_bbox, params['MAX_SNAP_DISTANCE_SHORT'])
             if closest_bbox_idx is not None:
-                closest_bbox = clean_bboxes[closest_bbox_idx]
+                closest_bbox = curr_bboxes[closest_bbox_idx]
                 print("\tAt frame {:d} SNAPPED tracker bbox {} to closest detected bbox {}".format(curr_idx, tracker_bbox, closest_bbox))
                 track.add(curr_idx, closest_bbox, Transition.snapped)
                 # Let's reset the tracker to make its algorithm "forget" what happened previously.
@@ -174,16 +165,16 @@ def find_some_track(bboxes_per_frame, is_filtered, params):
             # it was tracking. We don't want it to be too large since when 
             # tracking fails it could also be failing correctly (ie, that the
             # human left the scene, went underneath something, etc).
-            closest_bbox_idx, _ = find_bbox_to_snap(clean_bboxes, track.get_last_bbox(), params['MAX_SNAP_DISTANCE_LARGE'])
+            closest_bbox_idx, _ = find_bbox_to_snap(curr_bboxes, track.get_last_bbox(), params['MAX_SNAP_DISTANCE_LARGE'])
             if closest_bbox_idx is not None:
-                closest_bbox = clean_bboxes[closest_bbox_idx]
+                closest_bbox = curr_bboxes[closest_bbox_idx]
                 print("\tAt frame {:d} PATCHED the track by snapping from the previous bbox to {} in current frame".format(curr_idx, closest_bbox))
                 track.add(curr_idx, closest_bbox, Transition.patched)
                 tracker.restart(curr_frame, closest_bbox)
             else:
                 print("\tTrack lost at frame {:d}!".format(curr_idx))
                 avg_bbox_vel = average_bbox_velocity(track.get_bboxes(), params['AVG_BBOX_VEL_MAX_BACK_HOPS'])
-                target_idx, target_bbox = look_ahead(track.get_last_bbox(), bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'], is_filtered)
+                target_idx, target_bbox = look_ahead(track.get_last_bbox(), bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'])
                 if target_idx is not None:
                     print("\tLooked ahead and found a good target for intepolation: {} at index {:d}".format(target_bbox, target_idx))
                     steps = interpolate(track.get_last_bbox(), curr_idx, target_bbox, target_idx)
@@ -229,7 +220,7 @@ def average_bbox_velocity(track_bboxes, max_back_hops):
         return Point(0, 0)
 
 # TODO Refactor this function after testing.
-def look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered):
+def look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance):
     moving_center = base_bbox.center.copy()
     for idx in range(base_fr_idx, min(base_fr_idx + max_front_hops + 1, len(bboxes_per_frame))):
         moving_center = moving_center.add(avg_bbox_vel)
@@ -237,9 +228,8 @@ def look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front
         closest_bbox = None
         _, bboxes = bboxes_per_frame[idx]
         for bbox_idx, bbox in enumerate(bboxes):
-            filtered = (idx, bbox_idx) in is_filtered
             tracked = bbox.parent_track_id is not None
-            if filtered or tracked:
+            if tracked:
                 continue
             dist = bbox.center.distance_to(moving_center)
             if dist < max_snap_distance and dist < closest_dist:
@@ -249,13 +239,12 @@ def look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front
             return (idx, closest_bbox)
     return (None, None)
 
-def find_start(bboxes_per_frame, is_filtered, intersec_area_perc_thresh):
+def find_start(bboxes_per_frame, intersec_area_perc_thresh):
     for fr_idx, (frame, bboxes) in enumerate(bboxes_per_frame):
         for bbox_idx, bbox in enumerate(bboxes):
-            unfiltered = (fr_idx, bbox_idx) not in is_filtered
             untracked = bbox.parent_track_id is None
             without_large_intersections = not is_intersecting_any(bboxes, bbox_idx, intersec_area_perc_thresh)
-            if unfiltered and untracked and without_large_intersections:
+            if untracked and without_large_intersections:
                 return (fr_idx, bbox_idx)
     return (None, None)
 
