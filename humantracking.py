@@ -276,7 +276,7 @@ def is_intersecting_any(bboxes, base_bbox_idx, intersec_area_perc_thresh):
 def find_bbox_to_snap(bboxes, base_bbox, max_snap_distance):
     # FIXME refactor to return a bbox instead of idx, and no distance
     if not bboxes:
-        raise RuntimeError("bboxes must not be empty")
+        return (None, None)
     closest_dist = math.inf
     closest_bbox_idx = None
     for idx, bbox in enumerate(bboxes):
