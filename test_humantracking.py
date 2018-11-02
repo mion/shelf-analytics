@@ -254,9 +254,8 @@ class TestIsIntersectingAny(unittest.TestCase):
         self.assertEqual(is_intersecting_any(bboxes, 0, 0.75), False)
 
 class TestFindBBoxToSnap(unittest.TestCase):
-    def test_should_raise_an_exception_when_empty(self):
-        with self.assertRaises(RuntimeError):
-            find_bbox_to_snap([], BBox(Point(0, 0), 50, 50), 250)
+    def test_should_return_none_when_empty(self):
+        self.assertTupleEqual(find_bbox_to_snap([], BBox(Point(0, 0), 50, 50), 250), (None, None))
 
     def test_should_find_first_in_line(self):
         bboxes = [
