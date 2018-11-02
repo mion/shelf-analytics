@@ -78,23 +78,22 @@ class TestInterpolate(unittest.TestCase):
         self.assertEqual(steps[1][2], Transition.interpolated)
 
 class TestLookAhead(unittest.TestCase):
-    def test_should_ignore_filtered_or_tracked_bboxes(self):
+    def test_should_ignore_tracked_bboxes(self):
         base_bbox = mkbox(1, 0)
         target_bbox = mkbox(5, 0)
         bboxes_per_frame = [
             (None, [base_bbox]), # fr_idx = 0
             (None, []), # fr_idx = 1
             (None, [mkbox(3, 0, ptid=1)]), # fr_idx = 2
-            (None, [mkbox(4, 0)]), # fr_idx = 3
+            (None, [mkbox(4, 0, ptid=1)]), # fr_idx = 3
             (None, [target_bbox]), # fr_idx = 4
         ]
-        is_filtered = {(3, 0): True}
         base_fr_idx = 1
         avg_bbox_vel = Point(1, 0)
         max_front_hops = 3
         max_snap_distance = 100
 
-        idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+        idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance)
 
         self.assertEqual(idx, 4)
         self.assertIs(bbox, target_bbox)
@@ -108,13 +107,12 @@ class TestLookAhead(unittest.TestCase):
             (None, [mkbox(2, 100)]),
             (None, [mkbox(3, 100), target_bbox, mkbox(3, 200)]),
         ]
-        is_filtered = {}
         base_fr_idx = 1
         avg_bbox_vel = Point(1, 0)
         max_front_hops = 3
         max_snap_distance = 25
 
-        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance)
 
         self.assertEqual(fr_idx, 3)
         self.assertIs(bbox, target_bbox)
@@ -126,13 +124,12 @@ class TestLookAhead(unittest.TestCase):
             (None, [mkbox(10, 0, w=5, h=5)]),
             (None, [mkbox(20, 0, w=5, h=5)])
         ]
-        is_filtered = {}
         base_fr_idx = 1
         avg_bbox_vel = Point(-10, 0)
         max_front_hops = 2
         max_snap_distance = 15
 
-        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance)
 
         self.assertIsNone(fr_idx)
         self.assertIsNone(bbox)
@@ -145,13 +142,12 @@ class TestLookAhead(unittest.TestCase):
             (None, []),
             (None, [target_bbox]),
         ]
-        is_filtered = {}
         base_fr_idx = 0
         avg_bbox_vel = Point(1, 1)
         max_front_hops = 3
         max_snap_distance = 5
 
-        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance, is_filtered)
+        fr_idx, bbox = look_ahead(base_bbox, bboxes_per_frame, base_fr_idx, avg_bbox_vel, max_front_hops, max_snap_distance)
 
         self.assertEqual(fr_idx, 2)
         self.assertIs(bbox, target_bbox)
