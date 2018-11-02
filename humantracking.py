@@ -11,6 +11,12 @@ class Track:
     
     def __len__(self):
         return len(self.steps)
+    
+    def __contains__(self, item):
+        for _, bbox, _ in self.steps:
+            if bbox == item:
+                return True
+        return False
 
     def add(self, frame_index, bbox, transition):
         # We can't use the bbox index here because we may want to add a bbox
