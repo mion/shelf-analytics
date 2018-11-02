@@ -125,7 +125,7 @@ def find_some_track(bboxes_per_frame, obj_tracker_class, params):
     Returns None if no track found.
     """
     print("Searching for a bbox that is a good starting point...")
-    fr_idx, bbox_idx = find_start(bboxes_per_frame, params['MIN_INTERSEC_AREA_PERC'])
+    fr_idx, bbox_idx = find_start(bboxes_per_frame, params['MAX_INTERSEC_AREA_PERC'])
     if fr_idx is None:
         print("None found. All humans have been tracked.")
         return None
