@@ -23,6 +23,25 @@ class FakeObjectTracker:
         self.fixed_h = bbox.height
         self.orig = bbox.origin.copy()
 
+class SingleUpdateFakeObjectTracker:
+    def __init__(self, frame, bbox, opencv_obj_tracker_type):
+        self.fixed_w = bbox.width
+        self.fixed_h = bbox.height
+        self.orig = bbox.origin.copy()
+        self.should_return_none = False
+
+    def update(self, frame):
+        if self.should_return_none:
+            return None
+        self.should_return_none = True
+        self.orig = self.orig.add(Point(10, 0))
+        return BBox(self.orig, width=self.fixed_w, height=self.fixed_h)
+
+    def restart(self, frame, bbox):
+        self.fixed_w = bbox.width
+        self.fixed_h = bbox.height
+        self.orig = bbox.origin.copy()
+
 class TestFindSomeTrack(unittest.TestCase):
     def test_should_find_straight_continuous_track(self):
         bbox1 = mkbox(0, 0, 50, 50)
@@ -72,6 +91,7 @@ class TestFindSomeTrack(unittest.TestCase):
         }
 
         track = find_some_track(bboxes_per_frame, FakeObjectTracker, params)
+
         self.assertEqual(len(track), 4)
         self.assertTrue(track.steps[0].bbox == bbox1)
         self.assertTrue(track.steps[0].transition == Transition.first)
@@ -80,6 +100,36 @@ class TestFindSomeTrack(unittest.TestCase):
         self.assertTrue(track.steps[2].transition == Transition.tracked)
         self.assertTrue(track.steps[3].bbox == bbox3)
         self.assertTrue(track.steps[3].transition == Transition.snapped)
+
+    def test_should_snap_further_away_after_tracker_failure(self):
+        bbox1 = mkbox(0, 0, 50, 50)
+        bbox2 = mkbox(20, 0, 50, 50)
+        bbox3 = mkbox(50, 0, 50, 50)
+        bboxes_per_frame = [
+            (None, []),
+            (None, [bbox1]),
+            (None, [bbox2]),
+            (None, [bbox3])
+        ]
+        params = {
+            'MAX_INTERSEC_AREA_PERC': 0.0,
+            'OPENCV_OBJ_TRACKER_TYPE': '',
+            'TRACKER_SUCCESS_MAX_SNAP_DISTANCE': 20,
+            'TRACKER_FAIL_MAX_SNAP_DISTANCE': 30,
+            'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
+            'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
+            'LOOK_AHEAD_MAX_SNAP_DISTANCE': 0
+        }
+
+        track = find_some_track(bboxes_per_frame, SingleUpdateFakeObjectTracker, params)
+
+        self.assertEqual(len(track), 3)
+        self.assertTrue(track.steps[0].bbox == bbox1)
+        self.assertTrue(track.steps[0].transition == Transition.first)
+        self.assertTrue(track.steps[1].bbox == bbox2)
+        self.assertTrue(track.steps[1].transition == Transition.snapped)
+        self.assertTrue(track.steps[2].bbox == bbox3)
+        self.assertTrue(track.steps[2].transition == Transition.patched)
 
 class TestFilterBboxes(unittest.TestCase):
     def test_filter_bboxes(self):
