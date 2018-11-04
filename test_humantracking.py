@@ -48,7 +48,7 @@ class TestFindSomeTrack(unittest.TestCase):
         track = find_some_track(bboxes_per_frame, FakeObjectTracker(999), params)
 
         self.assertIsNone(track)
-    
+
     def test_single_bbox_track(self):
         bbox1 = mkbox()
         bboxes_per_frame = [
@@ -70,10 +70,6 @@ class TestFindSomeTrack(unittest.TestCase):
         self.assertEqual(len(track), 1)
         self.assertEqual(track.steps[0].bbox, bbox1)
         self.assertEqual(track.steps[0].transition, Transition.first)
-
-    # should work for single element track
-    # should ignore far away bboxes
-    # should not start at intersection
 
     def test_should_find_straight_continuous_track(self):
         bbox1 = mkbox(0, 0, 50, 50)
