@@ -30,7 +30,25 @@ class FakeObjectTracker:
         self.orig = bbox.origin.copy()
 
 class TestFindSomeTrack(unittest.TestCase):
-    # should work for empty track
+    def test_empty_frames(self):
+        bboxes_per_frame = [
+            (None, []),
+            (None, []),
+            (None, []),
+        ]
+        params = {
+            'MAX_INTERSEC_AREA_PERC': 0.0,
+            'OPENCV_OBJ_TRACKER_TYPE': '',
+            'TRACKER_SUCCESS_MAX_SNAP_DISTANCE': 0,
+            'TRACKER_FAIL_MAX_SNAP_DISTANCE': 0,
+            'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
+            'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
+        }
+
+        track = find_some_track(bboxes_per_frame, FakeObjectTracker(999), params)
+
+        self.assertIsNone(track)
+
     # should work for single element track
     # should ignore far away bboxes
     # should not start at intersection
