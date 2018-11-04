@@ -24,7 +24,7 @@ class FakeObjectTracker:
         self.orig = bbox.origin.copy()
 
 class TestFindSomeTrack(unittest.TestCase):
-    def test_should_find_simple_continuous_track(self):
+    def test_should_find_straight_continuous_track(self):
         bbox1 = mkbox(0, 0, 50, 50)
         bbox2 = mkbox(20, 0, 50, 50)
         bbox3 = mkbox(40, 0, 50, 50)
@@ -49,6 +49,37 @@ class TestFindSomeTrack(unittest.TestCase):
         self.assertTrue(bbox1 in track)
         self.assertTrue(bbox2 in track)
         self.assertTrue(bbox3 in track)
+
+    def test_should_find_straight_intermittent_track(self):
+        bbox1 = mkbox(0, 0, 50, 50)
+        bbox2 = mkbox(20, 0, 50, 50)
+        bbox3 = mkbox(60, 0, 50, 50)
+        bboxes_per_frame = [
+            (None, []),
+            (None, [bbox1]),
+            (None, [bbox2]),
+            (None, []),
+            (None, [bbox3])
+        ]
+        params = {
+            'MAX_INTERSEC_AREA_PERC': 0.0,
+            'OPENCV_OBJ_TRACKER_TYPE': '',
+            'TRACKER_SUCCESS_MAX_SNAP_DISTANCE': 20,
+            'TRACKER_FAIL_MAX_SNAP_DISTANCE': 0,
+            'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
+            'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
+            'LOOK_AHEAD_MAX_SNAP_DISTANCE': 0
+        }
+
+        track = find_some_track(bboxes_per_frame, FakeObjectTracker, params)
+        self.assertEqual(len(track), 4)
+        self.assertTrue(track.steps[0].bbox == bbox1)
+        self.assertTrue(track.steps[0].transition == Transition.first)
+        self.assertTrue(track.steps[1].bbox == bbox2)
+        self.assertTrue(track.steps[1].transition == Transition.snapped)
+        self.assertTrue(track.steps[2].transition == Transition.tracked)
+        self.assertTrue(track.steps[3].bbox == bbox3)
+        self.assertTrue(track.steps[3].transition == Transition.snapped)
 
 class TestFilterBboxes(unittest.TestCase):
     def test_filter_bboxes(self):
