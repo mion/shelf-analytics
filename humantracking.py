@@ -180,7 +180,7 @@ def find_some_track(bboxes_per_frame, obj_tracker_class, params):
                 print("\tAt frame {:d} PATCHED the track by snapping from the previous bbox to {} in current frame".format(curr_idx, closest_bbox))
                 track.add(curr_idx, closest_bbox, Transition.patched)
                 tracker.restart(curr_frame, closest_bbox)
-            else:
+            else: # TODO Can we get rid of the first case and always use interpolation?
                 print("\tTrack lost at frame {:d}!".format(curr_idx))
                 avg_bbox_vel = average_bbox_velocity(track.get_bboxes(), params['AVG_BBOX_VEL_MAX_BACK_HOPS'])
                 target_idx, target_bbox = look_ahead(track.get_last_bbox(), bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'])
