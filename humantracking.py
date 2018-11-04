@@ -50,7 +50,7 @@ class Transition(Enum):
     first = 1
     snapped = 2
     tracked = 3
-    patched = 4
+    patched = 4 # Snapped after the obj tracker fails, prob not the best name for this.
     interpolated = 5
 
 class ObjectTracker:
