@@ -186,7 +186,7 @@ def find_some_track(bboxes_per_frame, tracker, params):
             else: # TODO Can we get rid of the first case and always use interpolation?
                 print("\tTrack lost at frame {:d}!".format(curr_idx))
                 avg_bbox_vel = average_bbox_velocity(track.get_bboxes(), params['AVG_BBOX_VEL_MAX_BACK_HOPS'])
-                target_idx, target_bbox = look_ahead(track.get_last_bbox(), bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['LOOK_AHEAD_MAX_SNAP_DISTANCE'])
+                target_idx, target_bbox = look_ahead(track.get_last_bbox(), bboxes_per_frame, curr_idx, avg_bbox_vel, params['LOOK_AHEAD_MAX_FRONT_HOPS'], params['TRACKER_FAIL_MAX_SNAP_DISTANCE'])
                 if target_idx is not None:
                     print("\tLooked ahead and found a good target for intepolation: {} at index {:d}".format(target_bbox, target_idx))
                     steps = interpolate(track.get_last_bbox(), curr_idx, target_bbox, target_idx)
