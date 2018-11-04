@@ -54,9 +54,11 @@ class Transition(Enum):
     interpolated = 5
 
 class ObjectTracker:
-    def __init__(self, frame, bbox, opencv_obj_tracker_type):
+    def __init__(self, opencv_obj_tracker_type):
         self._opencv_obj_tracker_type = opencv_obj_tracker_type
-        self.opencv_tracker = self._create_opencv_tracker(opencv_obj_tracker_type)
+
+    def start(self, frame, bbox):
+        self.opencv_tracker = self._create_opencv_tracker(self._opencv_obj_tracker_type)
         ok = self.opencv_tracker.init(frame, bbox.to_tuple(Format.x1_y1_w_h))
         if not ok: # TODO Is this a good use of exceptions?
             raise RuntimeError('failed to init OpenCV tracker')
@@ -120,8 +122,9 @@ def filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_a
 def find_all_tracks(bboxes_per_frame, params):
     count = 0
     tracks = []
+    tracker = ObjectTracker(params['OPENCV_OBJ_TRACKER_TYPE'])
     while count < params['MAX_TRACK_COUNT']:
-        track = find_some_track(bboxes_per_frame, ObjectTracker, params)
+        track = find_some_track(bboxes_per_frame, tracker, params)
         count += 1
         if track is not None:
             tracks.append(track)
@@ -129,7 +132,7 @@ def find_all_tracks(bboxes_per_frame, params):
             break
     return tracks
 
-def find_some_track(bboxes_per_frame, obj_tracker_class, params):
+def find_some_track(bboxes_per_frame, tracker, params):
     """
     Returns None if no track found.
     """
@@ -141,7 +144,7 @@ def find_some_track(bboxes_per_frame, obj_tracker_class, params):
     print("Found start bbox at frame index {:d} and bbox index {:d}".format(fr_idx, bbox_idx))
     start_frame, start_bboxes = bboxes_per_frame[fr_idx]
     start_bbox = start_bboxes[bbox_idx]
-    tracker = obj_tracker_class(start_frame, start_bbox, params['OPENCV_OBJ_TRACKER_TYPE'])
+    tracker.start(start_frame, start_bbox)
     track = Track()
     track.add(fr_idx, start_bbox, Transition.first)
     print("Tracking started:")
