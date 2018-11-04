@@ -1,6 +1,9 @@
 import math
 from boundingbox import BBox, Format, DetectedBBox
 from point import Point
+from collections import namedtuple
+
+Step = namedtuple('Step', ('frame_index', 'bbox', 'transition'))
 
 class Track:
     next_id = 1
@@ -25,7 +28,7 @@ class Track:
         # For this reason we added an `id` field to the BBox class though
         # we also use indexes throughout the code when possible as it's simpler.
         bbox.parent_track_id = self.id
-        self.steps.append((frame_index, bbox, transition))
+        self.steps.append(Step(frame_index, bbox, transition))
     
     def get_bbox(self, idx):
         if idx >= len(self.steps):
