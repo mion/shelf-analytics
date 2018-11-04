@@ -48,6 +48,28 @@ class TestFindSomeTrack(unittest.TestCase):
         track = find_some_track(bboxes_per_frame, FakeObjectTracker(999), params)
 
         self.assertIsNone(track)
+    
+    def test_single_bbox_track(self):
+        bbox1 = mkbox()
+        bboxes_per_frame = [
+            (None, []),
+            (None, []),
+            (None, [bbox1]),
+        ]
+        params = {
+            'MAX_INTERSEC_AREA_PERC': 0.0,
+            'OPENCV_OBJ_TRACKER_TYPE': '',
+            'TRACKER_SUCCESS_MAX_SNAP_DISTANCE': 0,
+            'TRACKER_FAIL_MAX_SNAP_DISTANCE': 0,
+            'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
+            'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
+        }
+
+        track = find_some_track(bboxes_per_frame, FakeObjectTracker(999), params)
+
+        self.assertEqual(len(track), 1)
+        self.assertEqual(track.steps[0].bbox, bbox1)
+        self.assertEqual(track.steps[0].transition, Transition.first)
 
     # should work for single element track
     # should ignore far away bboxes
