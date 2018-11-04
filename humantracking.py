@@ -206,7 +206,7 @@ def interpolate(base_bbox, start_idx, end_bbox, end_idx):
     for idx in range(start_idx, end_idx):
         interpol_orig = interpol_orig.add(dir_vec.multiply(delta_per_hop))
         interpol_bbox = BBox(interpol_orig, base_bbox.width, base_bbox.height)
-        steps.append((idx, interpol_bbox, Transition.interpolated))
+        steps.append(Step(idx, interpol_bbox, Transition.interpolated))
     return steps
 
 # TODO Refactor this function after testing.
