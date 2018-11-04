@@ -52,7 +52,6 @@ class TestFindSomeTrack(unittest.TestCase):
             'TRACKER_FAIL_MAX_SNAP_DISTANCE': 0,
             'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
             'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
-            'LOOK_AHEAD_MAX_SNAP_DISTANCE': 0
         }
 
         track = find_some_track(bboxes_per_frame, FakeObjectTracker(999), params)
@@ -79,7 +78,6 @@ class TestFindSomeTrack(unittest.TestCase):
             'TRACKER_FAIL_MAX_SNAP_DISTANCE': 0,
             'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
             'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
-            'LOOK_AHEAD_MAX_SNAP_DISTANCE': 0
         }
 
         track = find_some_track(bboxes_per_frame, FakeObjectTracker(999), params)
@@ -110,7 +108,6 @@ class TestFindSomeTrack(unittest.TestCase):
             'TRACKER_FAIL_MAX_SNAP_DISTANCE': 30,
             'AVG_BBOX_VEL_MAX_BACK_HOPS': 0,
             'LOOK_AHEAD_MAX_FRONT_HOPS': 0,
-            'LOOK_AHEAD_MAX_SNAP_DISTANCE': 0
         }
 
         track = find_some_track(bboxes_per_frame, FakeObjectTracker(1), params)
@@ -142,28 +139,27 @@ class TestFindSomeTrack(unittest.TestCase):
             'MAX_INTERSEC_AREA_PERC': 0.0,
             'OPENCV_OBJ_TRACKER_TYPE': '',
             'TRACKER_SUCCESS_MAX_SNAP_DISTANCE': 20,
-            'TRACKER_FAIL_MAX_SNAP_DISTANCE': 0,
+            'TRACKER_FAIL_MAX_SNAP_DISTANCE': 30,
             'AVG_BBOX_VEL_MAX_BACK_HOPS': 3,
             'LOOK_AHEAD_MAX_FRONT_HOPS': 3,
-            'LOOK_AHEAD_MAX_SNAP_DISTANCE': 30
         }
 
-        track = find_some_track(bboxes_per_frame, FakeObjectTracker(999), params)
+        track = find_some_track(bboxes_per_frame, FakeObjectTracker(2), params)
 
         self.assertEqual(len(track), 7)
-        self.assertTrue(track.steps[0].bbox == bbox1)
-        self.assertTrue(track.steps[1].bbox == bbox2)
-        self.assertTrue(track.steps[1].transition == Transition.snapped)
-        self.assertTrue(track.steps[2].bbox == bbox3)
-        self.assertTrue(track.steps[2].transition == Transition.snapped)
+        self.assertEqual(track.steps[0].bbox, bbox1)
+        self.assertEqual(track.steps[1].bbox, bbox2)
+        self.assertEqual(track.steps[1].transition, Transition.snapped)
+        self.assertEqual(track.steps[2].bbox, bbox3)
+        self.assertEqual(track.steps[2].transition, Transition.snapped)
         self.assertEqual(track.steps[3].bbox.origin.x, 60)
-        self.assertTrue(track.steps[3].transition == Transition.interpolated)
+        self.assertEqual(track.steps[3].transition, Transition.interpolated)
         self.assertEqual(track.steps[4].bbox.origin.x, 80)
-        self.assertTrue(track.steps[4].transition == Transition.interpolated)
+        self.assertEqual(track.steps[4].transition, Transition.interpolated)
         self.assertEqual(track.steps[5].bbox.origin.x, 100)
-        self.assertTrue(track.steps[5].transition == Transition.interpolated)
-        self.assertTrue(track.steps[6].bbox == bbox4)
-        self.assertTrue(track.steps[6].transition == Transition.interpolated)
+        self.assertEqual(track.steps[5].transition, Transition.interpolated)
+        self.assertEqual(track.steps[6].bbox, bbox4)
+        self.assertEqual(track.steps[6].transition, Transition.patched)
 
 class TestFilterBboxes(unittest.TestCase):
     def test_filter_bboxes(self):
