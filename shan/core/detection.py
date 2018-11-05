@@ -182,10 +182,10 @@ def print_detected_result_opencv(image, output_image_path, boxes, masks, class_i
             p = Polygon(verts, facecolor="none", edgecolor=color)
             ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
-    # plt.savefig(output_image_path, bbox_inches="tight", pad_inches=0, Transparent=True)
+    plt.savefig(output_image_path, bbox_inches="tight", pad_inches=0, Transparent=True)
     plt.close(fig)
     # Save the image with OpenCV
-    cv2.imwrite(output_image_path, masked_image.astype(np.uint8))
+    # cv2.imwrite(output_image_path, masked_image.astype(np.uint8))
 
 def detect_humans(model, image, debug_output_path):
     """
@@ -228,12 +228,12 @@ def detect_humans(model, image, debug_output_path):
     
     return {'boxes': simple_boxes, 'scores': simple_scores}
 
-def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_path, pika_connection=None):
+def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_path, pika_connection=None, image_ext=DEFAULT_FRAME_IMAGE_EXTENSION):
     """
     This is ugly but we need the `pika_connection` to call `.process_data_events()` so it won't be closed by RabbitMQ.
     """
     ### Load images and last json
-    images = load_images(input_dir_path, DEFAULT_FRAME_IMAGE_EXTENSION)
+    images = load_images(input_dir_path, image_ext)
     output = None
     if os.path.exists(output_file_path):
         print("Found older output JSON, loading it")
@@ -263,7 +263,7 @@ def detect_humans_in_every_image(input_dir_path, output_file_path, frames_dir_pa
         try:
             img = images[index]
             n_digits = len(str(len(images)))
-            frame_image_name = 'detected-{}.png'.format(str(index).zfill(n_digits))
+            frame_image_name = 'detected-{}.{}'.format(str(index).zfill(n_digits), image_ext)
             tagged_frame_obj = detect_humans(model, img, os.path.join(frames_dir_path, frame_image_name))
             tagged_frame_obj.update({
                 'frame_index': index

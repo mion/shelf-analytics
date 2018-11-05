@@ -9,7 +9,7 @@ parser.add_argument("output_file_path", help="path to a JSON file where the data
 parser.add_argument("--frames_dir_path", help="if specified, save frames after detection in this directory")
 args = parser.parse_args()
 
-error = detect_humans_in_every_image(args.input_dir_path, args.output_file_path, args.frames_dir_path)
+error = detect_humans_in_every_image(args.input_dir_path, args.output_file_path, args.frames_dir_path, image_ext='jpg')
 if error is None:
     print("SUCCESS: detection completed")
     sys.exit(0)
