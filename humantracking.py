@@ -268,7 +268,7 @@ def is_intersecting_any(bboxes, base_bbox_idx, intersec_area_perc_thresh):
         if bbox is base_bbox:
             continue
         intersec_area = bbox.intersection_area(base_bbox)
-        if intersec_area is None:
+        if intersec_area == 0:
             continue
         else:
             # Since we don't know if base bbox is "the large one" or not

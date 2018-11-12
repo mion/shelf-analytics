@@ -35,14 +35,14 @@ class BBox:
         return self.center.distance_to(bbox.center)
 
     def has_intersection_with(self, bbox):
-        return self.intersection_area(bbox) is not None
+        return self.intersection_area(bbox) > 0
 
     def intersection_area(self, bbox):
         x1 = max(self.x1, bbox.x1)
         y1 = max(self.y1, bbox.y1)
         x2 = min(self.x2, bbox.x2)
         y2 = min(self.y2, bbox.y2)
-        return (x2 - x1) * (y2 - y1) if ((x1 < x2) and (y1 < y2)) else None
+        return (x2 - x1) * (y2 - y1) if ((x1 < x2) and (y1 < y2)) else 0
 
     def to_tuple(self, fmt):
         if fmt == Format.x1_y1_w_h:
