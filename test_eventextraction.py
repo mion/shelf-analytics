@@ -2,7 +2,7 @@ import unittest
 from humantracking import Track, Transition
 from point import Point
 from boundingbox import BBox
-from eventextraction import intersection_area_over_time, extract_traverse_events_for, RegionOfInterest as Roi
+from eventextraction import intersection_area_over_time, extract_traverse_events_for, RegionOfInterest as Roi, EventType
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
@@ -41,6 +41,19 @@ class TestExtractTraverseEvents(unittest.TestCase):
         roi = Roi('roi0', mkbox(15, 5))
         events = extract_traverse_events_for(bboxes, roi, min_duration=1, min_area=6)
         self.assertEqual(len(events), 0)
+
+    def test_traverse_single_hit(self):
+        bboxes = [
+            mkbox(0, 0),
+            mkbox(10, 0),
+            mkbox(20, 0),
+            mkbox(30, 0)
+        ]
+        roi = Roi('roi0', mkbox(15, 5, 5, 5))
+        events = extract_traverse_events_for(bboxes, roi, min_duration=1, min_area=5)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].type, EventType.traverse)
+        self.assertEqual(events[0].step_index, 1)
 
 class TestIntersectionOverTime(unittest.TestCase):
     def test_intersection_over_time(self):
