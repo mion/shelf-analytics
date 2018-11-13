@@ -37,6 +37,21 @@ def intersection_area_over_time(bboxes, roi_bbox):
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]
 
 def extract_traverse_events_for(bboxes, roi, min_duration, min_area):
+    # We are looking for a step signal, mathematically speaking. TODO Use numpy?
+    iaot = intersection_area_over_time(bboxes, roi.bbox)
+    for i in range(len(iaot)):
+        if iaot[i] < min_area:
+            continue
+        small_area_found = False
+        for j in range(i, i + min_duration):
+            if j >= len(iaot):
+                small_area_found = True # not enough time
+                break
+            if iaot[j] < min_area:
+                small_area_found = True
+                break
+        if not small_area_found:
+            return [TraverseEvent(roi.name, i)]
     return []
 
 def extract_events_for(bboxes, roi, params):
