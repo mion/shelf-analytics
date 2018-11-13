@@ -31,6 +31,17 @@ class TestExtractTraverseEvents(unittest.TestCase):
         events = extract_traverse_events_for(bboxes, roi, min_duration=3, min_area=1)
         self.assertEqual(len(events), 0)
 
+    def test_below_min_area(self):
+        bboxes = [
+            mkbox(0, 0),
+            mkbox(10, 0),
+            mkbox(20, 0),
+            mkbox(30, 0)
+        ]
+        roi = Roi('roi0', mkbox(15, 5))
+        events = extract_traverse_events_for(bboxes, roi, min_duration=1, min_area=6)
+        self.assertEqual(len(events), 0)
+
 class TestIntersectionOverTime(unittest.TestCase):
     def test_intersection_over_time(self):
         bboxes = [
