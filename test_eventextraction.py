@@ -39,7 +39,7 @@ class TestExtractTraverseEvents(unittest.TestCase):
             mkbox(30, 0)
         ]
         roi = Roi('roi0', mkbox(15, 5))
-        events = extract_traverse_events_for(bboxes, roi, min_duration=1, min_area=6)
+        events = extract_traverse_events_for(bboxes, roi, min_duration=1, min_area=26)
         self.assertEqual(len(events), 0)
 
     def test_traverse_single_hit(self):
