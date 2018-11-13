@@ -1,7 +1,13 @@
 import operator
 from functools import reduce
+from enum import Enum
 
-ALL_EVENT_TYPES = ['traverse', 'hover', 'in_out']
+class EventType(Enum):
+    traverse = 'traverse'
+    hover = 'hover'
+    in_out = 'in_out'
+
+ALL_EVENT_TYPES = [EventType.traverse, EventType.hover, EventType.in_out]
 
 class RegionOfInterest:
     def __init__(self, name, bbox, event_types=ALL_EVENT_TYPES):
