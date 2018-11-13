@@ -1,3 +1,14 @@
+import operator
+from functools import reduce
+
+ALL_EVENT_TYPES = ['traverse', 'hover', 'in_out']
+
+class RegionOfInterest:
+    def __init__(self, name, bbox, event_types=ALL_EVENT_TYPES):
+        self.name = name
+        self.bbox = bbox
+        self.event_types = event_types
+
 class Event:
     def __init__(self, _type, roi_name):
         self.type = _type
