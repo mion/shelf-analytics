@@ -33,7 +33,12 @@ class TestExtractTraverseEvent(unittest.TestCase):
         self.assertEqual(event.index, 1)
 
     def test_traverse_long_multiple_intersec(self):
-        pass
+        iaot = [0, 0, 7, 6, 2, 0, 6, 6, 7, 6]
+        event = extract_traverse_event_for(iaot, 'foo', min_duration=4, min_area=5)
+        self.assertIsNotNone(event)
+        self.assertEqual(event.type, EventType.traverse)
+        self.assertEqual(event.index, 6)
+        self.assertEqual(event.roi_name, 'foo')
 
 class TestIntersectionOverTime(unittest.TestCase):
     def test_intersection_over_time(self):
