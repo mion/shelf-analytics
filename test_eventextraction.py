@@ -11,50 +11,27 @@ def mkbox(x=0, y=0, w=10, h=10, ptid=None):
 
 class TestExtractTraverseEvent(unittest.TestCase):
     def test_no_intersection(self):
-        bboxes = [
-            mkbox(0, 0),
-            mkbox(5, 0),
-            mkbox(10, 0)
-        ]
-        roi = Roi('roi0', mkbox(-20, 0))
-        event = extract_traverse_event_for(bboxes, roi, min_duration=1, min_area=1)
+        iaot = [0, 0, 0]
+        event = extract_traverse_event_for(iaot, '', min_duration=1, min_area=1)
         self.assertIsNone(event)
 
     def test_below_min_duration(self):
-        bboxes = [
-            mkbox(0, 0),
-            mkbox(10, 0),
-            mkbox(20, 0),
-            mkbox(30, 0)
-        ]
-        roi = Roi('roi0', mkbox(15, 5))
-        event = extract_traverse_event_for(bboxes, roi, min_duration=3, min_area=1)
+        iaot = [0, 25, 25, 0]
+        event = extract_traverse_event_for(iaot, '', min_duration=3, min_area=1)
         self.assertIsNone(event)
 
     def test_below_min_area(self):
-        bboxes = [
-            mkbox(0, 0),
-            mkbox(10, 0),
-            mkbox(20, 0),
-            mkbox(30, 0)
-        ]
-        roi = Roi('roi0', mkbox(15, 5))
-        event = extract_traverse_event_for(bboxes, roi, min_duration=1, min_area=26)
+        iaot = [0, 25, 25, 0]
+        event = extract_traverse_event_for(iaot, '', min_duration=1, min_area=26)
         self.assertIsNone(event)
 
     def test_traverse_single_intersec(self):
-        bboxes = [
-            mkbox(0, 0),
-            mkbox(10, 0),
-            mkbox(20, 0),
-            mkbox(30, 0)
-        ]
-        roi = Roi('roi0', mkbox(15, 5, 5, 5))
-        event = extract_traverse_event_for(bboxes, roi, min_duration=1, min_area=5)
+        iaot = [0, 25, 0, 0]
+        event = extract_traverse_event_for(iaot, '', min_duration=1, min_area=5)
         self.assertIsNotNone(event)
         self.assertEqual(event.type, EventType.traverse)
         self.assertEqual(event.step_index, 1)
-    
+
     def test_traverse_long_multiple_intersec(self):
         pass
 
