@@ -42,7 +42,7 @@ class TestExtractTraverseEvent(unittest.TestCase):
         event = extract_traverse_event_for(bboxes, roi, min_duration=1, min_area=26)
         self.assertIsNone(event)
 
-    def test_traverse_single_hit(self):
+    def test_traverse_single_intersec(self):
         bboxes = [
             mkbox(0, 0),
             mkbox(10, 0),
@@ -54,6 +54,9 @@ class TestExtractTraverseEvent(unittest.TestCase):
         self.assertIsNotNone(event)
         self.assertEqual(event.type, EventType.traverse)
         self.assertEqual(event.step_index, 1)
+    
+    def test_traverse_long_multiple_intersec(self):
+        pass
 
 class TestIntersectionOverTime(unittest.TestCase):
     def test_intersection_over_time(self):
