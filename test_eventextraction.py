@@ -40,8 +40,8 @@ class TestExtractTraverseEvent(unittest.TestCase):
         self.assertEqual(event.index, 6)
         self.assertEqual(event.roi_name, 'foo')
 
-class TestIntersectionOverTime(unittest.TestCase):
-    def test_intersection_over_time(self):
+class TestIntersectionAreaOverTime(unittest.TestCase):
+    def test_intersection_area_over_time(self):
         bboxes = [
             mkbox(0, 0, 10, 10),
             mkbox(10, 0, 10, 10),
