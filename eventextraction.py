@@ -29,8 +29,11 @@ class InOutEvent(Event):
 def intersection_area_over_time(bboxes, roi_bbox):
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]
 
-def extract_events_for(bboxes, roi):
+def extract_traverse_events_for(bboxes, roi, min_duration, min_area):
     return []
 
-def extract_events(tracks, rois):
-    return reduce(operator.concat, [reduce(operator.concat, [extract_events_for(track.get_bboxes(), roi) for roi in rois]) for track in tracks])
+def extract_events_for(bboxes, roi, params):
+    return []
+
+def extract_events(tracks, rois, params):
+    return reduce(operator.concat, [reduce(operator.concat, [extract_events_for(track.get_bboxes(), roi, params) for roi in rois]) for track in tracks])
