@@ -23,15 +23,15 @@ class Event:
 
 class TraverseEvent(Event):
     def __init__(self, roi_name, step_index):
-        super().__init__('traverse', roi_name, step_index)
+        super().__init__(EventType.traverse, roi_name, step_index)
 
 class HoverEvent(Event):
     def __init__(self, roi_name, step_index):
-        super().__init__('hover', roi_name, step_index)
+        super().__init__(EventType.hover, roi_name, step_index)
 
 class InOutEvent(Event):
     def __init__(self, roi_name, step_index):
-        super().__init__('in_out', roi_name, step_index)
+        super().__init__(EventType.in_out, roi_name, step_index)
 
 def intersection_area_over_time(bboxes, roi_bbox):
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]
