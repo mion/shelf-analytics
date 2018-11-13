@@ -37,19 +37,16 @@ def intersection_area_over_time(bboxes, roi_bbox):
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]
 
 def extract_traverse_event_for(iaot, roi_name, min_duration, min_area):
-    # We are looking for a step signal, mathematically speaking. TODO Use numpy?
-    for i in range(len(iaot)): # TODO use enumerate
-        if iaot[i] < min_area:
+    # We are simply looking for a step signal, mathematically speaking. TODO Use numpy?
+    for i, area in enumerate(iaot):
+        if area < min_area:
             continue
-        small_area_found = False
+        valid_step_signal = True
         for j in range(i, i + min_duration):
-            if j >= len(iaot):
-                small_area_found = True # not enough time
+            if j >= len(iaot) or iaot[j] < min_area:
+                valid_step_signal = False
                 break
-            if iaot[j] < min_area:
-                small_area_found = True
-                break
-        if not small_area_found:
+        if valid_step_signal:
             return TraverseEvent(roi_name, i)
     return None
 
