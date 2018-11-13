@@ -16,22 +16,22 @@ class RegionOfInterest:
         self.event_types = event_types
 
 class Event:
-    def __init__(self, _type, roi_name, step_index):
+    def __init__(self, _type, roi_name, index):
         self.type = _type
         self.roi_name = roi_name
-        self.step_index = step_index
+        self.index = index
 
 class TraverseEvent(Event):
-    def __init__(self, roi_name, step_index):
-        super().__init__(EventType.traverse, roi_name, step_index)
+    def __init__(self, roi_name, index):
+        super().__init__(EventType.traverse, roi_name, index)
 
 class HoverEvent(Event):
-    def __init__(self, roi_name, step_index):
-        super().__init__(EventType.hover, roi_name, step_index)
+    def __init__(self, roi_name, index):
+        super().__init__(EventType.hover, roi_name, index)
 
 class InOutEvent(Event):
-    def __init__(self, roi_name, step_index):
-        super().__init__(EventType.in_out, roi_name, step_index)
+    def __init__(self, roi_name, index):
+        super().__init__(EventType.in_out, roi_name, index)
 
 def intersection_area_over_time(bboxes, roi_bbox):
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]

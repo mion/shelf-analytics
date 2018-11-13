@@ -30,7 +30,7 @@ class TestExtractTraverseEvent(unittest.TestCase):
         event = extract_traverse_event_for(iaot, '', min_duration=1, min_area=5)
         self.assertIsNotNone(event)
         self.assertEqual(event.type, EventType.traverse)
-        self.assertEqual(event.step_index, 1)
+        self.assertEqual(event.index, 1)
 
     def test_traverse_long_multiple_intersec(self):
         pass
