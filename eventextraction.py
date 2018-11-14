@@ -1,6 +1,7 @@
 import operator
 from functools import reduce
 from enum import Enum
+from collections import namedtuple
 
 class EventType(Enum):
     traverse = 'traverse'
@@ -8,6 +9,8 @@ class EventType(Enum):
     in_out = 'in_out'
 
 ALL_EVENT_TYPES = [EventType.traverse, EventType.hover, EventType.in_out]
+
+Peak = namedtuple('Peak', ('index', 'duration', 'height'))
 
 class RegionOfInterest:
     def __init__(self, name, bbox, event_types=ALL_EVENT_TYPES):
