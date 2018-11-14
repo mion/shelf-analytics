@@ -36,6 +36,12 @@ class InOutEvent(Event):
 def intersection_area_over_time(bboxes, roi_bbox):
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]
 
+def extract_in_out_event_for(peaks, roi_name, min_duration, min_area):
+    return None
+
+def extract_peaks(iaot, butter_ord, butter_crit_freq, peak_height, peak_width):
+    return []
+
 def extract_traverse_event_for(iaot, roi_name, min_duration, min_area):
     # We are simply looking for a step signal, mathematically speaking. TODO Use numpy?
     for i, area in enumerate(iaot):

@@ -2,12 +2,23 @@ import unittest
 from humantracking import Track, Transition
 from point import Point
 from boundingbox import BBox
-from eventextraction import intersection_area_over_time, extract_traverse_event_for, RegionOfInterest as Roi, EventType
+from eventextraction import intersection_area_over_time, extract_traverse_event_for, extract_peaks, RegionOfInterest as Roi, EventType
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
     bbox.parent_track_id = ptid
     return bbox
+
+class TestExtractPeaks(unittest.TestCase):
+    def test_empty(self):
+        iaot = []
+        peaks = extract_peaks(iaot, butter_ord=1, butter_crit_freq=0.1, peak_height=100, peak_width=1)
+        self.assertEqual(len(peaks), 0)
+
+    def test_one_peak_in_the_middle(self):
+        iaot = [0, 0, 1, 2, 4, 16, 64, 256, 52, 32, 8, 0, 0]
+        peaks = extract_peaks(iaot, butter_ord=1, butter_crit_freq=0.05, peak_height=200, peak_width=3)
+        self.assertEqual(len(peaks), 1)
 
 class TestExtractTraverseEvent(unittest.TestCase):
     def test_no_intersection(self):
