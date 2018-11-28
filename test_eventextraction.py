@@ -12,27 +12,19 @@ def mkbox(x=0, y=0, w=10, h=10, ptid=None):
 class TestExtractPeaks(unittest.TestCase):
     def test_empty(self):
         iaot = []
-        params = {
-            'butter_ord': 1,
-            'butter_crit_freq': 0.05,
-            'min_height': 500,
-            'min_width': 1
-        }
-        peaks = extract_peaks(iaot, **params)
+        peaks = extract_peaks(iaot, min_height=1, min_width=1)
         self.assertEqual(len(peaks), 0)
 
-    def test_one_peak_in_the_middle(self):
-        from fixtures import iaot_one_strong_peak_in_the_middle as iaot
-        params = {
-            'butter_ord': 1,
-            'butter_crit_freq': 0.05,
-            'min_height': 500,
-            'min_width': 1
-        }
-        peaks = extract_peaks(iaot, **params)
-        self.assertEqual(len(peaks), 1)
-        self.assertEqual(peaks[0].index, 5)
-
+    def test_signals(self):
+        from fixtures import iaot_signals
+        for msg, exp_idx, iaot, (min_height, min_width) in iaot_signals:
+            peaks = extract_peaks(iaot, min_height=min_height, min_width=min_width)
+            if exp_idx is not None:
+                self.assertEqual(len(peaks), 1, msg)
+                self.assertEqual(peaks[0].index, exp_idx, msg)
+            else:
+                self.assertEqual(len(peaks), 0, msg)
+    
 class TestExtractTraverseEvent(unittest.TestCase):
     def test_no_intersection(self):
         iaot = [0, 0, 0]
