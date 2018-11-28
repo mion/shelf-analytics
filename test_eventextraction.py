@@ -17,13 +17,9 @@ class TestExtractPeaks(unittest.TestCase):
 
     def test_signals(self):
         from fixtures import iaot_signals
-        for msg, exp_idx, iaot, (min_height, min_width) in iaot_signals:
+        for msg, exp_idxs, iaot, (min_height, min_width) in iaot_signals:
             peaks = extract_peaks(iaot, min_height=min_height, min_width=min_width)
-            if exp_idx is not None:
-                self.assertEqual(len(peaks), 1, msg)
-                self.assertEqual(peaks[0].index, exp_idx, msg)
-            else:
-                self.assertEqual(len(peaks), 0, msg)
+            self.assertEqual([p.index for p in peaks], exp_idxs, msg)
     
 class TestExtractTraverseEvent(unittest.TestCase):
     def test_no_intersection(self):
