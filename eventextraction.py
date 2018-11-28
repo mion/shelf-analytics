@@ -50,7 +50,7 @@ def extract_in_out_event_for(peaks, roi_name, min_duration, min_area):
 
 def smooth_without_delay(xn, butter_ord, butter_crit_freq):
     # Butterworth filter
-    b, a = butter(butter_order, butter_crit_freq)
+    b, a = butter(butter_ord, butter_crit_freq)
     # Apply the filter to xn.  Use lfilter_zi to choose the initial condition
     # of the filter.
     zi = lfilter_zi(b, a)
@@ -62,7 +62,23 @@ def smooth_without_delay(xn, butter_ord, butter_crit_freq):
     return filtfilt(b, a, xn)
 
 def extract_peaks(iaot, butter_ord, butter_crit_freq, min_height, min_width):
-    return []
+    # Here we are using this method from the SciPy cookbook: https://scipy-cookbook.readthedocs.io/items/FiltFilt.html
+    # There are others we could use such as the Savitzky-Golay filter approach, see: https://stackoverflow.com/questions/20618804/how-to-smooth-a-curve-in-the-right-way
+    if len(iaot) == 0:
+        return []
+    iaot = numpy.array(iaot)
+    # try
+    peaks = []
+    smooth_iaot = smooth_without_delay(iaot, butter_ord, butter_crit_freq)
+    indexes, props = find_peaks(smooth_iaot, height=min_height, width=min_width)
+    import pdb; pdb.set_trace()
+    for i in range(len(indexes)):
+        peaks.append(Peak(
+            indexes[i],
+            props['widths'][i], # in frames
+            props['peak_heights'][i] # intersection area in pixels
+        ))
+    return peaks
 
 def extract_traverse_event_for(iaot, roi_name, min_duration, min_area):
     # TODO We are simply looking for a step signal, mathematically speaking, so we could use numpy
