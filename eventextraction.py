@@ -71,7 +71,6 @@ def extract_peaks(iaot, butter_ord, butter_crit_freq, min_height, min_width):
     peaks = []
     smooth_iaot = smooth_without_delay(iaot, butter_ord, butter_crit_freq)
     indexes, props = find_peaks(smooth_iaot, height=min_height, width=min_width)
-    import pdb; pdb.set_trace()
     for i in range(len(indexes)):
         peaks.append(Peak(
             indexes[i],
