@@ -16,7 +16,13 @@ class TestExtractPeaks(unittest.TestCase):
         self.assertEqual(len(peaks), 0)
 
     def test_one_peak_in_the_middle(self):
-        iaot = [0, 1, 2, 30, 400, 5000, 600, 70, 8, 9, 10]
+        from fixtures import iaot_one_strong_peak_in_the_middle as iaot
+        params = {
+            'butter_ord': 1,
+            'butter_crit_freq': 0.05,
+            'min_height': 500,
+            'min_width': 1
+        }
         peaks = extract_peaks(iaot, butter_ord=1, butter_crit_freq=0.05, min_height=500, min_width=1)
         self.assertEqual(len(peaks), 1)
         self.assertEqual(peaks[0].index, 5)
