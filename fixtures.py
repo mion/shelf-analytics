@@ -1,0 +1,1 @@
+iaot_one_strong_peak_in_the_middle = [0, 1, 2, 30, 400, 5000, 600, 70, 8, 9, 10]
