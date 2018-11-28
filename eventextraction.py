@@ -1,7 +1,10 @@
+"""Currently we only extract the first event we find."""
 import operator
 from functools import reduce
 from enum import Enum
 from collections import namedtuple
+import numpy
+from scipy.signal import find_peaks, peak_widths, lfilter, lfilter_zi, filtfilt, butter
 
 class EventType(Enum):
     traverse = 'traverse'
@@ -37,16 +40,32 @@ class InOutEvent(Event):
         super().__init__(EventType.in_out, roi_name, index)
 
 def intersection_area_over_time(bboxes, roi_bbox):
+    """This bboxes array should have a len() equal to the number of frames.
+    It contains only one bbox in each position because it was extracted from a track.
+    """
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]
 
 def extract_in_out_event_for(peaks, roi_name, min_duration, min_area):
     return None
 
-def extract_peaks(iaot, butter_ord, butter_crit_freq, peak_height, peak_width):
+def smooth_without_delay(xn, butter_ord, butter_crit_freq):
+    # Butterworth filter
+    b, a = butter(butter_order, butter_crit_freq)
+    # Apply the filter to xn.  Use lfilter_zi to choose the initial condition
+    # of the filter.
+    zi = lfilter_zi(b, a)
+    z, _ = lfilter(b, a, xn, zi=zi*xn[0])
+    # Apply the filter again, to have a result filtered at an order
+    # the same as filtfilt.
+    z2, _ = lfilter(b, a, z, zi=zi*z[0])
+    # Use filtfilt to apply the filter.
+    return filtfilt(b, a, xn)
+
+def extract_peaks(iaot, butter_ord, butter_crit_freq, min_height, min_width):
     return []
 
 def extract_traverse_event_for(iaot, roi_name, min_duration, min_area):
-    # We are simply looking for a step signal, mathematically speaking. TODO Use numpy?
+    # TODO We are simply looking for a step signal, mathematically speaking, so we could use numpy
     for i, area in enumerate(iaot):
         if area < min_area:
             continue
