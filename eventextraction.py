@@ -59,17 +59,21 @@ def smooth_without_delay(xn, butter_ord, butter_crit_freq):
     # the same as filtfilt.
     z2, _ = lfilter(b, a, z, zi=zi*z[0])
     # Use filtfilt to apply the filter.
-    return filtfilt(b, a, xn)
+    return numpy.array(filtfilt(b, a, xn))
 
-def extract_peaks(iaot, butter_ord, butter_crit_freq, min_height, min_width):
+def interpolate_to_match(seq_orig, seq_dest):
+    """Interpoaltes signal (numpy array) `seq_orig` to match 
+    the amplitude of `seq_dest` (also a numpy array)."""
+    return numpy.interp(seq_orig, (seq_orig.min(), seq_orig.max()), (seq_dest.min(), seq_dest.max()))
+
+def extract_peaks(smooth_iaot, min_height, min_width):
     # Here we are using this method from the SciPy cookbook: https://scipy-cookbook.readthedocs.io/items/FiltFilt.html
     # There are others we could use such as the Savitzky-Golay filter approach, see: https://stackoverflow.com/questions/20618804/how-to-smooth-a-curve-in-the-right-way
-    if len(iaot) == 0:
+    if len(smooth_iaot) == 0:
         return []
-    iaot = numpy.array(iaot)
+    smooth_iaot = numpy.array(smooth_iaot)
     # try
     peaks = []
-    smooth_iaot = smooth_without_delay(iaot, butter_ord, butter_crit_freq)
     indexes, props = find_peaks(smooth_iaot, height=min_height, width=min_width)
     for i in range(len(indexes)):
         peaks.append(Peak(
