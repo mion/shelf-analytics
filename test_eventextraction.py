@@ -12,12 +12,12 @@ def mkbox(x=0, y=0, w=10, h=10, ptid=None):
 class TestExtractPeaks(unittest.TestCase):
     def test_empty(self):
         iaot = []
-        peaks = extract_peaks(iaot, butter_ord=1, butter_crit_freq=0.1, peak_height=100, peak_width=1)
+        peaks = extract_peaks(iaot, butter_ord=1, butter_crit_freq=0.1, min_height=100, min_width=1)
         self.assertEqual(len(peaks), 0)
 
     def test_one_peak_in_the_middle(self):
-        iaot = [0, 1, 2, 30, 400, 5000, 400, 30, 2, 1, 0]
-        peaks = extract_peaks(iaot, butter_ord=1, butter_crit_freq=0.05, peak_height=200, peak_width=3)
+        iaot = [0, 1, 2, 30, 400, 5000, 600, 70, 8, 9, 10]
+        peaks = extract_peaks(iaot, butter_ord=1, butter_crit_freq=0.05, min_height=500, min_width=1)
         self.assertEqual(len(peaks), 1)
         self.assertEqual(peaks[0].index, 5)
 
