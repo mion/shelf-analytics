@@ -4,7 +4,7 @@ import numpy as np
 from humantracking import Track, Transition
 from point import Point
 from boundingbox import BBox
-from eventextraction import intersection_area_over_time, extract_traverse_event_for, extract_in_out_event_for, extract_peaks, RegionOfInterest as Roi, EventType
+from eventextraction import intersection_area_over_time, index_for_step_event, index_for_in_out_event, extract_peaks, RegionOfInterest as Roi, EventType
 from fixtures import iaot_signals
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
@@ -21,21 +21,20 @@ def noisify(raw_seq, amp=0.2):
 
 class TestExtractInOutEvent(unittest.TestCase):
     def test_empty(self):
-        event = extract_in_out_event_for([], '', min_duration=1, min_area=1)
-        self.assertIsNone(event)
+        index = index_for_in_out_event([], min_duration=1, min_area=1)
+        self.assertIsNone(index)
     
     def test_signals(self):
         for msg, exp_idxs, iaot, (min_height, min_width), should_noisify in iaot_signals:
             if should_noisify:
                 iaot = noisify(iaot, amp=0.45)
             # NOTE: We're using the module defaults for the Buttersworth filter.
-            event = extract_in_out_event_for(iaot, 'foo', min_duration=min_width, min_area=min_height)
+            index = index_for_in_out_event(iaot, min_duration=min_width, min_area=min_height)
             if len(exp_idxs) == 0:
-                self.assertIsNone(event, msg)
+                self.assertIsNone(index, msg)
             else:
                 idx = exp_idxs[0]
-                self.assertEqual(event.index, idx, msg)
-                self.assertEqual(event.roi_name, 'foo', msg)
+                self.assertEqual(index, idx, msg)
 
 class TestExtractPeaks(unittest.TestCase):
     def test_empty(self):
@@ -51,33 +50,30 @@ class TestExtractPeaks(unittest.TestCase):
 class TestExtractTraverseEvent(unittest.TestCase):
     def test_no_intersection(self):
         iaot = [0, 0, 0]
-        event = extract_traverse_event_for(iaot, '', min_duration=1, min_area=1)
-        self.assertIsNone(event)
+        index = index_for_step_event(iaot, min_duration=1, min_area=1)
+        self.assertIsNone(index)
 
     def test_below_min_duration(self):
         iaot = [0, 25, 25, 0]
-        event = extract_traverse_event_for(iaot, '', min_duration=3, min_area=1)
-        self.assertIsNone(event)
+        index = index_for_step_event(iaot, min_duration=3, min_area=1)
+        self.assertIsNone(index)
 
     def test_below_min_area(self):
         iaot = [0, 25, 25, 0]
-        event = extract_traverse_event_for(iaot, '', min_duration=1, min_area=26)
-        self.assertIsNone(event)
+        index = index_for_step_event(iaot, min_duration=1, min_area=26)
+        self.assertIsNone(index)
 
     def test_traverse_single_intersec(self):
         iaot = [0, 25, 0, 0]
-        event = extract_traverse_event_for(iaot, '', min_duration=1, min_area=5)
-        self.assertIsNotNone(event)
-        self.assertEqual(event.type, EventType.traverse)
-        self.assertEqual(event.index, 1)
+        index = index_for_step_event(iaot, min_duration=1, min_area=5)
+        self.assertIsNotNone(index)
+        self.assertEqual(index, 1)
 
     def test_traverse_long_multiple_intersec(self):
         iaot = [0, 0, 7, 6, 2, 0, 6, 6, 7, 6]
-        event = extract_traverse_event_for(iaot, 'foo', min_duration=4, min_area=5)
-        self.assertIsNotNone(event)
-        self.assertEqual(event.type, EventType.traverse)
-        self.assertEqual(event.index, 6)
-        self.assertEqual(event.roi_name, 'foo')
+        index = index_for_step_event(iaot, min_duration=4, min_area=5)
+        self.assertIsNotNone(index)
+        self.assertEqual(index, 6)
 
 class TestIntersectionAreaOverTime(unittest.TestCase):
     def test_intersection_area_over_time(self):

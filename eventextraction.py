@@ -48,7 +48,7 @@ def intersection_area_over_time(bboxes, roi_bbox):
 DEFAULT_BUTTER_ORD = 1
 DEFAULT_BUTTER_CRIT_FREQ = 0.05
 
-def extract_in_out_event_for(raw_iaot, roi_name, **kwargs):
+def index_for_in_out_event(raw_iaot, **kwargs):
     if len(raw_iaot) == 0:
         return None
     min_duration = kwargs['min_duration']
@@ -62,7 +62,7 @@ def extract_in_out_event_for(raw_iaot, roi_name, **kwargs):
     if len(peaks) > 0:
         # Currently we use the first peak that matches our conditions.
         peak = peaks[0]
-        return InOutEvent(roi_name, peak.index)
+        return peak.index
     else:
         return None
 
@@ -103,7 +103,7 @@ def extract_peaks(smooth_iaot, min_height, min_width):
         ))
     return peaks
 
-def extract_traverse_event_for(iaot, roi_name, min_duration, min_area):
+def index_for_step_event(iaot, min_duration, min_area):
     # We are simply looking for a step signal, mathematically speaking.
     # (We should refactor this to use numpy.)
     for i, area in enumerate(iaot):
@@ -115,7 +115,7 @@ def extract_traverse_event_for(iaot, roi_name, min_duration, min_area):
                 valid_step_signal = False
                 break
         if valid_step_signal:
-            return TraverseEvent(roi_name, i)
+            return i
     return None
 
 def extract_events_for(bboxes, roi, params):
