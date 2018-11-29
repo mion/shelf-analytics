@@ -45,10 +45,30 @@ def intersection_area_over_time(bboxes, roi_bbox):
     """
     return [roi_bbox.intersection_area(bbox) for bbox in bboxes]
 
-def extract_in_out_event_for(peaks, roi_name, min_duration, min_area):
-    return None
+DEFAULT_BUTTER_ORD = 1
+DEFAULT_BUTTER_CRIT_FREQ = 0.05
+
+def extract_in_out_event_for(raw_iaot, roi_name, **kwargs):
+    if len(raw_iaot) == 0:
+        return None
+    min_duration = kwargs['min_duration']
+    min_area = kwargs['min_area']
+    butter_ord = kwargs['butter_ord'] if 'butter_ord' in kwargs else DEFAULT_BUTTER_ORD
+    butter_crit_freq = kwargs['butter_crit_freq'] if 'butter_crit_freq' in kwargs else DEFAULT_BUTTER_CRIT_FREQ
+    iaot = numpy.array(raw_iaot)
+    smooth_iaot = smooth_without_delay(iaot, butter_ord, butter_crit_freq)
+    interp_iaot = interpolate_to_match(smooth_iaot, iaot)
+    peaks = extract_peaks(interp_iaot, min_height=min_area, min_width=min_duration)
+    if len(peaks) > 0:
+        # Currently we use the first peak that matches our conditions.
+        peak = peaks[0]
+        return InOutEvent(roi_name, peak.index)
+    else:
+        return None
 
 def smooth_without_delay(xn, butter_ord, butter_crit_freq):
+    if len(xn) == 0:
+        return []
     # Butterworth filter
     b, a = butter(butter_ord, butter_crit_freq)
     # Apply the filter to xn.  Use lfilter_zi to choose the initial condition
@@ -84,7 +104,8 @@ def extract_peaks(smooth_iaot, min_height, min_width):
     return peaks
 
 def extract_traverse_event_for(iaot, roi_name, min_duration, min_area):
-    # TODO We are simply looking for a step signal, mathematically speaking, so we could use numpy
+    # We are simply looking for a step signal, mathematically speaking.
+    # (We should refactor this to use numpy.)
     for i, area in enumerate(iaot):
         if area < min_area:
             continue
