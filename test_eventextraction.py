@@ -19,7 +19,7 @@ def noisify(raw_seq, amp=0.2):
     noise_amp = amp * abs(seq.max() - seq.min())
     return np.array([(y + (random.random()*noise_amp/2) - (random.random()*noise_amp/2)) for y in seq])
 
-class TestExtractInOutEvent(unittest.TestCase):
+class TestIndexForInOutEvent(unittest.TestCase):
     def test_empty(self):
         index = index_for_in_out_event([], min_duration=1, min_area=1)
         self.assertIsNone(index)
@@ -47,7 +47,7 @@ class TestExtractPeaks(unittest.TestCase):
             peaks = extract_peaks(iaot, min_height=min_height, min_width=min_width)
             self.assertEqual([p.index for p in peaks], exp_idxs, msg)
     
-class TestExtractTraverseEvent(unittest.TestCase):
+class TestIndexForStepEvent(unittest.TestCase):
     def test_no_intersection(self):
         iaot = [0, 0, 0]
         index = index_for_step_event(iaot, min_duration=1, min_area=1)
