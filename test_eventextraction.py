@@ -1,13 +1,41 @@
 import unittest
+import random
+import numpy as np
 from humantracking import Track, Transition
 from point import Point
 from boundingbox import BBox
-from eventextraction import intersection_area_over_time, extract_traverse_event_for, extract_peaks, RegionOfInterest as Roi, EventType
+from eventextraction import intersection_area_over_time, extract_traverse_event_for, extract_in_out_event_for, extract_peaks, RegionOfInterest as Roi, EventType
+from fixtures import iaot_signals
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
     bbox.parent_track_id = ptid
     return bbox
+
+def noisify(raw_seq, amp=0.2):
+    """Artificially makes a smooth sequence noisy."""
+    seq = np.array(raw_seq)
+    random.seed(1) # ensure some determinism
+    noise_amp = amp * abs(seq.max() - seq.min())
+    return np.array([(y + (random.random()*noise_amp/2) - (random.random()*noise_amp/2)) for y in seq])
+
+class TestExtractInOutEvent(unittest.TestCase):
+    def test_empty(self):
+        event = extract_in_out_event_for([], '', min_duration=1, min_area=1)
+        self.assertIsNone(event)
+    
+    def test_signals(self):
+        for msg, exp_idxs, iaot, (min_height, min_width), should_noisify in iaot_signals:
+            if should_noisify:
+                iaot = noisify(iaot, amp=0.45)
+            # NOTE: We're using the module defaults for the Buttersworth filter.
+            event = extract_in_out_event_for(iaot, 'foo', min_duration=min_width, min_area=min_height)
+            if len(exp_idxs) == 0:
+                self.assertIsNone(event, msg)
+            else:
+                idx = exp_idxs[0]
+                self.assertEqual(event.index, idx, msg)
+                self.assertEqual(event.roi_name, 'foo', msg)
 
 class TestExtractPeaks(unittest.TestCase):
     def test_empty(self):
@@ -16,8 +44,7 @@ class TestExtractPeaks(unittest.TestCase):
         self.assertEqual(len(peaks), 0)
 
     def test_signals(self):
-        from fixtures import iaot_signals
-        for msg, exp_idxs, iaot, (min_height, min_width) in iaot_signals:
+        for msg, exp_idxs, iaot, (min_height, min_width), _ in iaot_signals:
             peaks = extract_peaks(iaot, min_height=min_height, min_width=min_width)
             self.assertEqual([p.index for p in peaks], exp_idxs, msg)
     
