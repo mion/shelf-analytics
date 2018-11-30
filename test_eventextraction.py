@@ -127,10 +127,10 @@ class TestIndexForStepEvent(unittest.TestCase):
         self.assertEqual(index, 1)
 
     def test_traverse_long_multiple_intersec(self):
-        iaot = [0, 0, 7, 6, 2, 0, 6, 6, 7, 6]
+        iaot = [0, 0, 7, 6, 2, 0, 6, 6, 7, 6, 5]
         index = index_for_step_event(iaot, min_duration=4, min_area=5)
         self.assertIsNotNone(index)
-        self.assertEqual(index, 6)
+        self.assertEqual(index, 8)
 
 class TestIntersectionAreaOverTime(unittest.TestCase):
     def test_intersection_area_over_time(self):
