@@ -21,7 +21,7 @@ def noisify(raw_seq, amp=0.2):
 
 class TestEventExtraction(unittest.TestCase):
     def test_empty(self):
-        event = extract_event_for([], {})
+        event = extract_event_for([], '', {})
         self.assertIsNone(event)
     
     def test_flat_signal(self):
@@ -31,7 +31,7 @@ class TestEventExtraction(unittest.TestCase):
             EventType.hover: {'min_area': 80, 'min_duration': 3},
             EventType.in_out: {'min_area': 80, 'min_duration': 3}
         }
-        event = extract_event_for(flat_seq, params_for_event_type)
+        event = extract_event_for(flat_seq, 'roi0', params_for_event_type)
         self.assertIsNone(event)
 
     def test_short_step(self):
@@ -39,11 +39,13 @@ class TestEventExtraction(unittest.TestCase):
         short_step = noisify(np.array(seq), amp=0.65)
         params_for_event_type = {
             EventType.traverse: {'min_area': 1000, 'min_duration': 10},
-            EventType.hover: {'min_area': 1000, 'min_duration': 60}
+            EventType.hover: {'min_area': 1000, 'min_duration': 60},
+            EventType.in_out: {'min_area': 1000, 'min_duration': 20}
         }
-        event = extract_event_for(short_step, params_for_event_type)
+        event = extract_event_for(short_step, 'roi0', params_for_event_type)
         self.assertIsNotNone(event)
         self.assertEqual(event.type, EventType.traverse)
+        self.assertEqual(event.roi_name, 'roi0')
         self.assertTrue(15 < event.index < 25)
     
     def test_long_step(self):
@@ -52,9 +54,11 @@ class TestEventExtraction(unittest.TestCase):
         params_for_event_type = {
             EventType.traverse: {'min_area': 800, 'min_duration': 10},
             EventType.hover: {'min_area': 800, 'min_duration': 60},
+            EventType.hover: {'min_area': 800, 'min_duration': 20}
         }
-        event = extract_event_for(long_step, params_for_event_type)
+        event = extract_event_for(long_step, 'roi0', params_for_event_type)
         self.assertIsNotNone(event)
+        self.assertEqual(event.roi_name, 'roi0')
         self.assertEqual(event.type, EventType.hover)
         self.assertTrue(40 < event.index < 70)
 
