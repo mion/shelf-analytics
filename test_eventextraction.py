@@ -1,4 +1,5 @@
 import unittest
+import math
 import random
 import numpy as np
 from humantracking import Track, Transition
@@ -59,6 +60,19 @@ class TestEventExtraction(unittest.TestCase):
         self.assertEqual(event.roi_name, 'roi0')
         self.assertEqual(event.type, EventType.hover)
         self.assertTrue(40 < event.index < 70)
+    
+    def test_small_peak_then_big_peak(self):
+        seq = [math.pow(i, 3) for i in range(15)] + [math.pow(15 - i, 3) for i in range(15)] + [math.pow(i, 2.5) for i in range(15)] + [math.pow(15 - i, 2.5) for i in range(15)]
+        seq.reverse()
+        small_peak_big_peak = noisify(np.array(seq), amp=0.35)
+        params_for_event_type = {
+            EventType.in_out: {'min_area': 1500, 'min_duration': 10}
+        }
+        event = extract_event_for(small_peak_big_peak, 'roi0', params_for_event_type)
+        self.assertIsNotNone(event)
+        self.assertEqual(event.roi_name, 'roi0')
+        self.assertEqual(event.type, EventType.in_out)
+        self.assertTrue(40 < event.index < 50)
 
 class TestIndexForInOutEvent(unittest.TestCase):
     def test_empty(self):
