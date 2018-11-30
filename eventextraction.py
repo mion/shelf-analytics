@@ -118,7 +118,7 @@ def index_for_step_event(iaot, min_duration, min_area):
             return i
     return None
 
-def extract_events_for(bboxes, roi, params):
+def extract_events_for(bboxes, params_for_event_type):
     return []
 
 def extract_events(tracks, rois, params):
