@@ -54,7 +54,7 @@ class TestEventExtraction(unittest.TestCase):
         event = extract_event_for(long_step, params_for_event_type)
         self.assertIsNotNone(event)
         self.assertEqual(event.type, EventType.hover)
-        self.assertTrue(40 < events[0].index < 70)
+        self.assertTrue(40 < event.index < 70)
 
 class TestIndexForInOutEvent(unittest.TestCase):
     def test_empty(self):
