@@ -46,7 +46,8 @@ class TestEventExtraction(unittest.TestCase):
         self.assertIsNotNone(event)
         self.assertEqual(event.type, EventType.traverse)
         self.assertEqual(event.roi_name, 'roi0')
-        self.assertTrue(15 < event.index < 25)
+        self.assertLess(15, event.index)
+        self.assertLess(event.index, 25)
     
     def test_long_step(self):
         seq = [100*i for i in range(10)] + [100*10 for i in range(10, 100)] + [100*(110 - i) for i in range(100, 110)]
@@ -59,7 +60,8 @@ class TestEventExtraction(unittest.TestCase):
         self.assertIsNotNone(event)
         self.assertEqual(event.roi_name, 'roi0')
         self.assertEqual(event.type, EventType.hover)
-        self.assertTrue(40 < event.index < 70)
+        self.assertLess(40, event.index)
+        self.assertLess(event.index, 70)
     
     def test_small_peak_then_big_peak(self):
         seq = [math.pow(i, 3) for i in range(15)] + [math.pow(15 - i, 3) for i in range(15)] + [math.pow(i, 2.5) for i in range(15)] + [math.pow(15 - i, 2.5) for i in range(15)]
