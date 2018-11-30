@@ -24,13 +24,15 @@ class TestEventExtraction(unittest.TestCase):
         event = extract_event_for([], {})
         self.assertIsNone(event)
     
-    def test_flat_zero(self):
+    def test_flat_signal(self):
         flat_seq = np.array([105, 99, 102, 98, 96, 99, 101, 100, 97, 103])
         params_for_event_type = {
             EventType.traverse: {'min_area': 80, 'min_duration': 3},
-            EventType.hover: {'min_area': 80, 'min_duration': 3}
+            EventType.hover: {'min_area': 80, 'min_duration': 3},
+            EventType.in_out: {'min_area': 80, 'min_duration': 3}
         }
-        # wip
+        event = extract_event_for(flat_seq, params_for_event_type)
+        self.assertIsNone(event)
 
     def test_short_step(self):
         seq = [100*i for i in range(15)] + [100*15 for i in range(15, 30)] + [100*(45 - i) for i in range(30, 45)]
