@@ -39,7 +39,7 @@ class TestEventExtraction(unittest.TestCase):
         seq = [100*i for i in range(15)] + [100*15 for i in range(15, 30)] + [100*(45 - i) for i in range(30, 45)]
         short_step = noisify(np.array(seq), amp=0.65)
         params_for_event_type = {
-            EventType.traverse: {'min_area': 1000, 'min_duration': 10},
+            EventType.traverse: {'min_area': 1000, 'min_duration': 20},
             EventType.hover: {'min_area': 1000, 'min_duration': 60},
         }
         event = extract_event_for(short_step, 'roi0', params_for_event_type)
@@ -53,8 +53,8 @@ class TestEventExtraction(unittest.TestCase):
         seq = [100*i for i in range(10)] + [100*10 for i in range(10, 100)] + [100*(110 - i) for i in range(100, 110)]
         long_step = noisify(np.array(seq), amp=0.45)
         params_for_event_type = {
-            EventType.traverse: {'min_area': 800, 'min_duration': 10},
-            EventType.hover: {'min_area': 800, 'min_duration': 60},
+            EventType.traverse: {'min_area': 800, 'min_duration': 30},
+            EventType.hover: {'min_area': 800, 'min_duration': 80},
         }
         event = extract_event_for(long_step, 'roi0', params_for_event_type)
         self.assertIsNotNone(event)
