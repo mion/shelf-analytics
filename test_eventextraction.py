@@ -4,7 +4,7 @@ import numpy as np
 from humantracking import Track, Transition
 from point import Point
 from boundingbox import BBox
-from eventextraction import intersection_area_over_time, index_for_step_event, index_for_in_out_event, extract_peaks, RegionOfInterest as Roi, EventType, extract_events_for
+from eventextraction import intersection_area_over_time, index_for_step_event, index_for_in_out_event, extract_peaks, RegionOfInterest as Roi, EventType, extract_event_for
 from fixtures import iaot_signals
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
@@ -21,8 +21,8 @@ def noisify(raw_seq, amp=0.2):
 
 class TestEventExtraction(unittest.TestCase):
     def test_empty(self):
-        events = extract_events_for([], {})
-        self.assertEqual(len(events), 0)
+        event = extract_event_for([], {})
+        self.assertIsNone(event)
     
     def test_flat_zero(self):
         flat_seq = np.array([105, 99, 102, 98, 96, 99, 101, 100, 97, 103])
@@ -39,10 +39,10 @@ class TestEventExtraction(unittest.TestCase):
             EventType.traverse: {'min_area': 1000, 'min_duration': 10},
             EventType.hover: {'min_area': 1000, 'min_duration': 60}
         }
-        events = extract_events_for(short_step, params_for_event_type)
-        self.assertTrue(len(events) == 1)
-        self.assertTrue(events[0].type == EventType.traverse)
-        self.assertTrue(15 < events[0].index < 25)
+        event = extract_event_for(short_step, params_for_event_type)
+        self.assertIsNotNone(event)
+        self.assertEqual(event.type, EventType.traverse)
+        self.assertTrue(15 < event.index < 25)
     
     def test_long_step(self):
         seq = [100*i for i in range(10)] + [100*10 for i in range(10, 100)] + [100*(110 - i) for i in range(100, 110)]
@@ -51,9 +51,9 @@ class TestEventExtraction(unittest.TestCase):
             EventType.traverse: {'min_area': 800, 'min_duration': 10},
             EventType.hover: {'min_area': 800, 'min_duration': 60},
         }
-        events = extract_events_for(long_step, params_for_event_type)
-        self.assertTrue(len(events) == 1)
-        self.assertTrue(events[0].type == EventType.hover)
+        event = extract_event_for(long_step, params_for_event_type)
+        self.assertIsNotNone(event)
+        self.assertEqual(event.type, EventType.hover)
         self.assertTrue(40 < events[0].index < 70)
 
 class TestIndexForInOutEvent(unittest.TestCase):
