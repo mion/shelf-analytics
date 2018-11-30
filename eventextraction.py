@@ -115,7 +115,8 @@ def index_for_step_event(iaot, min_duration, min_area):
                 valid_step_signal = False
                 break
         if valid_step_signal:
-            return i
+            # We return index right in the middle of the step
+            return int(float(i) + (float(min_duration) / 2.0))
     return None
 
 def extract_event_for(bboxes, roi_name, params_for_event_type):
