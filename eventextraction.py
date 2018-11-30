@@ -119,8 +119,24 @@ def index_for_step_event(iaot, min_duration, min_area):
             return int(float(i) + (float(min_duration) / 2.0))
     return None
 
-def extract_event_for(bboxes, roi_name, params_for_event_type):
+def extract_event_for(iaot, roi_name, params_for_event_type):
+    if EventType.hover in params_for_event_type:
+        params = params_for_event_type[EventType.hover]
+        idx = index_for_step_event(iaot, params['min_duration'], params['min_area'])
+        if idx:
+            return HoverEvent(roi_name, idx)
+    if EventType.traverse in params_for_event_type:
+        params = params_for_event_type[EventType.traverse]
+        idx = index_for_step_event(iaot, params['min_duration'], params['min_area'])
+        if idx:
+            return TraverseEvent(roi_name, idx)
+    if EventType.in_out in params_for_event_type:
+        params = params_for_event_type[EventType.in_out]
+        idx = index_for_in_out_event(iaot, **params)
+        if idx:
+            return InOutEvent(roi_name, idx)
     return None
 
-def extract_events(bboxes_per_track, roi_names, params_for_event_type):
-    return reduce(operator.concat, [reduce(operator.concat, [extract_event_for(bboxes, name, params_for_event_type) for name in roi_names]) for bboxes in bboxes_per_track])
+# def extract_events(bboxes_per_track, rois, params_for_event_type):
+#     pass
+    # return reduce(operator.concat, [reduce(operator.concat, [extract_event_for(bboxes, name, params_for_event_type) for name in roi_names]) for bboxes in bboxes_per_track])
