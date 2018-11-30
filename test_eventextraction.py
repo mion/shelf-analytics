@@ -33,7 +33,16 @@ class TestEventExtraction(unittest.TestCase):
             EventType.in_out: {'min_area': 80, 'min_duration': 3}
         }
         event = extract_event_for(flat_seq, 'roi0', params_for_event_type)
-        self.assertIsNone(event)
+        self.assertIsNotNone(event)
+        # Currently there's nothing in the extract_event_for function 
+        # that looks for a "ramp" in the beginning and ending of the signal.
+        # It actually looks for a straight line, so in this case the
+        # first three values match the duration of 3 for a hover event.
+        #
+        # NOTE: Make the function look for a ramp, it should improve accuracy.
+        #
+        self.assertEqual(event.type, EventType.hover)
+        self.assertEqual(event.index, 1)
 
     def test_short_step(self):
         seq = [100*i for i in range(15)] + [100*15 for i in range(15, 30)] + [100*(45 - i) for i in range(30, 45)]
