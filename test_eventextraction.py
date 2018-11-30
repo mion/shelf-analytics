@@ -40,7 +40,6 @@ class TestEventExtraction(unittest.TestCase):
         params_for_event_type = {
             EventType.traverse: {'min_area': 1000, 'min_duration': 10},
             EventType.hover: {'min_area': 1000, 'min_duration': 60},
-            EventType.in_out: {'min_area': 1000, 'min_duration': 20}
         }
         event = extract_event_for(short_step, 'roi0', params_for_event_type)
         self.assertIsNotNone(event)
@@ -54,7 +53,6 @@ class TestEventExtraction(unittest.TestCase):
         params_for_event_type = {
             EventType.traverse: {'min_area': 800, 'min_duration': 10},
             EventType.hover: {'min_area': 800, 'min_duration': 60},
-            EventType.hover: {'min_area': 800, 'min_duration': 20}
         }
         event = extract_event_for(long_step, 'roi0', params_for_event_type)
         self.assertIsNotNone(event)
