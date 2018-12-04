@@ -137,6 +137,6 @@ def extract_event_for(iaot, roi_name, params_for_event_type):
             return InOutEvent(roi_name, idx)
     return None
 
-# def extract_events(bboxes_per_track, rois, params_for_event_type):
-#     pass
+def extract_events(bboxes_per_track, rois, params_for_event_type):
     # return reduce(operator.concat, [reduce(operator.concat, [extract_event_for(bboxes, name, params_for_event_type) for name in roi_names]) for bboxes in bboxes_per_track])
+    return []

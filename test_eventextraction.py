@@ -20,7 +20,7 @@ def noisify(raw_seq, amp=0.2):
     noise_amp = amp * abs(seq.max() - seq.min())
     return np.array([(y + (random.random()*noise_amp/2) - (random.random()*noise_amp/2)) for y in seq])
 
-class TestEventExtraction(unittest.TestCase):
+class TestExtractEventFor(unittest.TestCase):
     def test_empty(self):
         event = extract_event_for([], '', {})
         self.assertIsNone(event)
