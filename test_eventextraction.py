@@ -5,7 +5,7 @@ import numpy as np
 from humantracking import Track, Transition
 from point import Point
 from boundingbox import BBox
-from eventextraction import intersection_area_over_time, index_for_step_event, index_for_in_out_event, extract_peaks, RegionOfInterest as Roi, EventType, extract_event_for
+from eventextraction import intersection_area_over_time, index_for_step_event, index_for_in_out_event, extract_peaks, RegionOfInterest as Roi, EventType, extract_event_for, extract_events
 from fixtures import iaot_signals
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
@@ -19,6 +19,11 @@ def noisify(raw_seq, amp=0.2):
     random.seed(1) # ensure some determinism
     noise_amp = amp * abs(seq.max() - seq.min())
     return np.array([(y + (random.random()*noise_amp/2) - (random.random()*noise_amp/2)) for y in seq])
+
+class TestExtractEvents(unittest.TestCase):
+    def test_empty(self):
+        events = extract_events([[], [], []], [], {})
+        self.assertEqual(len(events), 0)
 
 class TestExtractEventFor(unittest.TestCase):
     def test_empty(self):
