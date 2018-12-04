@@ -39,7 +39,7 @@ class TestEventExtraction(unittest.TestCase):
         # It actually looks for a straight line, so in this case the
         # first three values match the duration of 3 for a hover event.
         #
-        # NOTE: Make the function look for a ramp, it should improve accuracy.
+        # NOTE: If we make the function look for a ramp, does it improve accuracy?
         #
         self.assertEqual(event.type, EventType.hover)
         self.assertEqual(event.index, 1)
