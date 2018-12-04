@@ -1,6 +1,7 @@
 import unittest
 import math
 import random
+from collections import defaultdict
 import numpy as np
 from humantracking import Track, Transition
 from point import Point
@@ -47,11 +48,9 @@ class TestExtractEvents(unittest.TestCase):
         events = extract_events(bboxes_per_track, rois, params_for_event_type)
 
         self.assertEqual(len(events), 3)
-        events_for_type = {}
-        for ev in events:
-            if ev.type not in events_for_type:
-                events_for_type[ev.type] = []
-            events_for_type[ev.type].append(ev)
+        events_for_type = defaultdict(lambda: [])
+        for event in events:
+            events_for_type[event.type].append(event)
 
         self.assertTrue(EventType.traverse in events_for_type)
         self.assertEqual(events_for_type[EventType.traverse], 1)
