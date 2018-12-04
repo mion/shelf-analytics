@@ -25,6 +25,53 @@ class TestExtractEvents(unittest.TestCase):
         events = extract_events([[], [], []], [], {})
         self.assertEqual(len(events), 0)
 
+    def test_extract_events(self):
+        rois = [
+            Roi(name='shelf', bbox=mkbox(0, 0, 100, 100), event_types=[EventType.in_out]),
+            Roi(name='aisle', bbox=mkbox(0, 100, 100, 100), event_types=[EventType.traverse, EventType.hover])
+        ]
+        bboxes_per_track = [
+            # walks straight by
+            [mkbox(x, 100, 50, 50) for x in range(-50, 101)],
+            # walks in, stops for 10 frames and then walks away
+            [mkbox(x, 100, 50, 50) for x in range(-50, 30)] + [mkbox(30, 100, 50, 50) for _ in range(10)] + [mkbox(x, 100, 50, 50) for x in range(30, 101)],
+            # goes in and then out of the roi
+            [mkbox(0, 100 - (y * y), 100, 100) for y in range(0, 10)] + [mkbox(0, y * y, 100, 100) for y in range(0, 11)]
+        ]
+        params_for_event_type = {
+            EventType.traverse: {'min_duration': 50, 'min_area': 2460},
+            EventType.hover: {'min_duration': 60, 'min_area': 2460}, # Show that hover takes in consideration time spent "walking"
+            EventType.in_out: {'min_duration': 15, 'min_area': 10000, 'butter_ord': 1, 'butter_crit_freq': 0.05}
+        }
+
+        events = extract_events(bboxes_per_track, rois, params_for_event_type)
+
+        self.assertEqual(len(events), 3)
+        events_for_type = {}
+        for ev in events:
+            if ev.type not in events_for_type:
+                events_for_type[ev.type] = []
+            events_for_type[ev.type].append(ev)
+
+        self.assertTrue(EventType.traverse in events_for_type)
+        self.assertEqual(events_for_type[EventType.traverse], 1)
+        traverse_ev = events_for_type[EventType.traverse][0]
+        self.assertEqual(traverse_ev.roi_name, 'aisle')
+        self.assertEqual(traverse_ev.index, 25)
+
+        self.assertTrue(EventType.hover in events_for_type)
+        self.assertEqual(events_for_type[EventType.hover], 1)
+        hover_ev = events_for_type[EventType.hover][0]
+        self.assertEqual(hover_ev.roi_name, 'aisle')
+        self.assertEqual(hover_ev.index, 81)
+
+        self.assertTrue(EventType.in_out in events_for_type)
+        self.assertEqual(events_for_type[EventType.in_out], 1)
+        in_out_ev = events_for_type[EventType.in_out][0]
+        self.assertEqual(in_out_ev.roi_name, 'shelf')
+        self.assertGreaterEqual(in_out_ev.index, 8)
+        self.assertLessEqual(in_out_ev.index, 12)
+
 class TestExtractEventFor(unittest.TestCase):
     def test_empty(self):
         event = extract_event_for([], '', {})
