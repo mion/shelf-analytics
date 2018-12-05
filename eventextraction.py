@@ -11,7 +11,7 @@ class EventType(Enum):
     hover = 'hover'
     in_out = 'in_out'
 
-ALL_EVENT_TYPES = [EventType.traverse, EventType.hover, EventType.in_out]
+ALL_EVENT_TYPES = (EventType.traverse, EventType.hover, EventType.in_out)
 
 Peak = namedtuple('Peak', ('index', 'duration', 'height'))
 
