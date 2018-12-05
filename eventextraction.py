@@ -5,6 +5,7 @@ from enum import Enum
 from collections import namedtuple
 import numpy
 from scipy.signal import find_peaks, peak_widths, lfilter, lfilter_zi, filtfilt, butter
+from copy import deepcopy
 
 class EventType(Enum):
     traverse = 'traverse'
@@ -138,5 +139,14 @@ def extract_event_for(iaot, roi_name, params_for_event_type):
     return None
 
 def extract_events(bboxes_per_track, rois, params_for_event_type):
-    # return reduce(operator.concat, [reduce(operator.concat, [extract_event_for(bboxes, name, params_for_event_type) for name in roi_names]) for bboxes in bboxes_per_track])
-    return []
+    events = []
+    for bboxes in bboxes_per_track:
+        for roi in rois:
+            iaot = intersection_area_over_time(bboxes, roi.bbox)
+            roi_params = {}
+            for evt_type in roi.event_types:
+                roi_params[evt_type] = deepcopy(params_for_event_type[evt_type])
+            evt = extract_event_for(iaot, roi.name, roi_params)
+            if evt:
+                events.append(evt)
+    return events
