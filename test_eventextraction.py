@@ -42,30 +42,29 @@ class TestExtractEvents(unittest.TestCase):
         params_for_event_type = {
             EventType.traverse: {'min_duration': 50, 'min_area': 2460},
             EventType.hover: {'min_duration': 60, 'min_area': 2460}, # Show that hover takes in consideration time spent "walking"
-            EventType.in_out: {'min_duration': 15, 'min_area': 10000, 'butter_ord': 1, 'butter_crit_freq': 0.05}
+            EventType.in_out: {'min_duration': 5, 'min_area': 9000, 'butter_ord': 1, 'butter_crit_freq': 0.05}
         }
 
         events = extract_events(bboxes_per_track, rois, params_for_event_type)
-
         self.assertEqual(len(events), 3)
         events_for_type = defaultdict(lambda: [])
         for event in events:
             events_for_type[event.type].append(event)
 
         self.assertTrue(EventType.traverse in events_for_type)
-        self.assertEqual(events_for_type[EventType.traverse], 1)
+        self.assertEqual(len(events_for_type[EventType.traverse]), 1)
         traverse_ev = events_for_type[EventType.traverse][0]
         self.assertEqual(traverse_ev.roi_name, 'aisle')
-        self.assertEqual(traverse_ev.index, 25)
+        self.assertEqual(traverse_ev.index, 75)
 
         self.assertTrue(EventType.hover in events_for_type)
-        self.assertEqual(events_for_type[EventType.hover], 1)
+        self.assertEqual(len(events_for_type[EventType.hover]), 1)
         hover_ev = events_for_type[EventType.hover][0]
         self.assertEqual(hover_ev.roi_name, 'aisle')
-        self.assertEqual(hover_ev.index, 81)
+        self.assertEqual(hover_ev.index, 80)
 
         self.assertTrue(EventType.in_out in events_for_type)
-        self.assertEqual(events_for_type[EventType.in_out], 1)
+        self.assertEqual(len(events_for_type[EventType.in_out]), 1)
         in_out_ev = events_for_type[EventType.in_out][0]
         self.assertEqual(in_out_ev.roi_name, 'shelf')
         self.assertGreaterEqual(in_out_ev.index, 8)
