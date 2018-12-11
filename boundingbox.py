@@ -77,3 +77,9 @@ class DetectedBBox(BBox):
         super().__init__(origin, width, height)
         self.score = score
         self.obj_class = obj_class
+
+class ValidationError(Exception):
+    """The JSON data is invalid."""
+
+def load_detected_bounding_boxes_per_frame(raw_json):
+    return None
