@@ -82,5 +82,40 @@ class LoadDetectedBoundingBoxesPerFrameTest(unittest.TestCase):
             with self.assertRaises(ValidationError, msg='this JSON is invalid: \n' + json.dumps(raw_json, indent=3)):
                 load_detected_bounding_boxes_per_frame(raw_json)
 
+    def test_valid(self):
+        raw_json = {
+            'bboxes_per_frame': [
+                [{'origin': [1, 1], 'width': 10, 'height': 10, 'score': 0.1, 'obj_class': 'human'}],
+                [
+                    {'origin': [2, 2], 'width': 20, 'height': 20, 'score': 0.2, 'obj_class': 'cat'},
+                    {'origin': [3, 3], 'width': 30, 'height': 30, 'score': 0.3, 'obj_class': 'dog'}
+                ],
+            ]
+        }
+
+        det_bboxes_per_frame = load_detected_bounding_boxes_per_frame(raw_json)
+
+        self.assertEqual(len(det_bboxes_per_frame), 2)
+        self.assertEqual(len(det_bboxes_per_frame[0]), 1)
+        self.assertEqual(len(det_bboxes_per_frame[1]), 2)
+
+        self.assertEqual(det_bboxes_per_frame[0][0].origin, Point(1, 1))
+        self.assertEqual(det_bboxes_per_frame[0][0].height, 10)
+        self.assertEqual(det_bboxes_per_frame[0][0].width, 10)
+        self.assertEqual(det_bboxes_per_frame[0][0].score, 0.1)
+        self.assertEqual(det_bboxes_per_frame[0][0].obj_class, 'human')
+
+        self.assertEqual(det_bboxes_per_frame[1][0].origin, Point(2, 2))
+        self.assertEqual(det_bboxes_per_frame[1][0].height, 20)
+        self.assertEqual(det_bboxes_per_frame[1][0].width, 20)
+        self.assertEqual(det_bboxes_per_frame[1][0].score, 0.2)
+        self.assertEqual(det_bboxes_per_frame[1][0].obj_class, 'cat')
+
+        self.assertEqual(det_bboxes_per_frame[1][1].origin, Point(3, 3))
+        self.assertEqual(det_bboxes_per_frame[1][1].height, 30)
+        self.assertEqual(det_bboxes_per_frame[1][1].width, 30)
+        self.assertEqual(det_bboxes_per_frame[1][1].score, 0.3)
+        self.assertEqual(det_bboxes_per_frame[1][1].obj_class, 'dog')
+
 if __name__ == '__main__':
     unittest.main()
