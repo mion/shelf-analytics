@@ -1,7 +1,7 @@
 import unittest
-from point import Point
-from boundingbox import BBox, Format, load_detected_bounding_boxes_per_frame, ValidationError
 import json
+from point import Point
+from boundingbox import BBox, Format, load_detected_bboxes_per_frame, ValidationError
 
 class BBoxTest(unittest.TestCase):
     def test_parse_x1_y1_w_h(self):
@@ -80,7 +80,7 @@ class LoadDetectedBoundingBoxesPerFrameTest(unittest.TestCase):
 
         for raw_json in invalid_raw_jsons:
             with self.assertRaises(ValidationError, msg='this JSON is invalid: \n' + json.dumps(raw_json, indent=3)):
-                load_detected_bounding_boxes_per_frame(raw_json)
+                load_detected_bboxes_per_frame(raw_json)
 
     def test_valid(self):
         raw_json = {
@@ -93,7 +93,7 @@ class LoadDetectedBoundingBoxesPerFrameTest(unittest.TestCase):
             ]
         }
 
-        det_bboxes_per_frame = load_detected_bounding_boxes_per_frame(raw_json)
+        det_bboxes_per_frame = load_detected_bboxes_per_frame(raw_json)
 
         self.assertEqual(len(det_bboxes_per_frame), 2)
         self.assertEqual(len(det_bboxes_per_frame[0]), 1)
