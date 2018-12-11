@@ -78,6 +78,11 @@ class DetectedBBox(BBox):
         self.score = score
         self.obj_class = obj_class
 
+# These deserialization functions are nasty but let's avoid introducing
+# a dependency for the moment. If we need to do more of this, then we
+# can use `marshmallow` for proper deserialization.
+# See: https://marshmallow.readthedocs.io/en/3.0/index.html
+
 class ValidationError(Exception):
     """The JSON data is invalid."""
 
