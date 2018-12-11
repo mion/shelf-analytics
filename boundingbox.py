@@ -81,5 +81,47 @@ class DetectedBBox(BBox):
 class ValidationError(Exception):
     """The JSON data is invalid."""
 
-def load_detected_bounding_boxes_per_frame(raw_json):
-    return None
+def load_detected_bbox(bbox_json):
+    if not isinstance(bbox_json, dict):
+        raise ValidationError
+    for required_field in ('origin', 'width', 'height', 'score', 'obj_class'):
+        if required_field not in bbox_json:
+            raise ValidationError
+    if not isinstance(bbox_json['origin'], list):
+        raise ValidationError
+    if len(bbox_json['origin']) != 2:
+        raise ValidationError
+    x, y = bbox_json['origin']
+    if not isinstance(x, int) or not isinstance(y, int):
+        raise ValidationError
+    origin = Point(x, y)
+    if not isinstance(bbox_json['width'], int):
+        raise ValidationError
+    width = bbox_json['width']
+    if not isinstance(bbox_json['height'], int):
+        raise ValidationError
+    height = bbox_json['height']
+    if not isinstance(bbox_json['score'], float):
+        raise ValidationError
+    score = bbox_json['score']
+    if not isinstance(bbox_json['obj_class'], str):
+        raise ValidationError
+    obj_class = bbox_json['obj_class']
+    if width < 0 or height < 0 or score < 0.0:
+        raise ValidationError
+    return DetectedBBox(origin=origin, width=width, height=height, score=score, obj_class=obj_class)
+
+def load_detected_bboxes_per_frame(raw_json):
+    det_bboxes_per_frame = []
+    if not isinstance(raw_json, dict):
+        raise ValidationError
+    if 'bboxes_per_frame' not in raw_json:
+        raise ValidationError
+    if not isinstance(raw_json['bboxes_per_frame'], list):
+        raise ValidationError
+    for bboxes_json in raw_json['bboxes_per_frame']:
+        if not isinstance(bboxes_json, list):
+            raise ValidationError
+        det_bboxes = [load_detected_bbox(bbox_json) for bbox_json in bboxes_json]
+        det_bboxes_per_frame.append(det_bboxes)
+    return det_bboxes_per_frame
