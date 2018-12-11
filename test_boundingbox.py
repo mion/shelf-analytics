@@ -1,6 +1,6 @@
 import unittest
 from point import Point
-from boundingbox import BBox, Format
+from boundingbox import BBox, Format, load_detected_bounding_boxes_per_frame, ValidationError
 
 class BBoxTest(unittest.TestCase):
     def test_parse_x1_y1_w_h(self):
@@ -27,6 +27,60 @@ class BBoxTest(unittest.TestCase):
         bbox1 = BBox(Point(1, 2), 321, 123)
         self.assertEqual(bbox1.to_tuple(Format.x1_y1_w_h), (1, 2, 321, 123))
         self.assertEqual(bbox1.to_tuple(Format.y1_x1_y2_x2), (2, 1, 125, 322))
+
+class LoadDetectedBoundingBoxesPerFrameTest(unittest.TestCase):
+    def test_invalid(self):
+        invalid_raw_jsons = [
+            None,
+            {},
+            {'bboxes_per_frme': {}},
+            {'bboxes_per_frame': [
+                [{'origin': [0], 'width': 10, 'height': 10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': ['0', '0'], 'width': 10, 'height': 10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': '10', 'height': 10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'height': '10', 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'height': 10, 'score': '1.0', 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'height': 10, 'score': 1.0, 'obj_class': 0}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'width': 10, 'height': 10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'height': 10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'height': 10, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'height': 10, 'score': 1.0}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': -10, 'height': 10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'height': -10, 'score': 1.0, 'obj_class': 'foo'}]
+            ]},
+            {'bboxes_per_frame': [
+                [{'origin': [0, 0], 'width': 10, 'hight': 10, 'score': -1.0, 'obj_class': 'foo'}]
+            ]},
+        ]
+
+        for json in invalid_raw_jsons:
+            with self.assertRaises(ValidationError):
+                load_detected_bounding_boxes_per_frame(json)
 
 if __name__ == '__main__':
     unittest.main()
