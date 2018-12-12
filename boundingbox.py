@@ -78,6 +78,9 @@ class DetectedBBox(BBox):
         self.score = score
         self.obj_class = obj_class
 
+    def __repr__(self):
+        return "<DBBox#{:d} ({:d}, {:d}) {:d}x{:d} {}~{:.2f}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height, self.obj_class, self.score)
+
 # These deserialization functions are nasty but let's avoid introducing
 # a dependency for the moment. If we need to do more of this, then we
 # can use `marshmallow` for proper deserialization.
