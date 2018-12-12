@@ -95,7 +95,7 @@ class ObjectTracker:
             else:
                 raise RuntimeError("invalid object tracker type")
 
-def track_humans(det_bboxes_per_frame, config, params):
+def track_humans(det_bboxes_per_frame, params):
     """
     bboxes_per_frame is a list of pairs:
         (frame, bboxes)
