@@ -1,7 +1,8 @@
 import math
+from collections import namedtuple
+import cv2
 from boundingbox import BBox, Format, DetectedBBox
 from point import Point
-from collections import namedtuple
 
 Step = namedtuple('Step', ('frame_index', 'bbox', 'transition'))
 
@@ -111,7 +112,7 @@ def filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_a
     for frame, det_bboxes in det_bboxes_per_frame:
         bboxes = []
         for det_bbox in det_bboxes:
-            is_human = det_bbox.obj_class == 'human'
+            is_human = det_bbox.obj_class == 'person'
             above_conf_interv = (det_bbox.score >= min_det_score)
             has_proper_size = (min_bbox_area <= det_bbox.area <= max_bbox_area)
             if is_human and above_conf_interv and has_proper_size:
