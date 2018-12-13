@@ -22,11 +22,8 @@ class BBox:
         self.x2 = origin.x + width
         self.y2 = origin.y + height
 
-    def __str__(self):
-        return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
-
     def __repr__(self):
-        return "<BBox ({0}, {1}) {2}x{3}>".format(self.origin.x, self.origin.y, self.width, self.height)
+        return "<BBox#{:d} ({:d}, {:d}) {:d}x{:d}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height)
 
     def is_similar(self, bbox):
         return self.origin == bbox.origin and self.width == bbox.width and self.height == bbox.height
