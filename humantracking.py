@@ -31,6 +31,12 @@ class Track:
         bbox.parent_track_id = self.id
         self.steps.append(Step(frame_index, bbox, transition))
     
+    def get_step(self, idx):
+        return self.steps[idx]
+    
+    def get_last_step(self):
+        return self.steps[len(self.steps) - 1]
+    
     def get_bbox(self, idx):
         if idx >= len(self.steps):
             raise IndexError('bbox index out of bounds')
