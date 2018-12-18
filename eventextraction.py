@@ -146,6 +146,7 @@ def extract_events(bboxes_per_track, rois, params_for_event_type):
             roi_params = {}
             for evt_type in roi.event_types:
                 roi_params[evt_type] = deepcopy(params_for_event_type[evt_type])
+            # TODO pass 'first_track_idx' to extract_event_for
             evt = extract_event_for(iaot, roi.name, roi_params)
             if evt:
                 events.append(evt)
