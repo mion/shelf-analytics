@@ -22,6 +22,13 @@ class RegionOfInterest:
         self.bbox = bbox
         self.event_types = event_types
 
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'bbox': self.bbox.to_dict(),
+            'event_types': [evt_type.name for evt_type in self.event_types]
+        }
+
 class Event:
     def __init__(self, _type, roi_name, index):
         self.type = _type
