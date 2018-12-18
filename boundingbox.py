@@ -65,6 +65,14 @@ class BBox:
             width = x2 - x1
             height = y2 - y1
             return BBox(Point(x1, y1), width, height)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'origin': [self.origin.x, self.origin.y],
+            'width': self.width,
+            'height': self.height
+        }
 
 class DetectedBBox(BBox):
     """
@@ -77,6 +85,14 @@ class DetectedBBox(BBox):
 
     def __repr__(self):
         return "<DBBox#{:d} ({:d}, {:d}) {:d}x{:d} {}~{:.2f}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height, self.obj_class, self.score)
+    
+    def to_dict(self):
+        obj = super().to_dict()
+        obj.update({
+            'score': self.score,
+            'obj_class': self.obj_class
+        })
+        return obj
 
 # These deserialization functions are nasty but let's avoid introducing
 # a dependency for the moment. If we need to do more of this, then we

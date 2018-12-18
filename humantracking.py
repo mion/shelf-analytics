@@ -51,6 +51,9 @@ class Track:
     
     def get_bboxes(self):
         return [bbox for _, bbox, _ in self.steps]
+    
+    def to_dict(self):
+        return [{'frame_index': fi, 'bbox': b.to_dict(), 'transition': t.name} for fi, b, t in self.steps]
 
 from enum import Enum
 class Transition(Enum):
