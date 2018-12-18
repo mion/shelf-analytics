@@ -57,8 +57,8 @@ class TraverseTest(unittest.TestCase):
         tracks = track_humans(bboxes_per_frame, params)
         self.assertEqual(len(tracks), 1)
         self.assertGreater(len(tracks[0]), 40)
-        self.assertLess(tracks[0].get_step(0).frame_index, 70)
-        self.assertGreater(tracks[0].get_last_step().frame_index, 70)
+        self.assertLess(tracks[0].get_step(0).frame_index, 30)
+        self.assertGreater(tracks[0].get_last_step().frame_index, 110)
         rois = [
             Roi('aisle', BBox(Point(176, 125), 219, 120), [EventType.traverse])
         ]
