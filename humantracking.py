@@ -55,6 +55,7 @@ class Track:
     def to_dict(self):
         return [{'frame_index': fi, 'bbox': b.to_dict(), 'transition': t.name} for fi, b, t in self.steps]
 
+
 from enum import Enum
 class Transition(Enum):
     first = 1
@@ -75,7 +76,7 @@ class ObjectTracker:
 
     def update(self, frame):
         ok, xywh_tuple = self.opencv_tracker.update(frame)
-        return BBox.parse(xywh_tuple, Format.x1_y1_w_h) if ok else None
+        return BBox.from_tuple(xywh_tuple, Format.x1_y1_w_h) if ok else None
 
     def restart(self, frame, bbox):
         self.opencv_tracker.clear() # Dig into OpenCV docs/code to figure out
