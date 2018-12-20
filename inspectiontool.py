@@ -52,12 +52,27 @@ class InspectionTool:
         frame[0:(orig_height - 1), 0:(orig_width - 1)] = orig_frame[0:(orig_height - 1), 0:(orig_width - 1)]
         return frame
     
-    def render_bbox(self, frame, bbox):
+    def render_bbox_rect(self, frame, bbox):
         top_left = (bbox.x1, bbox.y1) 
         bottom_right = (bbox.x2, bbox.y2)
         color = (255, 255, 255)
         thickness = 1
         cv2.rectangle(frame, top_left, bottom_right, color=color, thickness=thickness)
+        return frame
+    
+    def render_bbox_props(self, frame, bbox):
+        text = '#{:d} ({:d},{:d}) {:d}x{:d} {:d}%'.format(bbox.id, bbox.x1, bbox.y1, bbox.width, bbox.height, int(100 * bbox.score))
+        font = cv2.FONT_HERSHEY_PLAIN
+        scale = 0.75
+        color = (255, 255, 255)
+        thickness = 1
+        top_margin = 6
+        cv2.putText(frame, text, (bbox.x1, bbox.y1 - top_margin), font, scale, color, thickness, cv2.LINE_AA)
+        return frame
+
+    def render_bbox(self, frame, bbox):
+        frame = self.render_bbox_rect(frame, bbox)
+        frame = self.render_bbox_props(frame, bbox)
         return frame
     
     def render_bboxes(self, frame, bboxes):
