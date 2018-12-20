@@ -48,7 +48,7 @@ class BBox:
             return (self.y1, self.x1, self.y2, self.x2)
 
     @staticmethod
-    def parse(raw_bbox, fmt):
+    def from_tuple(raw_bbox, fmt):
         # IMPORTANT: OpenCV expects tuples, not lists.
         #            Also, tuples will be used as indexes so
         #            ints are necessary.
