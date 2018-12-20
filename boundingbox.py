@@ -73,7 +73,17 @@ class BBox:
             'width': self.width,
             'height': self.height
         }
+    
+    @staticmethod
+    def parse(obj):
+        # TODO validation
+        x = obj['origin'][0]
+        y = obj['origin'][1]
+        return BBox(origin=Point(x, y), width=obj['width'], height=obj['height'])
 
+# TODO simplify: unite DetectedBBox with BBox
+# Having two classes for only two extra properties
+# is too much work for nothing.
 class DetectedBBox(BBox):
     """
     A bbox that was outputted from object detection.
