@@ -88,7 +88,8 @@ class LoadBoundingBoxesPerFrameTest(unittest.TestCase):
                 [{'origin': [1, 1], 'width': 10, 'height': 10, 'score': 0.1, 'obj_class': 'human'}],
                 [
                     {'origin': [2, 2], 'width': 20, 'height': 20, 'score': 0.2, 'obj_class': 'cat'},
-                    {'origin': [3, 3], 'width': 30, 'height': 30, 'score': 0.3, 'obj_class': 'dog'}
+                    {'origin': [3, 3], 'width': 30, 'height': 30, 'score': 0.3, 'obj_class': 'dog'},
+                    {'origin': [4, 4], 'width': 40, 'height': 40}
                 ],
             ]
         }
@@ -97,7 +98,7 @@ class LoadBoundingBoxesPerFrameTest(unittest.TestCase):
 
         self.assertEqual(len(bboxes_per_frame), 2)
         self.assertEqual(len(bboxes_per_frame[0]), 1)
-        self.assertEqual(len(bboxes_per_frame[1]), 2)
+        self.assertEqual(len(bboxes_per_frame[1]), 3)
 
         self.assertEqual(bboxes_per_frame[0][0].origin, Point(1, 1))
         self.assertEqual(bboxes_per_frame[0][0].height, 10)
@@ -116,6 +117,12 @@ class LoadBoundingBoxesPerFrameTest(unittest.TestCase):
         self.assertEqual(bboxes_per_frame[1][1].width, 30)
         self.assertEqual(bboxes_per_frame[1][1].score, 0.3)
         self.assertEqual(bboxes_per_frame[1][1].obj_class, 'dog')
+
+        self.assertEqual(bboxes_per_frame[1][2].origin, Point(4, 4))
+        self.assertEqual(bboxes_per_frame[1][2].height, 40)
+        self.assertEqual(bboxes_per_frame[1][2].width, 40)
+        self.assertIsNone(bboxes_per_frame[1][2].score)
+        self.assertIsNone(bboxes_per_frame[1][2].obj_class)
 
 if __name__ == '__main__':
     unittest.main()

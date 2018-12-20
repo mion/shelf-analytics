@@ -114,12 +114,18 @@ class BBox:
             if not isinstance(bbox_json['score'], float):
                 raise ValidationError
             score = bbox_json['score']
+            if score < 0.0:
+                raise ValidationError
         obj_class = None
         if 'obj_class' in bbox_json:
             if not isinstance(bbox_json['obj_class'], str):
                 raise ValidationError
             obj_class = bbox_json['obj_class']
-        if width < 0 or height < 0 or score < 0.0:
+        if score is None and obj_class is not None:
+            raise ValidationError
+        if score is not None and obj_class is None:
+            raise ValidationError
+        if width < 0 or height < 0:
             raise ValidationError
         return BBox(origin=origin, width=width, height=height, score=score, obj_class=obj_class)
 
