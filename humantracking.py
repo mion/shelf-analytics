@@ -8,10 +8,10 @@ Step = namedtuple('Step', ('frame_index', 'bbox', 'transition'))
 
 class Track:
     next_id = 1
-    def __init__(self):
+    def __init__(self, steps=None):
         self.id = Track.next_id
         Track.next_id += 1
-        self.steps = []
+        self.steps = [] if steps is None else steps
     
     def __len__(self):
         return len(self.steps)
@@ -54,7 +54,10 @@ class Track:
     
     def to_dict(self):
         return [{'frame_index': fi, 'bbox': b.to_dict(), 'transition': t.name} for fi, b, t in self.steps]
-
+    
+    @staticmethod
+    def parse(track_json):
+        return Track(steps=[Step(obj['frame_index'], BBox.parse(obj['bbox']), Transition.parse(obj['transition'])) for obj in track_json])
 
 from enum import Enum
 class Transition(Enum):
@@ -63,6 +66,22 @@ class Transition(Enum):
     tracked = 3
     patched = 4 # Snapped after the obj tracker fails, prob not the best name for this.
     interpolated = 5
+
+    @staticmethod
+    def parse(s):
+        if not isinstance(s, str):
+            raise RuntimeError("Transition.parse expects a string")
+        enum_for_str = {
+            'first': Transition.first,
+            'snapped': Transition.snapped,
+            'tracked': Transition.tracked,
+            'patched': Transition.patched,
+            'interpolated': Transition.interpolated
+        }
+        if s in enum_for_str:
+            return enum_for_str[s]
+        else:
+            raise ValueError('invalid Transition "{}"'.format(s))
 
 class ObjectTracker:
     def __init__(self, opencv_obj_tracker_type):
