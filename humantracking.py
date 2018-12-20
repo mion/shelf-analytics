@@ -1,7 +1,7 @@
 import math
 from collections import namedtuple
 import cv2
-from boundingbox import BBox, Format, DetectedBBox
+from boundingbox import BBox, Format
 from point import Point
 
 Step = namedtuple('Step', ('frame_index', 'bbox', 'transition'))
@@ -106,27 +106,28 @@ class ObjectTracker:
             else:
                 raise RuntimeError("invalid object tracker type")
 
-def track_humans(det_bboxes_per_frame, params):
+def track_humans(bboxes_per_frame, params):
     """
     bboxes_per_frame is a list of pairs:
         (frame, bboxes)
     At first they are in fact DetectedBBox, but that doesn't matter
     being filtering.
     """
-    bboxes_per_frame = filter_bboxes(det_bboxes_per_frame, params['MIN_OBJ_DET_SCORE'], params['MIN_BBOX_AREA'], params['MAX_BBOX_AREA'])
+    bboxes_per_frame = filter_bboxes(bboxes_per_frame, params['MIN_OBJ_DET_SCORE'], params['MIN_BBOX_AREA'], params['MAX_BBOX_AREA'])
     tracks = find_all_tracks(bboxes_per_frame, params)
     return tracks
 
-def filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_area):
+# TODO remove this hardcoded `person` string
+def filter_bboxes(orig_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_area):
     bboxes_per_frame = []
-    for frame, det_bboxes in det_bboxes_per_frame:
+    for frame, orig_bboxes in orig_bboxes_per_frame:
         bboxes = []
-        for det_bbox in det_bboxes:
-            is_human = det_bbox.obj_class == 'person'
-            above_conf_interv = (det_bbox.score >= min_det_score)
-            has_proper_size = (min_bbox_area <= det_bbox.area <= max_bbox_area)
+        for bbox in orig_bboxes:
+            is_human = bbox.obj_class == 'person'
+            above_conf_interv = (bbox.score >= min_det_score)
+            has_proper_size = (min_bbox_area <= bbox.area <= max_bbox_area)
             if is_human and above_conf_interv and has_proper_size:
-                bboxes.append(det_bbox)
+                bboxes.append(bbox)
         bboxes_per_frame.append((frame,bboxes))
     return bboxes_per_frame
 

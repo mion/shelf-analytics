@@ -1,6 +1,6 @@
 import unittest
 from point import Point
-from boundingbox import BBox, DetectedBBox
+from boundingbox import BBox
 from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition, filter_bboxes, find_some_track
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
@@ -199,36 +199,36 @@ class TestFindSomeTrack(unittest.TestCase):
 
 class TestFilterBboxes(unittest.TestCase):
     def test_filter_bboxes(self):
-        det_bbox1 = DetectedBBox(Point(0, 0), 50, 50, 0.5, 'human')
-        det_bbox2 = DetectedBBox(Point(5, 4), 50, 50, 0.93, 'human')
-        det_bbox3 = DetectedBBox(Point(90, 15), 50, 50, 0.85, 'bicycle')
-        det_bbox4 = DetectedBBox(Point(20, 30), 50, 50, 0.96, 'human')
-        det_bbox5 = DetectedBBox(Point(60, 10), 500, 500, 0.97, 'human')
-        det_bbox6 = DetectedBBox(Point(100, 33), 5, 5, 0.98, 'human')
-        det_bboxes_per_frame = [
+        bbox1 = BBox(Point(0, 0), 50, 50, 0.5, 'person')
+        bbox2 = BBox(Point(5, 4), 50, 50, 0.93, 'person')
+        bbox3 = BBox(Point(90, 15), 50, 50, 0.85, 'bicycle')
+        bbox4 = BBox(Point(20, 30), 50, 50, 0.96, 'person')
+        bbox5 = BBox(Point(60, 10), 500, 500, 0.97, 'person')
+        bbox6 = BBox(Point(100, 33), 5, 5, 0.98, 'person')
+        orig_bboxes_per_frame = [
             (None, [
-                det_bbox1,
-                det_bbox2,
+                bbox1,
+                bbox2,
             ]),
             (None, [
-                det_bbox3,
-                det_bbox4,
-                det_bbox5,
+                bbox3,
+                bbox4,
+                bbox5,
             ]),
             (None, [
-                det_bbox6,
+                bbox6,
             ])
         ]
         min_det_score = 0.95
         min_bbox_area = 25 * 25
         max_bbox_area = 100 * 100
 
-        bboxes_per_frame = filter_bboxes(det_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_area)
+        bboxes_per_frame = filter_bboxes(orig_bboxes_per_frame, min_det_score, min_bbox_area, max_bbox_area)
 
         self.assertEqual(len(bboxes_per_frame), 3)
         self.assertEqual(len(bboxes_per_frame[0][1]), 0)
         self.assertEqual(len(bboxes_per_frame[1][1]), 1)
-        self.assertIs(bboxes_per_frame[1][1][0], det_bbox4)
+        self.assertIs(bboxes_per_frame[1][1][0], bbox4)
         self.assertEqual(len(bboxes_per_frame[2][1]), 0)
 
 class TestInterpolate(unittest.TestCase):

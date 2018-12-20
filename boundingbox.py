@@ -1,16 +1,21 @@
 from enum import Enum
 from point import Point
 
+class ValidationError(Exception):
+    """The JSON data is invalid."""
+
 class Format(Enum):
     y1_x1_y2_x2 = "(y1, x1, y2, x2)"
     x1_y1_w_h = "(x1, y1, w, h)"
 
 class BBox:
     next_id = 1
-    def __init__(self, origin, width, height):
+    def __init__(self, origin, width, height, score=None, obj_class=None):
         self.id = BBox.next_id
         BBox.next_id += 1
         self.parent_track_id = None
+        self.score = score
+        self.obj_class = obj_class
         self.origin = origin
         self.width = width
         self.height = height
@@ -23,7 +28,10 @@ class BBox:
         self.y2 = origin.y + height
 
     def __repr__(self):
-        return "<BBox#{:d} ({:d}, {:d}) {:d}x{:d}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height)
+        if self.score and self.obj_class:
+            return "<BBox#{:d} ({:d}, {:d}) {:d}x{:d} {}~{:.2f}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height, self.score, self.obj_class)
+        else:
+            return "<BBox#{:d} ({:d}, {:d}) {:d}x{:d}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height)
 
     def is_similar(self, bbox):
         return self.origin == bbox.origin and self.width == bbox.width and self.height == bbox.height
@@ -67,83 +75,57 @@ class BBox:
             return BBox(Point(x1, y1), width, height)
     
     def to_dict(self):
-        return {
+        obj = {
             'id': self.id,
             'origin': [self.origin.x, self.origin.y],
             'width': self.width,
             'height': self.height
         }
+        if self.score and self.obj_class:
+            obj.update({
+                'score': self.score,
+                'obj_class': self.obj_class
+            })
+        return obj
     
     @staticmethod
-    def parse(obj):
-        # TODO validation
-        x = obj['origin'][0]
-        y = obj['origin'][1]
-        return BBox(origin=Point(x, y), width=obj['width'], height=obj['height'])
-
-# TODO simplify: unite DetectedBBox with BBox
-# Having two classes for only two extra properties
-# is too much work for nothing.
-class DetectedBBox(BBox):
-    """
-    A bbox that was outputted from object detection.
-    """
-    def __init__(self, origin, width, height, score, obj_class):
-        super().__init__(origin, width, height)
-        self.score = score
-        self.obj_class = obj_class
-
-    def __repr__(self):
-        return "<DBBox#{:d} ({:d}, {:d}) {:d}x{:d} {}~{:.2f}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height, self.obj_class, self.score)
-    
-    def to_dict(self):
-        obj = super().to_dict()
-        obj.update({
-            'score': self.score,
-            'obj_class': self.obj_class
-        })
-        return obj
+    def parse(bbox_json):
+        if not isinstance(bbox_json, dict):
+            raise ValidationError
+        for required_field in ('origin', 'width', 'height', 'score', 'obj_class'):
+            if required_field not in bbox_json:
+                raise ValidationError
+        if not isinstance(bbox_json['origin'], list):
+            raise ValidationError
+        if len(bbox_json['origin']) != 2:
+            raise ValidationError
+        x, y = bbox_json['origin']
+        if not isinstance(x, int) or not isinstance(y, int):
+            raise ValidationError
+        origin = Point(x, y)
+        if not isinstance(bbox_json['width'], int):
+            raise ValidationError
+        width = bbox_json['width']
+        if not isinstance(bbox_json['height'], int):
+            raise ValidationError
+        height = bbox_json['height']
+        if not isinstance(bbox_json['score'], float):
+            raise ValidationError
+        score = bbox_json['score']
+        if not isinstance(bbox_json['obj_class'], str):
+            raise ValidationError
+        obj_class = bbox_json['obj_class']
+        if width < 0 or height < 0 or score < 0.0:
+            raise ValidationError
+        return BBox(origin=origin, width=width, height=height, score=score, obj_class=obj_class)
 
 # These deserialization functions are nasty but let's avoid introducing
 # a dependency for the moment. If we need to do more of this, then we
 # can use `marshmallow` for proper deserialization.
 # See: https://marshmallow.readthedocs.io/en/3.0/index.html
 
-class ValidationError(Exception):
-    """The JSON data is invalid."""
-
-def load_detected_bbox(bbox_json):
-    if not isinstance(bbox_json, dict):
-        raise ValidationError
-    for required_field in ('origin', 'width', 'height', 'score', 'obj_class'):
-        if required_field not in bbox_json:
-            raise ValidationError
-    if not isinstance(bbox_json['origin'], list):
-        raise ValidationError
-    if len(bbox_json['origin']) != 2:
-        raise ValidationError
-    x, y = bbox_json['origin']
-    if not isinstance(x, int) or not isinstance(y, int):
-        raise ValidationError
-    origin = Point(x, y)
-    if not isinstance(bbox_json['width'], int):
-        raise ValidationError
-    width = bbox_json['width']
-    if not isinstance(bbox_json['height'], int):
-        raise ValidationError
-    height = bbox_json['height']
-    if not isinstance(bbox_json['score'], float):
-        raise ValidationError
-    score = bbox_json['score']
-    if not isinstance(bbox_json['obj_class'], str):
-        raise ValidationError
-    obj_class = bbox_json['obj_class']
-    if width < 0 or height < 0 or score < 0.0:
-        raise ValidationError
-    return DetectedBBox(origin=origin, width=width, height=height, score=score, obj_class=obj_class)
-
-def load_detected_bboxes_per_frame(raw_json):
-    det_bboxes_per_frame = []
+def load_bboxes_per_frame(raw_json):
+    bboxes_per_frame = []
     if not isinstance(raw_json, dict):
         raise ValidationError
     if 'bboxes_per_frame' not in raw_json:
@@ -153,6 +135,6 @@ def load_detected_bboxes_per_frame(raw_json):
     for bboxes_json in raw_json['bboxes_per_frame']:
         if not isinstance(bboxes_json, list):
             raise ValidationError
-        det_bboxes = [load_detected_bbox(bbox_json) for bbox_json in bboxes_json]
-        det_bboxes_per_frame.append(det_bboxes)
-    return det_bboxes_per_frame
+        bboxes = [BBox.parse(bbox_json) for bbox_json in bboxes_json]
+        bboxes_per_frame.append(bboxes)
+    return bboxes_per_frame

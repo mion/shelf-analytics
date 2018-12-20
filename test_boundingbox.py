@@ -1,7 +1,7 @@
 import unittest
 import json
 from point import Point
-from boundingbox import BBox, Format, load_detected_bboxes_per_frame, ValidationError
+from boundingbox import BBox, Format, load_bboxes_per_frame, ValidationError
 
 class BBoxTest(unittest.TestCase):
     def test_from_tuple_x1_y1_w_h(self):
@@ -29,7 +29,7 @@ class BBoxTest(unittest.TestCase):
         self.assertEqual(bbox1.to_tuple(Format.x1_y1_w_h), (1, 2, 321, 123))
         self.assertEqual(bbox1.to_tuple(Format.y1_x1_y2_x2), (2, 1, 125, 322))
 
-class LoadDetectedBoundingBoxesPerFrameTest(unittest.TestCase):
+class LoadBoundingBoxesPerFrameTest(unittest.TestCase):
     def test_invalid(self):
         invalid_raw_jsons = [
             {},
@@ -80,7 +80,7 @@ class LoadDetectedBoundingBoxesPerFrameTest(unittest.TestCase):
 
         for raw_json in invalid_raw_jsons:
             with self.assertRaises(ValidationError, msg='this JSON is invalid: \n' + json.dumps(raw_json, indent=3)):
-                load_detected_bboxes_per_frame(raw_json)
+                load_bboxes_per_frame(raw_json)
 
     def test_valid(self):
         raw_json = {
@@ -93,29 +93,29 @@ class LoadDetectedBoundingBoxesPerFrameTest(unittest.TestCase):
             ]
         }
 
-        det_bboxes_per_frame = load_detected_bboxes_per_frame(raw_json)
+        bboxes_per_frame = load_bboxes_per_frame(raw_json)
 
-        self.assertEqual(len(det_bboxes_per_frame), 2)
-        self.assertEqual(len(det_bboxes_per_frame[0]), 1)
-        self.assertEqual(len(det_bboxes_per_frame[1]), 2)
+        self.assertEqual(len(bboxes_per_frame), 2)
+        self.assertEqual(len(bboxes_per_frame[0]), 1)
+        self.assertEqual(len(bboxes_per_frame[1]), 2)
 
-        self.assertEqual(det_bboxes_per_frame[0][0].origin, Point(1, 1))
-        self.assertEqual(det_bboxes_per_frame[0][0].height, 10)
-        self.assertEqual(det_bboxes_per_frame[0][0].width, 10)
-        self.assertEqual(det_bboxes_per_frame[0][0].score, 0.1)
-        self.assertEqual(det_bboxes_per_frame[0][0].obj_class, 'human')
+        self.assertEqual(bboxes_per_frame[0][0].origin, Point(1, 1))
+        self.assertEqual(bboxes_per_frame[0][0].height, 10)
+        self.assertEqual(bboxes_per_frame[0][0].width, 10)
+        self.assertEqual(bboxes_per_frame[0][0].score, 0.1)
+        self.assertEqual(bboxes_per_frame[0][0].obj_class, 'human')
 
-        self.assertEqual(det_bboxes_per_frame[1][0].origin, Point(2, 2))
-        self.assertEqual(det_bboxes_per_frame[1][0].height, 20)
-        self.assertEqual(det_bboxes_per_frame[1][0].width, 20)
-        self.assertEqual(det_bboxes_per_frame[1][0].score, 0.2)
-        self.assertEqual(det_bboxes_per_frame[1][0].obj_class, 'cat')
+        self.assertEqual(bboxes_per_frame[1][0].origin, Point(2, 2))
+        self.assertEqual(bboxes_per_frame[1][0].height, 20)
+        self.assertEqual(bboxes_per_frame[1][0].width, 20)
+        self.assertEqual(bboxes_per_frame[1][0].score, 0.2)
+        self.assertEqual(bboxes_per_frame[1][0].obj_class, 'cat')
 
-        self.assertEqual(det_bboxes_per_frame[1][1].origin, Point(3, 3))
-        self.assertEqual(det_bboxes_per_frame[1][1].height, 30)
-        self.assertEqual(det_bboxes_per_frame[1][1].width, 30)
-        self.assertEqual(det_bboxes_per_frame[1][1].score, 0.3)
-        self.assertEqual(det_bboxes_per_frame[1][1].obj_class, 'dog')
+        self.assertEqual(bboxes_per_frame[1][1].origin, Point(3, 3))
+        self.assertEqual(bboxes_per_frame[1][1].height, 30)
+        self.assertEqual(bboxes_per_frame[1][1].width, 30)
+        self.assertEqual(bboxes_per_frame[1][1].score, 0.3)
+        self.assertEqual(bboxes_per_frame[1][1].obj_class, 'dog')
 
 if __name__ == '__main__':
     unittest.main()
