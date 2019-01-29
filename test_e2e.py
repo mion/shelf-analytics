@@ -2,7 +2,7 @@ import unittest
 import json
 import cv2
 from point import Point
-from boundingbox import BBox, load_detected_bboxes_per_frame
+from boundingbox import BBox, load_bboxes_per_frame
 from humantracking import track_humans
 from eventextraction import RegionOfInterest as Roi, EventType, extract_events
 
@@ -34,14 +34,18 @@ class TraverseTest(unittest.TestCase):
     def test_traverse_simple(self):
         json_path = '/Users/gvieira/shan-test/traverse-simple.json'
         raw_json = load_json(json_path)
-        det_bboxes_per_frame = load_detected_bboxes_per_frame(raw_json)
+        bboxes_per_frame = load_bboxes_per_frame(raw_json)
         video_path = '/Users/gvieira/shan-test/traverse-simple.mp4'
         frames = load_frames(video_path)
-        if len(frames) != len(det_bboxes_per_frame):
+        if len(frames) != len(bboxes_per_frame):
             raise RuntimeError('frames and bboxes per frame lists have different length')
+        # TODO
+        # The `bboxes_per_frame` of the tracking module is different
+        # from the `bboxes_per_frame` that comes from the object 
+        # detection JSON. This is confusing and should be fixed.
         bboxes_per_frame = []
         for idx, frame in enumerate(frames):
-            bboxes_per_frame.append((frame, det_bboxes_per_frame[idx]))
+            bboxes_per_frame.append((frame, bboxes_per_frame[idx]))
         params = {
             'MAX_TRACK_COUNT': 40,
             'OPENCV_OBJ_TRACKER_TYPE': 'KCF',
@@ -55,6 +59,12 @@ class TraverseTest(unittest.TestCase):
             'LOOK_AHEAD_MAX_FRONT_HOPS': 5
         }
         tracks = track_humans(bboxes_per_frame, params)
+
+        # <hack> save this to test the inspection tool
+        with open('traverse-simple-track.json', 'w') as f:
+            json.dump({'tracks': [track.to_dict() for track in tracks]}, f)
+        # </hack>
+
         self.assertEqual(len(tracks), 1)
         self.assertGreater(len(tracks[0]), 40)
         self.assertLess(tracks[0].get_step(0).frame_index, 30)
@@ -62,6 +72,12 @@ class TraverseTest(unittest.TestCase):
         rois = [
             Roi('aisle', BBox(Point(176, 125), 219, 120), [EventType.traverse])
         ]
+        
+        # <hack> save this to test the inspection tool
+        with open('traverse-simple-rois.json', 'w') as f:
+            json.dump({'rois': [roi.to_dict() for roi in rois]}, f)
+        # </hack>
+
         bboxes_per_track = [track.get_bboxes() for track in tracks]
         params_for_event_type = {
             EventType.traverse: {'min_duration': 20, 'min_area': 10000}
