@@ -3,7 +3,8 @@ import argparse
 from enum import Enum, unique
 import numpy as np 
 import cv2
-from boundingbox import load_detected_bboxes_per_frame
+from boundingbox import load_bboxes_per_frame
+from humantracking import Track
 
 def load_json(path):
     with open(path, "r") as file:
@@ -35,10 +36,10 @@ class FooterView(Enum):
     tracks = 1
 
 class InspectionTool:
-    def __init__(self, frames, det_bboxes_per_frame):
+    def __init__(self, frames, bboxes_per_frame, tracks):
         self.frames = frames
-        self.det_bboxes_per_frame = det_bboxes_per_frame
-        self.tracks = [1, 2, 3]
+        self.bboxes_per_frame = bboxes_per_frame
+        self.tracks = tracks
         self.state = {
             'track_id': 1,
             'frame_index': 0,
@@ -46,6 +47,7 @@ class InspectionTool:
         }
     
     def copy_frame(self, index):
+        # We need to copy a frame because it's going to be mutated.
         orig_frame = self.frames[index]
         orig_height, orig_width, orig_channels = orig_frame.shape
         frame = np.zeros((orig_height, orig_width, orig_channels), np.uint8)
@@ -83,7 +85,7 @@ class InspectionTool:
     def render(self):
         fr_idx = self.state['frame_index']
         frame = self.copy_frame(fr_idx)
-        frame = self.render_bboxes(frame, self.det_bboxes_per_frame[fr_idx])
+        frame = self.render_bboxes(frame, self.bboxes_per_frame[fr_idx])
         # frame = self.render_footer(frame)
         # frame = self.render_bboxes(frame, self.bboxes_by_frame_index[self.state['frame_index']], self.transition_by_bbox_track_ids)
         return frame
@@ -125,14 +127,15 @@ if __name__ == '__main__':
     parser.add_argument('video_path', help='Path to the video file')
     parser.add_argument('--tracks_path', help='Path to the tracks JSON file')
     parser.add_argument('--rois_path', help='Path to the ROIs JSON file')
-    parser.add_argument('--det_bboxes_path', help='Path to the detected bboxes per frame JSON file')
+    parser.add_argument('--bboxes_path', help='Path to the detected bboxes per frame JSON file')
     # TODO parser.add_argument('--events_path')
     args = parser.parse_args()
     # TODO check for files existance
 
-    raw_json = load_json(args.det_bboxes_path)
-    det_bboxes = load_detected_bboxes_per_frame(raw_json)
-
     loaded_frames = load_frames(path=args.video_path)
-    tool = InspectionTool(frames=loaded_frames, det_bboxes_per_frame=det_bboxes)
+    bboxes_json = load_json(args.bboxes_path)
+    bboxes = load_bboxes_per_frame(bboxes_json)
+    tracks_json = load_json(args.tracks_path)
+    tracks = [Track.parse(t_json) for t_json in tracks_json['tracks']]
+    tool = InspectionTool(frames=loaded_frames, bboxes_per_frame=bboxes, tracks=tracks)
     tool.start()
