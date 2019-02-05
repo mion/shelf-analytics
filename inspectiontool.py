@@ -116,6 +116,10 @@ class InspectionTool:
     def render_horizontal_line(self, frame, orig, width, color=(255, 255, 255), thickness=1):
         cv2.line(frame, orig, (orig[0] + width, orig[1]), color, thickness, cv2.LINE_AA)
         return frame
+
+    def render_vertical_line(self, frame, orig, height, color=(255, 255, 255), thickness=1):
+        cv2.line(frame, orig, (orig[0], orig[1] + height), color, thickness, cv2.LINE_AA)
+        return frame
     
     def render_text(self, frame, text, orig, color=(255, 255, 255), scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
         cv2.putText(frame, text, orig, font, scale, color, thickness, cv2.LINE_AA)
@@ -142,13 +146,18 @@ class InspectionTool:
                 rows.append(('Track #{}'.format(track.id), line_perc_start_x, line_perc_width))
             else:
                 rows.append(('Track #{}'.format(track.id), line_base_start_x, 0))
-        # Now we can start drawing
+        # Draw rows
         frame_with_footer = self.render_footer_bg(frame, footer_height)
         current_y = frame_height + PADDING + max_text_height # (the first y where we draw is at the bottom of the original frame)
         for text, line_start_x, line_width in rows:
-            frame_with_footer = self.render_text(frame_with_footer, text, (PADDING, current_y), scale=TEXT_SCALE)
-            frame_with_footer = self.render_horizontal_line(frame_with_footer, (line_start_x, current_y), line_width)
+            text_color = (0, 0, 255) if text.startswith('Frame') else (255, 255, 255)
+            frame_with_footer = self.render_text(frame_with_footer, text, (PADDING, current_y), color=text_color, scale=TEXT_SCALE)
+            line_color = (125, 125, 125) if text.startswith('Frame') else (255, 255, 255)
+            frame_with_footer = self.render_horizontal_line(frame_with_footer, (line_start_x, current_y), line_width, color=line_color)
             current_y += row_height
+        # Draw marker
+        marker_offset_x = int(line_max_width * (self.state['frame_index'] / len(self.frames)))
+        frame_with_footer = self.render_vertical_line(frame_with_footer, (line_base_start_x + marker_offset_x, frame_height), footer_height, color=(0, 0, 255))
         return frame_with_footer
 
     def render_footer(self, frame):
