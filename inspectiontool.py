@@ -43,7 +43,7 @@ class InspectionTool:
         self.state = {
             'track_id': 1,
             'frame_index': 0,
-            'footer_view': FooterView.calibration
+            'footer_view': FooterView.calibration.value
         }
     
     def copy_frame(self, index):
@@ -82,10 +82,88 @@ class InspectionTool:
             frame = self.render_bbox(frame, bbox)
         return frame
     
+    def render_footer_bg(self, frame, footer_height):
+        """Renders a black rectangle at the bottom of the frame."""
+        frame_height, frame_width, frame_channels = frame.shape
+        frame_with_footer = np.zeros((frame_height + footer_height, frame_width, frame_channels), np.uint8)
+        frame_with_footer[0:(frame_height - 1), 0:(frame_width - 1)] = frame[0:(frame_height - 1), 0:(frame_width - 1)]
+        return frame_with_footer
+    
+    def render_calibration_footer(self, frame):
+        return frame
+
+    def get_text_size(self, text, scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
+        size = cv2.getTextSize(text, font, scale, thickness)
+        width, height = size[0]
+        return (width, height)
+    
+    def get_text_width(self, text, scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
+        width, _ = self.get_text_size(text, scale, font, thickness)
+        return width
+    
+    def find_max_rendered_size(self, texts, scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
+        """Returns a pair of (max width, max height) from a set of texts when rendered.
+        Each value of the pair may come from a different text."""
+        max_width, max_height = (0, 0)
+        for text in texts:
+            width, height = self.get_text_size(text, scale=scale, font=font, thickness=thickness)
+            if width > max_width:
+                max_width = width
+            if height > max_height:
+                max_height = height
+        return (max_width, max_height)
+
+    def render_horizontal_line(self, frame, orig, width, color=(255, 255, 255), thickness=1):
+        cv2.line(frame, orig, (orig[0] + width, orig[1]), color, thickness, cv2.LINE_AA)
+        return frame
+    
+    def render_text(self, frame, text, orig, color=(255, 255, 255), scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
+        cv2.putText(frame, text, orig, font, scale, color, thickness, cv2.LINE_AA)
+        return frame
+
+    def render_tracks_footer(self, frame):
+        TEXT_SCALE = 0.5
+        PADDING = 5
+        frame_height, frame_width, _ = frame.shape
+        labels = ['Frame: {}'.format(len(self.frames) - 1)] + ['Track #{}'.format(track.id) for track in self.tracks]
+        max_text_width, max_text_height = self.find_max_rendered_size(labels, scale=TEXT_SCALE)
+        # A row is a label followed by a line to its right;
+        # The first row has "Frame XYZ" and the rest has "Track ABC";
+        row_height = max_text_height + (2 * PADDING)
+        footer_height = row_height * (1 + len(self.tracks)) # the 1 is for the header
+        line_base_start_x = max_text_width + (2 * PADDING)
+        line_max_width = frame_width - line_base_start_x
+        rows = [('Frame: {}'.format(self.state['frame_index']), line_base_start_x, line_max_width)]
+        for track in tracks:
+            if not track.is_empty():
+                start_i, end_i = track.get_start_end_indexes()
+                line_perc_width = int(((end_i - start_i) / len(self.frames)) * line_max_width)
+                line_perc_start_x = line_base_start_x + int((start_i / len(self.frames)) * line_max_width)
+                rows.append(('Track #{}'.format(track.id), line_perc_start_x, line_perc_width))
+            else:
+                rows.append(('Track #{}'.format(track.id), line_base_start_x, 0))
+        # Now we can start drawing
+        frame_with_footer = self.render_footer_bg(frame, footer_height)
+        current_y = frame_height + PADDING + max_text_height # (the first y where we draw is at the bottom of the original frame)
+        for text, line_start_x, line_width in rows:
+            frame_with_footer = self.render_text(frame_with_footer, text, (PADDING, current_y), scale=TEXT_SCALE)
+            frame_with_footer = self.render_horizontal_line(frame_with_footer, (line_start_x, current_y), line_width)
+            current_y += row_height
+        return frame_with_footer
+
+    def render_footer(self, frame):
+        if self.state['footer_view'] == FooterView.calibration.value:
+            return self.render_calibration_footer(frame)
+        elif self.state['footer_view'] == FooterView.tracks.value:
+            return self.render_tracks_footer(frame)
+        else:
+            raise RuntimeError('invalid footer view')
+    
     def render(self):
         fr_idx = self.state['frame_index']
         frame = self.copy_frame(fr_idx)
         frame = self.render_bboxes(frame, self.bboxes_per_frame[fr_idx])
+        frame = self.render_footer(frame)
         # frame = self.render_footer(frame)
         # frame = self.render_bboxes(frame, self.bboxes_by_frame_index[self.state['frame_index']], self.transition_by_bbox_track_ids)
         return frame
