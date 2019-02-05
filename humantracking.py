@@ -22,6 +22,9 @@ class Track:
                 return True
         return False
 
+    def is_empty(self):
+        return len(self.steps) == 0
+
     def add(self, frame_index, bbox, transition):
         # We can't use the bbox index here because we may want to add a bbox
         # that wasn't detected (it may be have come from object tracking or
@@ -51,6 +54,15 @@ class Track:
     
     def get_bboxes(self):
         return [bbox for _, bbox, _ in self.steps]
+    
+    def get_start_end_indexes(self):
+        if len(self) == 0:
+            raise RuntimeError('unable to get start and end indexes from empty track')
+        first_step = self.steps[0]
+        last_step = self.get_last_step()
+        start_index, _, _ = first_step
+        end_index, _, _ = last_step
+        return (start_index, end_index)
     
     def to_dict(self):
         return [{'frame_index': fi, 'bbox': b.to_dict(), 'transition': t.name} for fi, b, t in self.steps]
