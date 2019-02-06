@@ -21,6 +21,17 @@ class Track:
             if bbox == item:
                 return True
         return False
+    
+    def exists_at(self, frame_index):
+        r = self.get_bbox_transition_for(frame_index)
+        return r != None
+
+    def get_bbox_transition_for(self, frame_index):
+        # TODO remove this loop with a cached dict
+        for fr_idx, bbox, transition in self.steps:
+            if fr_idx == frame_index:
+                return (bbox, transition)
+        return None
 
     def is_empty(self):
         return len(self.steps) == 0
