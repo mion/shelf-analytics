@@ -29,7 +29,7 @@ class BBox:
 
     def __repr__(self):
         if self.score and self.obj_class:
-            return "<BBox#{:d} ({:d}, {:d}) {:d}x{:d} {}~{:.2f}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height, self.score, self.obj_class)
+            return "<BBox#{:d} ({:d}, {:d}) {:d}x{:d} {}~{:.2f}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height, self.obj_class, self.score)
         else:
             return "<BBox#{:d} ({:d}, {:d}) {:d}x{:d}>".format(self.id, self.origin.x, self.origin.y, self.width, self.height)
 
