@@ -4,7 +4,7 @@ from enum import Enum, unique
 import numpy as np 
 import cv2
 from boundingbox import load_bboxes_per_frame
-from humantracking import Track
+from humantracking import Track, Transition
 
 def load_json(path):
     with open(path, "r") as file:
@@ -54,22 +54,29 @@ class InspectionTool:
         frame[0:(orig_height - 1), 0:(orig_width - 1)] = orig_frame[0:(orig_height - 1), 0:(orig_width - 1)]
         return frame
     
-    def render_bbox_rect(self, frame, bbox):
+    def render_bbox_rect(self, frame, bbox, color=(255, 255, 255), thickness=1):
         top_left = (bbox.x1, bbox.y1) 
         bottom_right = (bbox.x2, bbox.y2)
-        color = (255, 255, 255)
-        thickness = 1
         cv2.rectangle(frame, top_left, bottom_right, color=color, thickness=thickness)
         return frame
     
-    def render_bbox_props(self, frame, bbox):
+    def render_bbox_props(self, frame, bbox, scale=0.75, color=(255, 255, 255), thickness=1, margin=6):
+        FONT = cv2.FONT_HERSHEY_PLAIN
         text = '#{:d} ({:d},{:d}) {:d}x{:d} {:d}%'.format(bbox.id, bbox.x1, bbox.y1, bbox.width, bbox.height, int(100 * bbox.score))
-        font = cv2.FONT_HERSHEY_PLAIN
-        scale = 0.75
-        color = (255, 255, 255)
-        thickness = 1
-        top_margin = 6
-        cv2.putText(frame, text, (bbox.x1, bbox.y1 - top_margin), font, scale, color, thickness, cv2.LINE_AA)
+        cv2.putText(frame, text, (bbox.x1, bbox.y1 - margin), FONT, scale, color, thickness, cv2.LINE_AA)
+        return frame
+    
+    def render_track_bbox_props(self, frame, bbox, transition, scale=0.75, color=(255, 255, 255), thickness=1, margin=12):
+        FONT = cv2.FONT_HERSHEY_PLAIN
+        trans_label = {
+            Transition.first: 'F',
+            Transition.snapped: 'S',
+            Transition.tracked: 'T',
+            Transition.patched: 'P',
+            Transition.interpolated: 'I'
+        }[transition]
+        text = '<{}> #{:d} ({:d},{:d}) {:d}x{:d}'.format(trans_label, bbox.id, bbox.x1, bbox.y1, bbox.width, bbox.height)
+        cv2.putText(frame, text, (bbox.x1, bbox.y2 + margin), FONT, scale, color, thickness, cv2.LINE_AA)
         return frame
 
     def render_bbox(self, frame, bbox):
@@ -168,13 +175,29 @@ class InspectionTool:
         else:
             raise RuntimeError('invalid footer view')
     
+    def render_track(self, frame, frame_index, bboxes, track):
+        bbox, transition = track.get_bbox_transition_for(frame_index=frame_index)
+        frame = self.render_bbox_rect(frame, bbox, color=(0, 255, 0))
+        frame = self.render_track_bbox_props(frame, bbox, transition, color=(0, 255, 0))
+        return frame
+    
+    def get_track(self, track_id):
+        for track in self.tracks:
+            if track.id == track_id:
+                return track
+        return None
+    
     def render(self):
         fr_idx = self.state['frame_index']
+        bboxes_in_frame = self.bboxes_per_frame[fr_idx]
         frame = self.copy_frame(fr_idx)
-        frame = self.render_bboxes(frame, self.bboxes_per_frame[fr_idx])
+        frame = self.render_bboxes(frame, bboxes_in_frame)
         frame = self.render_footer(frame)
-        # frame = self.render_footer(frame)
-        # frame = self.render_bboxes(frame, self.bboxes_by_frame_index[self.state['frame_index']], self.transition_by_bbox_track_ids)
+        curr_track = self.get_track(track_id=self.state['track_id'])
+        if not curr_track:
+            raise RuntimeError('no track found with currently selected track ID')
+        if curr_track.exists_at(frame_index=fr_idx):
+            self.render_track(frame, fr_idx, bboxes_in_frame, curr_track)
         return frame
     
     def on_change_frame_index(self, new_value):
@@ -218,7 +241,6 @@ if __name__ == '__main__':
     # TODO parser.add_argument('--events_path')
     args = parser.parse_args()
     # TODO check for files existance
-
     loaded_frames = load_frames(path=args.video_path)
     bboxes_json = load_json(args.bboxes_path)
     bboxes = load_bboxes_per_frame(bboxes_json)
