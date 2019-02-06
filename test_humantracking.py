@@ -1,7 +1,7 @@
 import unittest
 from point import Point
 from boundingbox import BBox
-from humantracking import find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition, filter_bboxes, find_some_track
+from humantracking import Track, find_bbox_to_snap, is_intersecting_any, find_start, average_bbox_velocity, look_ahead, interpolate, Transition, filter_bboxes, find_some_track
 
 def mkbox(x=0, y=0, w=10, h=10, ptid=None):
     bbox = BBox(Point(x, y), w, h)
@@ -466,6 +466,33 @@ class TestFindBBoxToSnap(unittest.TestCase):
 
         self.assertEqual(idx, None)
         self.assertEqual(dist, None)
+
+class TestParseTrack(unittest.TestCase):
+    def test_parse_json(self):
+        track_json = [ # TODO Move this into fixtures
+            {"frame_index": 28, "bbox": {"id": 1, "origin": [0, 84], "width": 107, "height": 92, "score": 0.81, "obj_class": "person"}, "transition": "first"}, 
+            {"frame_index": 29, "bbox": {"id": 2, "origin": [0, 96], "width": 122, "height": 81, "score": 0.98, "obj_class": "person"}, "transition": "snapped"}
+        ]
+        track = Track.parse(track_json)
+        self.assertEqual(len(track), 2)
+        fr_idx1, bbox1, trans1 = track.get_step(0)
+        self.assertEqual(fr_idx1, 28)
+        # self.assertEqual(bbox1.id, 1) TODO what about this?
+        self.assertEqual(bbox1.origin, Point(0, 84))
+        self.assertEqual(bbox1.width, 107)
+        self.assertEqual(bbox1.height, 92)
+        self.assertAlmostEqual(bbox1.score, 0.81, places=2)
+        self.assertEqual(bbox1.obj_class, 'person')
+        self.assertEqual(trans1, Transition.first)
+        fr_idx2, bbox2, trans2 = track.get_step(1)
+        self.assertEqual(fr_idx2, 29)
+        # self.assertEqual(bbox2.id, 2) TODO what about this?
+        self.assertEqual(bbox2.origin, Point(0, 96))
+        self.assertEqual(bbox2.width, 122)
+        self.assertEqual(bbox2.height, 81)
+        self.assertAlmostEqual(bbox2.score, 0.98, places=2)
+        self.assertEqual(bbox2.obj_class, 'person')
+        self.assertEqual(trans2, Transition.snapped)
 
 if __name__ == '__main__':
     unittest.main()
