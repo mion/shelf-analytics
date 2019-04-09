@@ -36,10 +36,11 @@ class FooterView(Enum):
     tracks = 1
 
 class InspectionTool:
-    def __init__(self, frames, bboxes_per_frame, tracks):
+    def __init__(self, frames, bboxes_per_frame, tracks, params):
         self.frames = frames
         self.bboxes_per_frame = bboxes_per_frame
         self.tracks = tracks
+        self.params = params
         self.state = {
             'track_id': 1,
             'frame_index': 0,
@@ -96,9 +97,6 @@ class InspectionTool:
         frame_with_footer[0:(frame_height - 1), 0:(frame_width - 1)] = frame[0:(frame_height - 1), 0:(frame_width - 1)]
         return frame_with_footer
     
-    def render_calibration_footer(self, frame):
-        return frame
-
     def get_text_size(self, text, scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
         size = cv2.getTextSize(text, font, scale, thickness)
         width, height = size[0]
@@ -165,6 +163,32 @@ class InspectionTool:
         # Draw marker
         marker_offset_x = int(line_max_width * (self.state['frame_index'] / len(self.frames)))
         frame_with_footer = self.render_vertical_line(frame_with_footer, (line_base_start_x + marker_offset_x, frame_height), footer_height, color=(0, 0, 255))
+        return frame_with_footer
+
+    def render_calibration_footer(self, frame):
+        TEXT_SCALE = 0.5
+        PADDING = 5
+        LINE_COLOR = (0, 220, 220) # Yellow (OpenCV uses BGR instead of RGB)
+        TEXT_COLOR = (255, 255, 255)
+        frame_height, frame_width, _ = frame.shape
+        labels = []
+        distances = []
+        for key, val in self.params.items():
+            if key.endswith("_DISTANCE"):
+                labels.append(key)
+                distances.append(val)
+        max_text_width, max_text_height = self.find_max_rendered_size(labels, scale=TEXT_SCALE)
+        row_height = (2 * PADDING) + max_text_height
+        footer_height = row_height * len(labels)
+        line_base_start_x = max_text_width + (2 * PADDING)
+        frame_with_footer = self.render_footer_bg(frame, footer_height)
+        current_y = frame_height + PADDING + max_text_height
+        for i in range(len(labels)):
+            label = labels[i]
+            distance = distances[i]
+            frame_with_footer = self.render_text(frame_with_footer, label, (PADDING, current_y), color=TEXT_COLOR, scale=TEXT_SCALE)
+            frame_with_footer = self.render_horizontal_line(frame_with_footer, (line_base_start_x, current_y), distance, color=LINE_COLOR)
+            current_y += row_height
         return frame_with_footer
 
     def render_footer(self, frame):
@@ -238,6 +262,7 @@ if __name__ == '__main__':
     parser.add_argument('--tracks_path', help='Path to the tracks JSON file')
     parser.add_argument('--rois_path', help='Path to the ROIs JSON file')
     parser.add_argument('--bboxes_path', help='Path to the detected bboxes per frame JSON file')
+    parser.add_argument('--params_path', help='Path to the params JSON file')
     # TODO parser.add_argument('--events_path')
     args = parser.parse_args()
     # TODO check for files existance
@@ -245,6 +270,7 @@ if __name__ == '__main__':
     bboxes_json = load_json(args.bboxes_path)
     bboxes = load_bboxes_per_frame(bboxes_json)
     tracks_json = load_json(args.tracks_path)
+    params_json = load_json(args.params_path)
     tracks = [Track.parse(t_json) for t_json in tracks_json['tracks']]
-    tool = InspectionTool(frames=loaded_frames, bboxes_per_frame=bboxes, tracks=tracks)
+    tool = InspectionTool(frames=loaded_frames, bboxes_per_frame=bboxes, tracks=tracks, params=params_json)
     tool.start()
