@@ -96,7 +96,7 @@ class InspectionTool:
         frame_with_footer = np.zeros((frame_height + footer_height, frame_width, frame_channels), np.uint8)
         frame_with_footer[0:(frame_height - 1), 0:(frame_width - 1)] = frame[0:(frame_height - 1), 0:(frame_width - 1)]
         return frame_with_footer
-    
+
     def get_text_size(self, text, scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
         size = cv2.getTextSize(text, font, scale, thickness)
         width, height = size[0]
@@ -105,7 +105,7 @@ class InspectionTool:
     def get_text_width(self, text, scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
         width, _ = self.get_text_size(text, scale, font, thickness)
         return width
-    
+
     def find_max_rendered_size(self, texts, scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
         """Returns a pair of (max width, max height) from a set of texts when rendered.
         Each value of the pair may come from a different text."""
@@ -125,9 +125,22 @@ class InspectionTool:
     def render_vertical_line(self, frame, orig, height, color=(255, 255, 255), thickness=1):
         cv2.line(frame, orig, (orig[0], orig[1] + height), color, thickness, cv2.LINE_AA)
         return frame
-    
+
     def render_text(self, frame, text, orig, color=(255, 255, 255), scale=1.0, font=cv2.FONT_HERSHEY_PLAIN, thickness=1):
         cv2.putText(frame, text, orig, font, scale, color, thickness, cv2.LINE_AA)
+        return frame
+
+    def render_labeled_lines(self, frame, origin, rows, max_text_size, text_scale, padding):
+        origin_x, origin_y = origin
+        max_text_width, max_text_height = max_text_size
+        row_height = max_text_height + (2 * padding)
+        row_start_y = origin_y + padding + max_text_height
+        line_start_x = max_text_width + (2 * padding)
+        current_y = row_start_y
+        for row in rows:
+            frame = self.render_text(frame, row['label'], (origin_x + padding, current_y), color=row['text_color'], scale=text_scale)
+            frame = self.render_horizontal_line(frame, (line_start_x, current_y), row['line_width'], color=row['line_color'])
+            current_y += row_height
         return frame
 
     def render_tracks_footer(self, frame):
@@ -165,35 +178,33 @@ class InspectionTool:
         frame_with_footer = self.render_vertical_line(frame_with_footer, (line_base_start_x + marker_offset_x, frame_height), footer_height, color=(0, 0, 255))
         return frame_with_footer
 
-    def render_calibration_footer(self, frame):
+    def render_calibration_footer(self, frame, params):
         TEXT_SCALE = 0.5
         PADDING = 5
-        LINE_COLOR = (0, 220, 220) # Yellow (OpenCV uses BGR instead of RGB)
+        LINE_COLOR = (0, 220, 220) # OpenCV uses BGR instead of RGB
         TEXT_COLOR = (255, 255, 255)
+        rows = []
+        for key, val in params.items():
+            if key.endswith('_DISTANCE'):
+                rows.append({
+                    'label': key,
+                    'line_width': val,
+                    'text_color': TEXT_COLOR,
+                    'line_color': LINE_COLOR
+                })
+        labels = [row['label'] for row in rows]
+        max_text_size = self.find_max_rendered_size(labels, scale=TEXT_SCALE)
+        max_text_width, max_text_height = max_text_size
         frame_height, frame_width, _ = frame.shape
-        labels = []
-        distances = []
-        for key, val in self.params.items():
-            if key.endswith("_DISTANCE"):
-                labels.append(key)
-                distances.append(val)
-        max_text_width, max_text_height = self.find_max_rendered_size(labels, scale=TEXT_SCALE)
-        row_height = (2 * PADDING) + max_text_height
+        row_height = max_text_height + (2 * PADDING)
         footer_height = row_height * len(labels)
-        line_base_start_x = max_text_width + (2 * PADDING)
+        origin = (0, frame_height) # the footer starts at the bottom of the original frame
         frame_with_footer = self.render_footer_bg(frame, footer_height)
-        current_y = frame_height + PADDING + max_text_height
-        for i in range(len(labels)):
-            label = labels[i]
-            distance = distances[i]
-            frame_with_footer = self.render_text(frame_with_footer, label, (PADDING, current_y), color=TEXT_COLOR, scale=TEXT_SCALE)
-            frame_with_footer = self.render_horizontal_line(frame_with_footer, (line_base_start_x, current_y), distance, color=LINE_COLOR)
-            current_y += row_height
-        return frame_with_footer
+        return self.render_labeled_lines(frame_with_footer, origin, rows, max_text_size, TEXT_SCALE, PADDING)
 
     def render_footer(self, frame):
         if self.state['footer_view'] == FooterView.calibration.value:
-            return self.render_calibration_footer(frame)
+            return self.render_calibration_footer(frame, self.params)
         elif self.state['footer_view'] == FooterView.tracks.value:
             return self.render_tracks_footer(frame)
         else:
